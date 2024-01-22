@@ -978,10 +978,15 @@ public class FragmentMessages extends FragmentBase
                 if (!ch && !dh)
                     return null;
 
-                if (EntityMessage.PRIORITIY_HIGH.equals(message.importance)) {
+                Integer importance =
+                        (viewType == AdapterMessage.ViewType.UNIFIED ||
+                                viewType == AdapterMessage.ViewType.FOLDER
+                                ? message.importance : null);
+
+                if (EntityMessage.PRIORITIY_HIGH.equals(importance)) {
                     if (pos > 0)
                         return null;
-                } else if (EntityMessage.PRIORITIY_LOW.equals(message.importance)) {
+                } else if (EntityMessage.PRIORITIY_LOW.equals(importance)) {
                     if (prev != null && EntityMessage.PRIORITIY_LOW.equals(prev.importance))
                         return null;
                 } else if (pos > 0) {
@@ -999,7 +1004,8 @@ public class FragmentMessages extends FragmentBase
                         year0--;
                     int day0 = cal0.get(date_week ? Calendar.WEEK_OF_YEAR : Calendar.DAY_OF_YEAR);
                     int day1 = cal1.get(date_week ? Calendar.WEEK_OF_YEAR : Calendar.DAY_OF_YEAR);
-                    if (year0 == year1 && day0 == day1)
+                    if (year0 == year1 && day0 == day1 &&
+                            !EntityMessage.PRIORITIY_HIGH.equals(prev.importance))
                         dh = false;
                 }
 
@@ -1031,9 +1037,9 @@ public class FragmentMessages extends FragmentBase
                         vSeparator.setVisibility(View.GONE);
                     }
 
-                    if (EntityMessage.PRIORITIY_HIGH.equals(message.importance))
+                    if (EntityMessage.PRIORITIY_HIGH.equals(importance))
                         tvDate.setText(R.string.title_important);
-                    else if (EntityMessage.PRIORITIY_LOW.equals(message.importance))
+                    else if (EntityMessage.PRIORITIY_LOW.equals(importance))
                         tvDate.setText(R.string.title_unimportant);
                     else
                         tvDate.setText(date_week
