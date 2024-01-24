@@ -28,6 +28,7 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.pdf.PdfRenderer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -55,7 +56,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class AdapterImage extends RecyclerView.Adapter<AdapterImage.ViewHolder> {
+public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> {
     private Fragment parentFragment;
     private final Context context;
     private final LayoutInflater inflater;
@@ -90,12 +91,24 @@ public class AdapterImage extends RecyclerView.Adapter<AdapterImage.ViewHolder> 
             view.setOnLongClickListener(null);
         }
 
+        private void showPlayerState(EntityAttachment attachment) {
+            if (MediaPlayerHelper.isPlaying(attachment.getUri(context)))
+                ivImage.setImageResource(R.drawable.twotone_stop_48);
+            else
+                ivImage.setImageResource(R.drawable.twotone_play_arrow_48);
+        }
+
         private void bindTo(EntityAttachment attachment) {
             tvCaption.setText(attachment.name);
             tvCaption.setVisibility(TextUtils.isEmpty(attachment.name) ? View.GONE : View.VISIBLE);
             tvProperties.setVisibility(View.GONE);
 
             if (attachment.available) {
+                if (attachment.isAudio()) {
+                    showPlayerState(attachment);
+                    return;
+                }
+
                 Bundle args = new Bundle();
                 args.putSerializable("file", attachment.getFile(context));
                 args.putString("type", attachment.getMimeType());
@@ -243,13 +256,34 @@ public class AdapterImage extends RecyclerView.Adapter<AdapterImage.ViewHolder> 
                 return;
 
             EntityAttachment attachment = items.get(pos);
-            if (attachment.available)
-                try {
-                    Helper.share(context, attachment.getFile(context), attachment.getMimeType(), attachment.name);
-                } catch (Throwable ex) {
-                    Log.unexpectedError(parentFragment.getParentFragmentManager(), ex);
+            if (attachment.available) {
+                if (attachment.isAudio()) {
+                    try {
+                        Uri uri = attachment.getUri(context);
+                        if (MediaPlayerHelper.isPlaying(uri))
+                            MediaPlayerHelper.stopMusic(context);
+                        else
+                            MediaPlayerHelper.startMusic(context, uri,
+                                    new RunnableEx("player") {
+                                        @Override
+                                        public void delegate() {
+                                            showPlayerState(attachment);
+                                        }
+                                    });
+
+                        showPlayerState(attachment);
+                    } catch (Throwable ex) {
+                        ivImage.setImageResource(R.drawable.twotone_warning_24);
+                        Log.unexpectedError(parentFragment, ex);
+                    }
+                } else {
+                    try {
+                        Helper.share(context, attachment.getFile(context), attachment.getMimeType(), attachment.name);
+                    } catch (Throwable ex) {
+                        Log.unexpectedError(parentFragment.getParentFragmentManager(), ex);
+                    }
                 }
-            else {
+            } else {
                 if (attachment.progress == null) {
                     Bundle args = new Bundle();
                     args.putLong("id", attachment.id);
@@ -293,9 +327,9 @@ public class AdapterImage extends RecyclerView.Adapter<AdapterImage.ViewHolder> 
                             }
 
                             if (reload == null)
-                                ServiceSynchronize.eval(context, "image");
+                                ServiceSynchronize.eval(context, "media");
                             else
-                                ServiceSynchronize.reload(context, reload, false, "image");
+                                ServiceSynchronize.reload(context, reload, false, "media");
 
                             return null;
                         }
@@ -304,7 +338,7 @@ public class AdapterImage extends RecyclerView.Adapter<AdapterImage.ViewHolder> 
                         protected void onException(Bundle args, Throwable ex) {
                             Log.unexpectedError(parentFragment.getParentFragmentManager(), ex);
                         }
-                    }.execute(context, owner, args, "image:fetch");
+                    }.execute(context, owner, args, "media:fetch");
                 }
             }
         }
@@ -325,7 +359,7 @@ public class AdapterImage extends RecyclerView.Adapter<AdapterImage.ViewHolder> 
         }
     }
 
-    AdapterImage(Fragment parentFragment) {
+    AdapterMedia(Fragment parentFragment) {
         this.parentFragment = parentFragment;
         this.context = parentFragment.getContext();
         this.owner = parentFragment.getViewLifecycleOwner();
@@ -336,15 +370,16 @@ public class AdapterImage extends RecyclerView.Adapter<AdapterImage.ViewHolder> 
         owner.getLifecycle().addObserver(new LifecycleObserver() {
             @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
             public void onDestroyed() {
-                Log.d(AdapterImage.this + " parent destroyed");
-                AdapterImage.this.parentFragment = null;
+                Log.d(AdapterMedia.this + " parent destroyed");
+                MediaPlayerHelper.stopMusic(context);
+                AdapterMedia.this.parentFragment = null;
                 owner.getLifecycle().removeObserver(this);
             }
         });
     }
 
     public void set(@NonNull List<EntityAttachment> attachments) {
-        Log.i("Set images=" + attachments.size());
+        Log.i("Set media=" + attachments.size());
 
         Collections.sort(attachments, new Comparator<EntityAttachment>() {
             @Override
@@ -433,7 +468,7 @@ public class AdapterImage extends RecyclerView.Adapter<AdapterImage.ViewHolder> 
     @Override
     @NonNull
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ViewHolder(inflater.inflate(R.layout.item_image, parent, false));
+        return new ViewHolder(inflater.inflate(R.layout.item_media, parent, false));
     }
 
     @Override
@@ -447,7 +482,7 @@ public class AdapterImage extends RecyclerView.Adapter<AdapterImage.ViewHolder> 
     }
 
     @Override
-    public void onViewRecycled(@NonNull AdapterImage.ViewHolder holder) {
+    public void onViewRecycled(@NonNull AdapterMedia.ViewHolder holder) {
         holder.ivImage.setImageDrawable(null);
     }
 }
