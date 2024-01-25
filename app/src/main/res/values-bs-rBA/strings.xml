@@ -362,7 +362,7 @@
     <string name="title_advanced_when">Raspored</string>
     <string name="title_advanced_optimize">Automatski optimizuj</string>
     <string name="title_advanced_always">Uvijek primaj poruke s ovih računa</string>
-    <string name="title_advanced_with_exceptions" comment="title_advanced_with_exceptions&#10;Remark above some options to make an exception to the rule">Sa slijedećim izuzecima:</string>
+    <string name="title_advanced_with_exceptions">Sa slijedećim izuzecima:</string>
     <string name="title_advanced_poll_metered">Periodično provjeri nove poruke na mrežama s ograničenim paketom</string>
     <string name="title_advanced_poll_unmetered">Periodično provjeri nove poruke na neograničenim mrežama</string>
     <string name="title_advanced_schedule">Raspored</string>
@@ -561,6 +561,7 @@
     <string name="title_advanced_attachments_alt">Prikaži priloge poslije teksta poruke</string>
     <string name="title_advanced_thumbnails">Prikaži sličice fotografija poslije teksta poruke</string>
     <string name="title_advanced_pdf_preview">Prikaži PDF sličice</string>
+    <string name="title_advanced_audio_preview">Prikaži mini zvučni plejer</string>
     <string name="title_advanced_message_text_zoom2">Zadani nivo zumiranja teksta: %1$s %%</string>
     <string name="title_advanced_editor_text_zoom">Zumiraj tekst poruke i u uređivaču poruka</string>
     <string name="title_advanced_overview_mode">Zumiraj originalne poruke da popune ekran</string>

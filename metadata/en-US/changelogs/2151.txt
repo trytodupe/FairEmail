@@ -6,6 +6,15 @@ For support you can use the contact form.
 
 Ypupiara
 
+Next version
+
+* Added mini audio player
+* Added video preview image
+* Small improvements and minor bug fixes
+* Updated AndroidX
+* Updated Public Suffix List
+* Updated translations
+
 1.2151 - 2024-01-22
 
 * Fixed crash on some devices

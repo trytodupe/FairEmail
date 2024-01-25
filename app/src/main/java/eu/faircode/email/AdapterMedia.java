@@ -28,11 +28,13 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.pdf.PdfRenderer;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
+import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -121,7 +123,7 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
                     }
 
                     @Override
-                    protected Drawable onExecute(Context context, Bundle args) throws Throwable {
+                    protected Drawable onExecute(Context context, Bundle args) {
                         File file = (File) args.getSerializable("file");
                         String type = args.getString("type");
                         int max = args.getInt("max");
@@ -144,14 +146,22 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
                                 Log.w(ex);
                                 return null;
                             }
+                        } else if (type != null && type.startsWith("video/")) {
+                            try {
+                                Bitmap bm = ThumbnailUtils.createVideoThumbnail(file, new Size(max, max), null);
+                                if (bm == null)
+                                    return null;
+                                return new BitmapDrawable(context.getResources(), bm);
+                            } catch (Throwable ex) {
+                                Log.i(ex);
+                                return context.getDrawable(R.drawable.twotone_ondemand_video_24);
+                            }
                         } else {
                             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
                             boolean webp = prefs.getBoolean("webp", true);
 
-                            if ("image/webp".equalsIgnoreCase(type) && !webp) {
-                                args.putBoolean("nowebp", true);
-                                return null;
-                            }
+                            if ("image/webp".equalsIgnoreCase(type) && !webp)
+                                return context.getDrawable(R.drawable.twotone_image_not_supported_24);
 
                             args.putLong("size", file.length());
 
@@ -189,15 +199,18 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
 
                     @Override
                     protected void onExecuted(Bundle args, Drawable image) {
-                        if (image == null)
-                            if (args.getBoolean("nowebp"))
-                                ivImage.setImageResource(R.drawable.twotone_warning_24);
+                        if (image == null) {
+                            String type = args.getString("type");
+                            if ("application/pdf".equals(type))
+                                ivImage.setImageResource(R.drawable.twotone_article_24);
+                            else if (attachment.isVideo())
+                                ivImage.setImageResource(R.drawable.twotone_ondemand_video_24);
                             else
                                 ivImage.setImageResource(R.drawable.twotone_broken_image_24);
-                        else
+                        } else {
                             ivImage.setImageDrawable(image);
-
-                        ImageHelper.animate(context, image);
+                            ImageHelper.animate(context, image);
+                        }
 
                         StringBuilder sb = new StringBuilder();
 
@@ -241,7 +254,7 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
                     protected void onException(Bundle args, Throwable ex) {
                         tvCaption.setText(Log.formatThrowable(ex));
                         tvCaption.setVisibility(View.VISIBLE);
-                        ivImage.setImageResource(R.drawable.twotone_broken_image_24);
+                        ivImage.setImageResource(R.drawable.twotone_warning_24);
                     }
                 }.execute(context, owner, args, "image:load");
             } else
