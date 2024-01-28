@@ -471,7 +471,7 @@
     <string name="title_advanced_attachments_alt">نمایش پیوست‌ها بعد از متن پیام</string>
     <string name="title_advanced_thumbnails">نمایش ریز عکس‌ها بعد از متن پیام</string>
     <string name="title_advanced_pdf_preview">نمایش ریز پی‌دی‌اف‌ها</string>
-    <string name="title_advanced_video_preview" comment="title_advanced_video_preview&#10;Title for option switch to enable/disable showing thumbnails for video files">نمایش ریز ویدئو‌ها</string>
+    <string name="title_advanced_video_preview">نمایش ریز ویدئو‌ها</string>
     <string name="title_advanced_audio_preview">نمایش پخش‌کننده صوتی کوچک</string>
     <string name="title_advanced_message_text_zoom2">بزرگ‌نمایی پیش‌فرض متن پیام: %1$s %%</string>
     <string name="title_advanced_editor_text_zoom">متن پیام را نیز در ویرایشگر پیام بزرگنمایی کنید</string>
@@ -610,6 +610,7 @@
     <string name="title_advanced_open_safe_hint">فعال کردن این نیازمند ارتباطات امن برای دانلود تصاویر و غیره خواهد بود</string>
     <string name="title_advanced_browse_hint">واکشی پیام‌های بیشتر هنگام پیمایش به پایین</string>
     <string name="title_advanced_threading_hint">پیام‌های گروهی مرتبط با یکدیگر</string>
+    <string name="title_advanced_indentation_hint" comment="title_advanced_indentation_hint&#10;Remark for options that are available when using the card style only, and not when using the tabular style.">فقط برای سبک کارت</string>
     <string name="title_advanced_privacy_risk">شاید خطر حریم خصوصی وجود داشته باشد</string>
     <string name="title_advanced_preview_hint">فقط زمانی در دسترس است که متن پیام دانلود شده باشد</string>
     <string name="compressed">محتویات فایل‌های فشرده شده (%1$s) با بیش از %2$s فایل یا فایل‌های بزرگ‌تر از %3$s نمایش داده نخواهند شد</string>

@@ -546,7 +546,7 @@
     <string name="title_advanced_attachments_alt">Mostrar anexos após o texto da mensagem</string>
     <string name="title_advanced_thumbnails">Mostrar miniaturas das imagens após o texto da mensagem</string>
     <string name="title_advanced_pdf_preview">Mostrar miniaturas de PDF</string>
-    <string name="title_advanced_video_preview" comment="title_advanced_video_preview&#10;Title for option switch to enable/disable showing thumbnails for video files">Mostrar miniaturas de vídeos</string>
+    <string name="title_advanced_video_preview">Mostrar miniaturas de vídeos</string>
     <string name="title_advanced_audio_preview">Mostrar mini player de áudio</string>
     <string name="title_advanced_message_text_zoom2">Zoom padrão da mensagem: %1$s %%</string>
     <string name="title_advanced_editor_text_zoom">Amplie o texto da mensagem também no editor de mensagens</string>
@@ -830,6 +830,7 @@
     <string name="title_advanced_split_hint">Isso irá dividir a tela em partes</string>
     <string name="title_advanced_split_min_hint">Esta é uma condição destinada a dispositivos dobráveis</string>
     <string name="title_advanced_threading_hint">Agrupe as mensagens relacionadas entre si</string>
+    <string name="title_advanced_indentation_hint" comment="title_advanced_indentation_hint&#10;Remark for options that are available when using the card style only, and not when using the tabular style.">Apenas para estilo de cartão</string>
     <string name="title_advanced_highlight_hint">A cor de destaque do tema será usada para destacar</string>
     <string name="title_advanced_privacy_risk">Pode haver um risco na privacidade</string>
     <string name="title_advanced_name_email_hint">Nomes apenas serão exibidos quando disponíveis</string>

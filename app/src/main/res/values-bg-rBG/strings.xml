@@ -546,6 +546,8 @@
     <string name="title_advanced_attachments_alt">Покажи прикачените файлове след текста на съобщението</string>
     <string name="title_advanced_thumbnails">Показване на миниатюри на изображения след текста на съобщението</string>
     <string name="title_advanced_pdf_preview">Показване на миниобраз на PDF</string>
+    <string name="title_advanced_video_preview">Показване на миниобраз на видео</string>
+    <string name="title_advanced_audio_preview">Показване на дребен звуковъзпроизводител</string>
     <string name="title_advanced_message_text_zoom2">Подразбиращ се мащаб на текста на съобщение: %1$s %%</string>
     <string name="title_advanced_editor_text_zoom">Мащабиране на текста на съобщението в редактора</string>
     <string name="title_advanced_overview_mode">Мащабиране на първообразните съобщения към размера на екрана</string>
@@ -828,6 +830,7 @@
     <string name="title_advanced_split_hint">Това ще раздели екрана на части</string>
     <string name="title_advanced_split_min_hint">Това е условие предназначено за сгъваеми устройства</string>
     <string name="title_advanced_threading_hint">Групови съобщения, свързани помежду си</string>
+    <string name="title_advanced_indentation_hint" comment="title_advanced_indentation_hint&#10;Remark for options that are available when using the card style only, and not when using the tabular style.">Само за картов стил</string>
     <string name="title_advanced_highlight_hint">Акцентираният цвят на темата ще бъде използван за подчертаване</string>
     <string name="title_advanced_privacy_risk">Възможно е да съществува риск за поверителността</string>
     <string name="title_advanced_name_email_hint">Имената ще се показват само, когато са налични</string>

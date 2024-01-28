@@ -28,12 +28,15 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.pdf.PdfRenderer;
+import android.media.MediaMetadataRetriever;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -93,11 +96,13 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
             view.setOnLongClickListener(null);
         }
 
-        private void showPlayerState(EntityAttachment attachment) {
-            if (MediaPlayerHelper.isPlaying(attachment.getUri(context)))
+        private void showPlayerState(Uri uri) {
+            if (MediaPlayerHelper.isPlaying(uri))
                 ivImage.setImageResource(R.drawable.twotone_stop_48);
-            else
+            else {
                 ivImage.setImageResource(R.drawable.twotone_play_arrow_48);
+                tvProperties.setVisibility(View.GONE);
+            }
         }
 
         private void bindTo(EntityAttachment attachment) {
@@ -106,11 +111,6 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
             tvProperties.setVisibility(View.GONE);
 
             if (attachment.available) {
-                if (attachment.isAudio()) {
-                    showPlayerState(attachment);
-                    return;
-                }
-
                 Bundle args = new Bundle();
                 args.putSerializable("file", attachment.getFile(context));
                 args.putString("type", attachment.getMimeType());
@@ -127,6 +127,22 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
                         File file = (File) args.getSerializable("file");
                         String type = args.getString("type");
                         int max = args.getInt("max");
+
+                        args.putLong("size", file.length());
+
+                        if (type != null &&
+                                (type.startsWith("audio/") || type.startsWith("video")))
+                            // https://developer.android.com/reference/android/media/MediaMetadataRetriever
+                            try (MediaMetadataRetriever ret = new MediaMetadataRetriever()) {
+                                ret.setDataSource(file.getAbsolutePath());
+
+                                String value = ret.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                                Integer duration = Helper.parseInt(value);
+                                if (duration != null)
+                                    args.putInt("duration", duration);
+                            } catch (Throwable ex) {
+                                Log.w(ex);
+                            }
 
                         if ("application/pdf".equals(type)) {
                             // https://developer.android.com/reference/android/graphics/pdf/PdfRenderer
@@ -148,12 +164,17 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
                             }
                         } else if (type != null && type.startsWith("video/")) {
                             try {
-                                Bitmap bm = ThumbnailUtils.createVideoThumbnail(file, new Size(max, max), null);
+                                // https://developer.android.com/reference/android/media/ThumbnailUtils
+                                Bitmap bm;
+                                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
+                                    bm = ThumbnailUtils.createVideoThumbnail(file.getAbsolutePath(), MediaStore.Images.Thumbnails.MINI_KIND);
+                                else
+                                    bm = ThumbnailUtils.createVideoThumbnail(file, new Size(max, max), null);
                                 if (bm == null)
-                                    return null;
+                                    throw new IllegalArgumentException("Thumbnail generation failed");
                                 return new BitmapDrawable(context.getResources(), bm);
                             } catch (Throwable ex) {
-                                Log.i(ex);
+                                Log.w(ex);
                                 return context.getDrawable(R.drawable.twotone_ondemand_video_24);
                             }
                         } else {
@@ -162,8 +183,6 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
 
                             if ("image/webp".equalsIgnoreCase(type) && !webp)
                                 return context.getDrawable(R.drawable.twotone_image_not_supported_24);
-
-                            args.putLong("size", file.length());
 
                             try {
                                 BitmapFactory.Options options = new BitmapFactory.Options();
@@ -199,7 +218,9 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
 
                     @Override
                     protected void onExecuted(Bundle args, Drawable image) {
-                        if (image == null) {
+                        if (attachment.isAudio())
+                            showPlayerState(attachment.getUri(context));
+                        else if (image == null) {
                             String type = args.getString("type");
                             if ("application/pdf".equals(type))
                                 ivImage.setImageResource(R.drawable.twotone_article_24);
@@ -240,8 +261,15 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
                         long size = args.getLong("size");
                         if (size > 0) {
                             if (sb.length() > 0)
-                                sb.append(" \u2013 "); // –
+                                sb.append(' ');
                             sb.append(Helper.humanReadableByteCount(size));
+                        }
+
+                        int duration = args.getInt("duration");
+                        if (duration > 0) {
+                            if (sb.length() > 0)
+                                sb.append(' ');
+                            sb.append(Helper.formatDuration(duration));
                         }
 
                         if (sb.length() > 0) {
@@ -275,16 +303,33 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
                         Uri uri = attachment.getUri(context);
                         if (MediaPlayerHelper.isPlaying(uri))
                             MediaPlayerHelper.stopMusic(context);
-                        else
+                        else {
+                            Runnable updatePosition = new RunnableEx("updatePosition") {
+                                @Override
+                                protected void delegate() {
+                                    Pair<Integer, Integer> pos = MediaPlayerHelper.getPosition(uri);
+                                    if (pos != null) {
+                                        int at = (int) Math.round(pos.first / 1000.0) * 1000;
+                                        tvProperties.setText(
+                                                Helper.formatDuration(at, false) + " / " +
+                                                        Helper.formatDuration(pos.second, true));
+                                        view.postDelayed(this, 1000L);
+                                    }
+                                    tvProperties.setVisibility(pos == null ? View.GONE : View.VISIBLE);
+                                }
+                            };
+                            view.postDelayed(updatePosition, 1000L);
+
                             MediaPlayerHelper.startMusic(context, uri,
-                                    new RunnableEx("player") {
+                                    new RunnableEx("onCompleted") {
                                         @Override
                                         public void delegate() {
-                                            showPlayerState(attachment);
+                                            showPlayerState(uri);
                                         }
                                     });
+                        }
 
-                        showPlayerState(attachment);
+                        showPlayerState(uri);
                     } catch (Throwable ex) {
                         ivImage.setImageResource(R.drawable.twotone_warning_24);
                         Log.unexpectedError(parentFragment, ex);
