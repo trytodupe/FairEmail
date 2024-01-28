@@ -1,4 +1,4 @@
-# 2024-01-10 21:10
+# 2024-01-28 21:10
 # build-github.yml
 name: FairEmail - github
 
@@ -40,8 +40,8 @@ jobs:
   validation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: gradle/wrapper-validation-action@v1
+      - uses: deep-soft/checkout@v4
+      - uses: deep-soft/wrapper-validation-action@v1
 
   build:
     runs-on: ubuntu-latest
@@ -157,7 +157,7 @@ jobs:
       - name: Publish source
 #        if: inputs.create-archive-all == true
         continue-on-error: true
-        uses: deep-soft/action-gh-release@v1
+        uses: deep-soft/action-gh-release@v2.1
         with:
           draft: true
           tag_name: ${{ env.TAG_NAME }}-${{ env.PRG_FLAVOR }}
@@ -209,7 +209,7 @@ jobs:
       - name: Publish Release
         if: inputs.create-archive-all == true
         continue-on-error: true
-        uses: deep-soft/action-gh-release@v1
+        uses: deep-soft/action-gh-release@v2.1
         with:
           draft: true
           tag_name: ${{ env.TAG_NAME }}-${{ env.PRG_FLAVOR }}
@@ -219,7 +219,7 @@ jobs:
 # zip release end
 
       - name: Upload Artifact
-        uses: deep-soft/upload-artifact@v3
+        uses: deep-soft/upload-artifact@v4
         with:
           name: upload-artifact
           path: |
@@ -239,7 +239,7 @@ jobs:
           echo "LIST: " ${{ env.PRG_NAME }}-${{ env.PRG_VERSION }}-${{ env.PRG_FLAVOR }}-release.apk
           ls -l ./signed-apk/
 
-      - uses: deep-soft/sign-android-release@master
+      - uses: deep-soft/sign-android-release@v1
         name: Sign app APK
         if: env.ANDROID_SIGNING_KEY != null
         id: sign-FairEmail
@@ -257,14 +257,14 @@ jobs:
 
       - name: Upload Artifacts
         if: env.ANDROID_SIGNING_KEY != null
-        uses: deep-soft/upload-artifact@v3
+        uses: deep-soft/upload-artifact@v4
         with:
           name: ${{ env.PRG_NAME }}-${{ env.PRG_VERSION }}-${{ env.PRG_FLAVOR }}-release.apk
           path: ${{steps.sign-FairEmail.outputs.signedReleaseFile}}
 
       - name: Publish signed apk package
         if: env.ANDROID_SIGNING_KEY != null
-        uses: deep-soft/action-gh-release@v1
+        uses: deep-soft/action-gh-release@v2.1
         with:
           draft: true
           tag_name: ${{ env.TAG_NAME }}
@@ -274,7 +274,7 @@ jobs:
 
       - name: Publish version build - signed apk package
         if: env.ANDROID_SIGNING_KEY != null
-        uses: deep-soft/action-gh-release@v1
+        uses: deep-soft/action-gh-release@v2.1
         with:
           draft: true
           tag_name: ${{ env.TAG_NAME }}-${{ env.TAG_VERSION }}${{ env.TAG_BUILD }}
@@ -284,7 +284,7 @@ jobs:
 
       - name: Publish unsigned apk package
         if: env.ANDROID_SIGNING_KEY == null
-        uses: deep-soft/action-gh-release@v1
+        uses: deep-soft/action-gh-release@v2.1
         with:
           draft: true
           tag_name: ${{ env.TAG_NAME }}
