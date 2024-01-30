@@ -55,6 +55,7 @@ import org.minidns.record.Record;
 import org.minidns.record.SRV;
 import org.minidns.record.TXT;
 import org.minidns.source.AbstractDnsDataSource;
+import org.minidns.source.DnsDataSource;
 import org.minidns.util.MultipleIoException;
 
 import java.io.ByteArrayOutputStream;
@@ -88,7 +89,8 @@ import javax.net.ssl.SSLSocketFactory;
 
 public class DnsHelper {
     // https://dns.watch/
-    private static final String DEFAULT_DNS = "84.200.69.80";
+    private static final String DEFAULT_DNS4 = "84.200.69.80";
+    private static final String DEFAULT_DNS6 = "2001:1608:10:25::1c04:b12f";
     private static final int CHECK_TIMEOUT = 5; // seconds
     private static final int LOOKUP_TIMEOUT = 15; // seconds
 
@@ -183,6 +185,8 @@ public class DnsHelper {
         ResolverApi resolver = DnssecResolverApi.INSTANCE;
         AbstractDnsClient client = resolver.getClient();
 
+        DnsDataSource dataSource = client.getDataSource();
+
         if (false) {
             String private_dns = ConnectionHelper.getPrivateDnsServerName(context);
             Log.w("DNS private=" + private_dns);
@@ -198,10 +202,30 @@ public class DnsHelper {
             ((DnssecClient) client).setUseHardcodedDnsServers(false);
 
         Log.i("DNS query name=" + type + ":" + name);
-        ResolverResult<? extends Data> data = resolver.resolve(name, clazz);
-        data.throwIfErrorResponse();
+        ResolverResult<? extends Data> data;
+        try {
+            data = resolver.resolve(name, clazz);
+        } catch (Throwable ex) {
+            Log.w(ex);
+            if (dataSource == null || dataSource == client.getDataSource())
+                throw ex;
+            Log.i("DNS retry custom");
+            client.setDataSource(dataSource);
+            data = resolver.resolve(name, clazz);
+        }
+        Log.i("DNS resolved name=" + type + ":" + name +
+                " success=" + data.wasSuccessful() +
+                " rcode=" + data.getResponseCode());
+
+        try {
+            data.throwIfErrorResponse();
+        } catch (Throwable ex) {
+            Log.w("DNS error message=" + ex.getMessage());
+            throw ex;
+        }
 
         boolean secure = (data.getUnverifiedReasons() != null);
+        Log.i("DNS secure=" + secure + " dnssec=" + dnssec);
         if (secure && dnssec) {
             DnssecResultNotAuthenticException ex = data.getDnssecResultNotAuthenticException();
             if (ex != null)
@@ -260,16 +284,19 @@ public class DnsHelper {
                 } else if (answer instanceof AAAA) {
                     AAAA aaaa = (AAAA) answer;
                     result.add(new DnsRecord(aaaa.getInetAddress()));
-                } else
-                    throw new IllegalArgumentException(answer.getClass().getName());
-
+                }
             }
         }
 
         for (DnsRecord record : result) {
             record.query = name;
             record.secure = secure;
-            record.authentic = data.isAuthenticData();
+            try {
+                record.authentic = data.isAuthenticData();
+            } catch (Throwable ex) {
+                Log.w(ex);
+                record.authentic = false;
+            }
         }
 
         if ("mx".equals(type) || "srv".equals(type))
@@ -372,7 +399,7 @@ public class DnsHelper {
         }
     }
 
-    private static List<String> getDnsServers(Context context) {
+    static List<String> getDnsServers(Context context) {
         List<String> result = new ArrayList<>(_getDnsServers(context));
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -386,7 +413,8 @@ public class DnsHelper {
                     Log.w("DNS extra invalid=" + extra);
         }
 
-        result.add(DEFAULT_DNS);
+        result.add(DEFAULT_DNS4);
+        result.add(DEFAULT_DNS6);
 
         return result;
     }
@@ -568,6 +596,7 @@ public class DnsHelper {
                         @Override
                         public void onAnswer(@NonNull byte[] bytes, int rcode) {
                             try {
+                                Log.i("DNS rcode=" + rcode);
                                 DnsMessage answer = new DnsMessage(bytes)
                                         .asBuilder()
                                         .setResponseCode(DnsMessage.RESPONSE_CODE.getResponseCode(rcode))
