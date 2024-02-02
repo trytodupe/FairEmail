@@ -185,8 +185,6 @@ public class DnsHelper {
         ResolverApi resolver = DnssecResolverApi.INSTANCE;
         AbstractDnsClient client = resolver.getClient();
 
-        DnsDataSource dataSource = client.getDataSource();
-
         if (false) {
             String private_dns = ConnectionHelper.getPrivateDnsServerName(context);
             Log.w("DNS private=" + private_dns);
@@ -197,27 +195,20 @@ public class DnsHelper {
 
         client.getDataSource().setTimeout(timeout * 1000);
 
+        if (!dnssec)
+            client.setDataSource(new AuthoritiveDataSource(client.getDataSource()));
+
         // https://github.com/MiniDNS/minidns/issues/102
-        if (client instanceof DnssecClient && dns_custom)
+        if (client instanceof DnssecClient)
             ((DnssecClient) client).setUseHardcodedDnsServers(false);
 
-        Log.i("DNS query name=" + type + ":" + name);
         ResolverResult<? extends Data> data;
         try {
+            Log.i("DNS query name=" + type + ":" + name);
             data = resolver.resolve(name, clazz);
-        } catch (Throwable ex) {
-            Log.w(ex);
-            if (dataSource == null || dataSource == client.getDataSource())
-                throw ex;
-            Log.i("DNS retry custom");
-            client.setDataSource(dataSource);
-            data = resolver.resolve(name, clazz);
-        }
-        Log.i("DNS resolved name=" + type + ":" + name +
-                " success=" + data.wasSuccessful() +
-                " rcode=" + data.getResponseCode());
-
-        try {
+            Log.i("DNS resolved name=" + type + ":" + name +
+                    " success=" + data.wasSuccessful() +
+                    " rcode=" + data.getResponseCode());
             data.throwIfErrorResponse();
         } catch (Throwable ex) {
             Log.w("DNS error message=" + ex.getMessage());
@@ -284,7 +275,9 @@ public class DnsHelper {
                 } else if (answer instanceof AAAA) {
                     AAAA aaaa = (AAAA) answer;
                     result.add(new DnsRecord(aaaa.getInetAddress()));
-                }
+                } else
+                    Log.e("DNS unexpected record=" +
+                            (answer == null ? null : answer.getClass().getName()));
             }
         }
 
@@ -400,10 +393,15 @@ public class DnsHelper {
     }
 
     static List<String> getDnsServers(Context context) {
-        List<String> result = new ArrayList<>(_getDnsServers(context));
-
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean dns_custom = prefs.getBoolean("dns_custom", false);
         String dns_extra = prefs.getString("dns_extra", null);
+
+        List<String> result = new ArrayList<>();
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || dns_custom)
+            result.addAll(_getDnsServers(context));
+
         if (!TextUtils.isEmpty(dns_extra)) {
             String[] extras = dns_extra.replaceAll("\\s+", "").split(",");
             for (String extra : extras)
@@ -637,6 +635,24 @@ public class DnsHelper {
                 Log.i(ex);
                 throw ex;
             }
+        }
+    }
+
+    private static class AuthoritiveDataSource extends AbstractDnsDataSource {
+        private final DnsDataSource delegate;
+
+        AuthoritiveDataSource(DnsDataSource delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public DnsQueryResult query(DnsMessage message, InetAddress address, int port) throws IOException {
+            DnsQueryResult result = delegate.query(message, address, port);
+            DnsMessage answer = new DnsMessage(result.response.toArray())
+                    .asBuilder()
+                    .setRecursionAvailable(true)
+                    .build();
+            return new StandardDnsQueryResult(address, port, result.queryMethod, result.query, answer);
         }
     }
 

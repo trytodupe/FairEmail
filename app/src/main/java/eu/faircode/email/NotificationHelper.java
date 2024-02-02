@@ -138,7 +138,7 @@ class NotificationHelper {
         notification.enableLights(true);
         notification.setLightColor(Color.YELLOW);
         notification.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-        notification.setBypassDnd(true);
+        //notification.setBypassDnd(true);
         createNotificationChannel(nm, notification);
 
         NotificationChannel progress = new NotificationChannel(
@@ -898,7 +898,9 @@ class NotificationHelper {
                             .setShowWhen(true)
                             .setSortKey(sortKey)
                             .setDeleteIntent(piIgnore)
-                            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                            .setPriority(EntityMessage.PRIORITIY_HIGH.equals(message.importance)
+                                    ? NotificationCompat.PRIORITY_HIGH
+                                    : NotificationCompat.PRIORITY_DEFAULT)
                             .setCategory(NotificationCompat.CATEGORY_EMAIL)
                             .setVisibility(notify_private
                                     ? NotificationCompat.VISIBILITY_PRIVATE

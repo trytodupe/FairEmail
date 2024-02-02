@@ -1792,7 +1792,7 @@ public class MessageHelper {
         }
 
         // https://docs.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxomsg/9e994fbb-b839-495f-84e3-2c8c02c7dd9b
-        if (BuildConfig.DEBUG)
+        if (BuildConfig.DEBUG && false)
             try {
                 String tindex = imessage.getHeader("Thread-Index", null);
                 if (tindex != null) {
@@ -1880,7 +1880,7 @@ public class MessageHelper {
                 }
         }
 
-        if (thread == null && !TextUtils.isEmpty(BuildConfig.DEV_DOMAIN)) {
+        if (thread == null && !TextUtils.isEmpty(BuildConfig.DEV_DOMAIN) && false) {
             String awsses = imessage.getHeader("X-SES-Outgoing", null);
             if (!TextUtils.isEmpty(awsses)) {
                 Address[] froms = getFrom();
@@ -2761,13 +2761,12 @@ public class MessageHelper {
         }
     }
 
-    String getListUnsubscribe() throws MessagingException {
+    Pair<String, Boolean> getListUnsubscribe() throws MessagingException {
         ensureHeaders();
 
-        String list;
         try {
             // https://www.ietf.org/rfc/rfc2369.txt
-            list = imessage.getHeader("List-Unsubscribe", null);
+            String list = imessage.getHeader("List-Unsubscribe", null);
             if (list == null)
                 return null;
 
@@ -2776,6 +2775,15 @@ public class MessageHelper {
 
             if (list == null || list.startsWith("NO"))
                 return null;
+
+            // https://datatracker.ietf.org/doc/html/rfc8058
+            boolean onclick = false;
+            String post = imessage.getHeader("List-Unsubscribe-Post", null);
+            if (post != null) {
+                post = MimeUtility.unfold(post);
+                post = decodeMime(post);
+                onclick = "List-Unsubscribe=One-Click".equalsIgnoreCase(post.trim());
+            }
 
             String link = null;
             String mailto = null;
@@ -2821,9 +2829,9 @@ public class MessageHelper {
             }
 
             if (link != null)
-                return link;
+                return new Pair<>(link, onclick);
             if (mailto != null)
-                return mailto;
+                return new Pair<>(mailto, onclick);
 
             if (!BuildConfig.PLAY_STORE_RELEASE)
                 Log.i(new IllegalArgumentException("List-Unsubscribe: " + list));
