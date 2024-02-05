@@ -6,9 +6,14 @@ For support you can use [the contact form](https://contact.faircode.eu/?product=
 
 ### [Ypupiara](https://en.wikipedia.org/wiki/Ypupiara)
 
-### Next version
+### 1.2156 - 2024-02-03 *
 
-* Added title fields for count/unified widgets
+* Small improvements and minor bug fixes
+* Updated [translations](https://crowdin.com/project/open-source-email)
+
+### 1.2155 - 2024-02-03
+
+* Added title input fields for widgets
 * Using high priority notifications for high importance messages
 * Small improvements and minor bug fixes
 * Updated [Public Suffix List](https://github.com/publicsuffix/list)

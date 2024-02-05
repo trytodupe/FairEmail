@@ -3338,6 +3338,10 @@ If you receive a lot of spam messages in your inbox, the best you can do is to c
 Also, FairEmail can show a small red warning flag
 when DKIM, SPF or [DMARC](https://en.wikipedia.org/wiki/DMARC) authentication failed on the receiving server.
 You can enable/disable [authentication verification](https://en.wikipedia.org/wiki/Email_authentication) in the display settings.
+The feature depends on the header [Authentication-Results](https://datatracker.ietf.org/doc/html/rfc7601), which the receiving email server should add.
+If the email server doesn't add an *Authentication-Results*, which is optional,
+you can enable native DKIM in the debug panel, which appears when you enable debug mode in the miscellaneous settings tab page (last option).
+Please be aware that this option will increase both data and battery usage.
 
 FairEmail can show a warning flag too if the domain name of the (reply) email address of the sender does not define an MX record pointing to an email server.
 This can be enabled in the receive settings. Be aware that this will slow down synchronization of messages significantly.
@@ -4472,6 +4476,10 @@ which mostly involves signing a contract with binding terms and conditions.
 Note that you'll need to uninstall the F-Droid build first before you can install a GitHub release
 because Android refuses to install ("*App was not installed*") the same app with a different signature for security reasons.
 
+At the start of 2024, the Play Store app started to update all apps, including apps not installed via the Play Store.
+Since the F-Droid build is signed by the F-Droid organization, which basically means the F-Droid build is another app, updating the F-Droid build will fail.
+Unfortunately, there is no way to resolve this.
+
 Note that the GitHub version will automatically check for updates.
 When desired, this can be turned off in the miscellaneous settings.
 
@@ -5145,8 +5153,6 @@ Received: brown.elm.relay.mailchannels.net (brown.elm.relay.mailchannels.net. [2
 	by mx.google.com with ESMTPS id d10si6675855pgb.5.2021.12.24.13.20.38
 	for <test@example.org> (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
 ```
-
-The feature depends on the header *Authentication-Results*, which the receiving email server should add.
 
 <br />
 
