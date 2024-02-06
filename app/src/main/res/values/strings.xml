@@ -1459,6 +1459,7 @@
     <string name="title_new_message">New message</string>
     <string name="title_editasnew">Edit as new</string>
     <string name="title_edit_notes">Edit local notes</string>
+    <string name="title_edit_notes_remark">Local notes are not stored on the mail server and are therefore only available in this app on this device</string>
     <string name="title_create_rule">Create rule &#8230;</string>
     <string name="title_full_screen">Full screen</string>
     <string name="title_force_light">Force light theme</string>
@@ -2086,6 +2087,7 @@
     <string name="title_legend_section_keyboard">Keyboard</string>
 
     <string name="title_legend_oauth">OAuth authorization</string>
+    <string name="title_legend_graph" translatable="false">Microsoft Graph</string>
     <string name="title_legend_folder_connected">Folder connected</string>
     <string name="title_legend_folder_disconnected">Folder disconnected</string>
     <string name="title_legend_download_on">Download message content automatically</string>
@@ -2394,6 +2396,7 @@
     <string name="title_widget_background">Background color</string>
     <string name="title_widget_icon">Icon color</string>
     <string name="title_widget_day_night">Follow dark system theme</string>
+    <string name="title_widget_standalone">Open the content standalone</string>
 
     <string name="title_compat_dark">Google removed dark mode for Android versions before version 10</string>
 
