@@ -221,6 +221,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
     private SwitchCompat swJsonLd;
     private SwitchCompat swDupMsgId;
     private SwitchCompat swThreadByRef;
+    private SwitchCompat swSaveUserFlags;
     private SwitchCompat swMdn;
     private SwitchCompat swAppChooser;
     private SwitchCompat swAppChooserShare;
@@ -287,7 +288,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             "exact_alarms",
             "native_dkim", "native_arc", "native_arc_whitelist",
             "webp", "animate_images",
-            "easy_correct", "infra", "tld_flags", "json_ld", "dup_msgids", "thread_byref", "mdn",
+            "easy_correct", "infra", "tld_flags", "json_ld", "dup_msgids", "thread_byref", "save_user_flags", "mdn",
             "app_chooser", "app_chooser_share", "adjacent_links", "adjacent_documents", "adjacent_portrait", "adjacent_landscape",
             "delete_confirmation", "global_keywords", "test_iab"
     ));
@@ -307,6 +308,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             "raw_asked", "all_read_asked", "delete_asked",
             "cc_bcc", "inline_image_hint", "compose_reference", "send_dialog",
             "setup_reminder", "was_ignoring", "setup_advanced",
+            "notifications_reminder", "datasaver_reminder",
             "signature_images_hint",
             "gmail_checked",
             "eml_auto_confirm",
@@ -315,8 +317,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             "redmi_note",
             "accept_space", "accept_unsupported",
             "junk_hint",
-            "last_update_check", "last_announcement_check",
-            "notifications_reminder"
+            "last_update_check", "last_announcement_check"
     };
 
     @Override
@@ -460,6 +461,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
         swJsonLd = view.findViewById(R.id.swJsonLd);
         swDupMsgId = view.findViewById(R.id.swDupMsgId);
         swThreadByRef = view.findViewById(R.id.swThreadByRef);
+        swSaveUserFlags = view.findViewById(R.id.swSaveUserFlags);
         swMdn = view.findViewById(R.id.swMdn);
         swAppChooser = view.findViewById(R.id.swAppChooser);
         swAppChooserShare = view.findViewById(R.id.swAppChooserShare);
@@ -1570,6 +1572,13 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             }
         });
 
+        swSaveUserFlags.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+                prefs.edit().putBoolean("save_user_flags", checked).apply();
+            }
+        });
+
         swMdn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
@@ -2365,6 +2374,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             swJsonLd.setChecked(prefs.getBoolean("json_ld", false));
             swDupMsgId.setChecked(prefs.getBoolean("dup_msgids", false));
             swThreadByRef.setChecked(prefs.getBoolean("thread_byref", true));
+            swSaveUserFlags.setChecked(prefs.getBoolean("save_user_flags", false));
             swMdn.setChecked(prefs.getBoolean("mdn", swExperiments.isChecked()));
             swAppChooser.setChecked(prefs.getBoolean("app_chooser", false));
             swAppChooserShare.setChecked(prefs.getBoolean("app_chooser_share", false));

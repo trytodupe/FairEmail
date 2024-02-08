@@ -924,7 +924,18 @@ public class HtmlHelper {
                                         String text = tnode.getWholeText();
                                         switch (value) {
                                             case "capitalize":
-                                                // TODO: capitalize
+                                                for (int i = 0; i < text.length(); ) {
+                                                    int codepoint = text.codePointAt(i);
+                                                    if (Character.isLetter(codepoint)) {
+                                                        tnode.text(text.substring(0, i) +
+                                                                text.substring(i, i + 1).toUpperCase(Locale.ROOT) +
+                                                                text.substring(i + 1));
+                                                        break;
+                                                    } else if (!Character.isWhitespace(codepoint))
+                                                        break;
+                                                    else
+                                                        i += Character.charCount(codepoint);
+                                                }
                                                 break;
                                             case "uppercase":
                                                 tnode.text(text.toUpperCase(Locale.ROOT));
@@ -1137,7 +1148,8 @@ public class HtmlHelper {
 
             if (TextUtils.isEmpty(p.text())) {
                 p.attr("x-line-before", "false");
-                p.attr("x-line-after", "true");
+                if (!"false".equals(p.attr("x-line-after")))
+                    p.attr("x-line-after", "true");
             } else
                 p.attr("x-paragraph", "true");
         }
@@ -1296,7 +1308,8 @@ public class HtmlHelper {
                             }
                         }
 
-                        if (lonely instanceof TextNode &&
+                        if (cols.size() > 1 &&
+                                lonely instanceof TextNode &&
                                 "\u00a0".equals(((TextNode) lonely).getWholeText()))
                             lonely.remove(); // -> column separator
                     }

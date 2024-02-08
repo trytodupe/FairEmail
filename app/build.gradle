@@ -3,7 +3,7 @@ apply plugin: 'com.bugsnag.android.gradle'
 apply plugin: 'kotlin-android'
 apply plugin: 'de.undercouch.download'
 
-def getVersionCode = { -> return 2156 }
+def getVersionCode = { -> return 2157 }
 def getRevision = { -> return "b" }
 def getReleaseName = { -> return "Ypupiara" }
 // https://en.wikipedia.org/wiki/List_of_dinosaur_genera
@@ -519,15 +519,15 @@ dependencies {
     def appcompat_version = "1.6.1" // 1.7.0-alpha03
     def emoji_version = "1.4.0" // 1.5.0-alpha01
     def flatbuffers_version = "2.0.0"
-    def activity_version = "1.8.2" // 1.9.0-alpha02
-    def fragment_version = "1.6.2" // 1.7.0-alpha09
-    def windows_version = "1.2.0" // 1.3.0-alpha01
-    def webkit_version = "1.10.0"
+    def activity_version = "1.8.2" // 1.9.0-alpha03
+    def fragment_version = "1.6.2" // 1.7.0-alpha10
+    def windows_version = "1.2.0" // 1.3.0-alpha02
+    def webkit_version = "1.10.0" // 1.11.0-alpha01
     def recyclerview_version = "1.3.2" // 1.4.0-alpha01
     def coordinatorlayout_version = "1.2.0" // 1.3.0-alpha02
     def constraintlayout_version = "2.1.4" // 2.2.0-alpha13
     def material_version = "1.11.0" // 1.11.0-alpha01
-    def browser_version = "1.7.0" // 1.8.0-beta01
+    def browser_version = "1.7.0" // 1.8.0-beta02
     def lbm_version = "1.1.0"
     def swiperefresh_version = "1.2.0-alpha01"
     def documentfile_version = "1.1.0-alpha01"
@@ -536,7 +536,7 @@ dependencies {
     def room_version = "2.4.3" // 2.5.2/2.6.1
     def sqlite_version = "2.4.0"
     def requery_version = "3.39.2"
-    def paging_version = "2.1.2" //  3.2.0
+    def paging_version = "2.1.2" //  3.3.0-alpha03
     def preference_version = "1.2.1"
     def work_version = "2.9.0" // 2.10.0-alpha01
     def exif_version = "1.3.7"
@@ -572,6 +572,7 @@ dependencies {
     def canary_version = "2.13"
     def ws_version = "2.14"
     def tinylog_version = "2.6.2"
+    def zxing_version = "3.5.3"
 
     // https://mvnrepository.com/artifact/com.android.tools/desugar_jdk_libs?repo=google
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$desugar_version"
@@ -828,4 +829,8 @@ dependencies {
     // https://mvnrepository.com/artifact/org.tinylog
     implementation "org.tinylog:tinylog-api:$tinylog_version"
     implementation "org.tinylog:tinylog-impl:$tinylog_version"
+
+    // https://github.com/zxing/zxing
+    // https://mvnrepository.com/artifact/com.google.zxing/core
+    implementation "com.google.zxing:core:$zxing_version"
 }

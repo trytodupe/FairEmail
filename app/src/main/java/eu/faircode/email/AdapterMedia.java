@@ -25,6 +25,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.pdf.PdfRenderer;
@@ -35,7 +37,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.StyleSpan;
+import android.text.style.URLSpan;
 import android.util.Pair;
 import android.util.Size;
 import android.view.LayoutInflater;
@@ -45,6 +50,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.text.method.LinkMovementMethodCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
@@ -55,7 +61,16 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListUpdateCallback;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.zxing.BinaryBitmap;
+import com.google.zxing.MultiFormatReader;
+import com.google.zxing.NotFoundException;
+import com.google.zxing.RGBLuminanceSource;
+import com.google.zxing.Result;
+import com.google.zxing.common.HybridBinarizer;
+
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -66,6 +81,8 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
     private final Context context;
     private final LayoutInflater inflater;
     private final LifecycleOwner owner;
+    private final int textColorTertiary;
+    private final int textColorLink;
 
     private List<EntityAttachment> items = new ArrayList<>();
 
@@ -76,6 +93,7 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
         private final ImageView ivImage;
         private final TextView tvCaption;
         private final TextView tvProperties;
+        private final TextView tvContent;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -84,16 +102,19 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
             ivImage = itemView.findViewById(R.id.ivImage);
             tvCaption = itemView.findViewById(R.id.tvCaption);
             tvProperties = itemView.findViewById(R.id.tvProperties);
+            tvContent = itemView.findViewById(R.id.tvContent);
         }
 
         private void wire() {
             view.setOnClickListener(this);
             view.setOnLongClickListener(this);
+            tvContent.setOnClickListener(this);
         }
 
         private void unwire() {
             view.setOnClickListener(null);
             view.setOnLongClickListener(null);
+            tvContent.setOnClickListener(null);
         }
 
         private void showPlayerState(Uri uri) {
@@ -109,6 +130,7 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
             tvCaption.setText(attachment.name);
             tvCaption.setVisibility(TextUtils.isEmpty(attachment.name) ? View.GONE : View.VISIBLE);
             tvProperties.setVisibility(View.GONE);
+            tvContent.setVisibility(View.GONE);
 
             if (attachment.available) {
                 Bundle args = new Bundle();
@@ -180,6 +202,7 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
                         } else {
                             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
                             boolean webp = prefs.getBoolean("webp", true);
+                            boolean barcode_preview = prefs.getBoolean("barcode_preview", true);
 
                             if ("image/webp".equalsIgnoreCase(type) && !webp)
                                 return context.getDrawable(R.drawable.twotone_image_not_supported_24);
@@ -199,6 +222,25 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
                             } catch (Throwable ex) {
                                 Log.w(ex);
                             }
+
+                            if (barcode_preview)
+                                try (InputStream is = new FileInputStream(file)) {
+                                    Bitmap bitmap = BitmapFactory.decodeStream(is);
+                                    int width = bitmap.getWidth(), height = bitmap.getHeight();
+                                    int[] pixels = new int[width * height];
+                                    bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+
+                                    RGBLuminanceSource source = new RGBLuminanceSource(width, height, pixels);
+                                    BinaryBitmap bBitmap = new BinaryBitmap(new HybridBinarizer(source));
+                                    MultiFormatReader reader = new MultiFormatReader();
+                                    Result result = reader.decode(bBitmap);
+                                    args.putString("barcode_text", result.getText());
+                                    args.putString("barcode_format", result.getBarcodeFormat().name());
+                                } catch (NotFoundException ex) {
+                                    Log.w(ex);
+                                } catch (Throwable ex) {
+                                    Log.e(ex);
+                                }
 
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
                                     !"image/svg+xml".equals(type) &&
@@ -272,9 +314,45 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
                             sb.append(Helper.formatDuration(duration));
                         }
 
+                        if (BuildConfig.DEBUG) {
+                            String barcode_format = args.getString("barcode_format");
+                            if (!TextUtils.isEmpty(barcode_format)) {
+                                if (sb.length() > 0)
+                                    sb.append(' ');
+                                sb.append(barcode_format);
+                            }
+                        }
+
                         if (sb.length() > 0) {
                             tvProperties.setText(sb);
                             tvProperties.setVisibility(View.VISIBLE);
+                        }
+
+                        String barcode_text = args.getString("barcode_text");
+                        if (!TextUtils.isEmpty(barcode_text)) {
+                            Uri uri;
+                            try {
+                                uri = UriHelper.guessScheme(Uri.parse(barcode_text));
+                            } catch (Throwable ex) {
+                                Log.w(ex);
+                                uri = null;
+                            }
+
+                            boolean openable = (uri != null &&
+                                    !TextUtils.isEmpty(uri.getScheme()) &&
+                                    !"tel".equals(uri.getScheme()));
+
+                            tvContent.setTypeface(null, openable ? Typeface.NORMAL : Typeface.BOLD);
+                            int flags = tvContent.getPaintFlags();
+                            if (openable)
+                                flags |= Paint.UNDERLINE_TEXT_FLAG;
+                            else
+                                flags &= ~Paint.UNDERLINE_TEXT_FLAG;
+                            tvContent.setPaintFlags(flags);
+                            tvContent.setTextColor(openable ? textColorLink : textColorTertiary);
+                            tvContent.setTag(openable ? uri.toString() : null);
+                            tvContent.setText(barcode_text);
+                            tvContent.setVisibility(View.VISIBLE);
                         }
                     }
 
@@ -295,6 +373,18 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
             int pos = getAdapterPosition();
             if (pos == RecyclerView.NO_POSITION)
                 return;
+
+            if (view.getId() == R.id.tvContent && view.getTag() instanceof String) {
+                Bundle args = new Bundle();
+                args.putParcelable("uri", Uri.parse((String) view.getTag()));
+                args.putString("title", ((TextView) view).getText().toString());
+                args.putBoolean("always_confirm", true);
+
+                FragmentDialogOpenLink fragment = new FragmentDialogOpenLink();
+                fragment.setArguments(args);
+                fragment.show(parentFragment.getParentFragmentManager(), "open:barcode");
+                return;
+            }
 
             EntityAttachment attachment = items.get(pos);
             if (attachment.available) {
@@ -422,6 +512,9 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
         this.context = parentFragment.getContext();
         this.owner = parentFragment.getViewLifecycleOwner();
         this.inflater = LayoutInflater.from(context);
+
+        this.textColorTertiary = Helper.resolveColor(context, android.R.attr.textColorTertiary);
+        this.textColorLink = Helper.resolveColor(context, android.R.attr.textColorLink);
 
         setHasStableIds(true);
 
