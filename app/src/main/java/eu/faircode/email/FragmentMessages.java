@@ -5410,15 +5410,22 @@ public class FragmentMessages extends FragmentBase
             if (canNotify)
                 prefs.edit().remove("notifications_reminder").apply();
             boolean notifications_reminder = prefs.getBoolean("notifications_reminder", true);
-            grpNotifications.setVisibility(canNotify || !notifications_reminder ? View.GONE : View.VISIBLE);
+            grpNotifications.setVisibility(
+                    !canNotify && notifications_reminder
+                            ? View.VISIBLE : View.GONE);
         }
 
         if (grpDataSaver != null &&
                 ("enabled".equals(key) || "datasaver_reminder".equals(key))) {
-            boolean enabled = prefs.getBoolean("enabled", true);
             boolean isDataSaving = ConnectionHelper.isDataSaving(getContext());
-            boolean datasaver_reminder = prefs.getBoolean(key, true);
-            grpDataSaver.setVisibility(enabled && isDataSaving && datasaver_reminder ? View.VISIBLE : View.GONE);
+            if (!isDataSaving)
+                prefs.edit().remove("datasaver_reminder").apply();
+
+            boolean enabled = prefs.getBoolean("enabled", true);
+            boolean datasaver_reminder = prefs.getBoolean("datasaver_reminder", true);
+            grpDataSaver.setVisibility(
+                    isDataSaving && enabled && datasaver_reminder
+                            ? View.VISIBLE : View.GONE);
         }
 
         if (grpSupport != null &&

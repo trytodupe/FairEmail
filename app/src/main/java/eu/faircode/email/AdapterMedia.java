@@ -37,10 +37,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.style.StyleSpan;
-import android.text.style.URLSpan;
 import android.util.Pair;
 import android.util.Size;
 import android.view.LayoutInflater;
@@ -50,7 +47,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.text.method.LinkMovementMethodCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
@@ -223,9 +219,11 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
                                 Log.w(ex);
                             }
 
-                            if (barcode_preview)
+                            // https://github.com/zxing/zxing/wiki/Frequently-Asked-Questions#developers
+                            if (barcode_preview &&
+                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
                                 try (InputStream is = new FileInputStream(file)) {
-                                    Bitmap bitmap = BitmapFactory.decodeStream(is);
+                                    Bitmap bitmap = ImageHelper.getScaledBitmap(is, file.getAbsolutePath(), type, max);
                                     int width = bitmap.getWidth(), height = bitmap.getHeight();
                                     int[] pixels = new int[width * height];
                                     bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
@@ -234,7 +232,7 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
                                     BinaryBitmap bBitmap = new BinaryBitmap(new HybridBinarizer(source));
                                     MultiFormatReader reader = new MultiFormatReader();
                                     Result result = reader.decode(bBitmap);
-                                    args.putString("barcode_text", result.getText());
+                                    args.putString("barcode_text", Helper.getPrintableString(result.getText()));
                                     args.putString("barcode_format", result.getBarcodeFormat().name());
                                 } catch (NotFoundException ex) {
                                     Log.w(ex);

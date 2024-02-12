@@ -4181,22 +4181,22 @@ In the account settings (Settings, tap Manual setup, tap Accounts, tap account) 
 
 *IMAP*
 
-Since the IMAP protocol is meant to synchronize two ways,
+Since the IMAP protocol is meant to synchronize two ways, from server to client and from client to server,
 trashing (=move to trash) and (permanently) deleting messages will be performed on the email server too,
 so that the message list is the same for all connected clients.
-Deleting a messages from the device only won't work because it would be synchronized again later.
+Deleting a message from the device only won't work because it would be synchronized again later.
 
-However, FairEmail supports hiding messages,
-either via the three-dots menu in the action bar just above the message text (you can configure a button for this via the same menu)
+Some email apps pretend they can do this, but, in fact, messages are hidden on the device.
+FairEmail can do this too, but in a more explicit way, also allowing you to show the messages again.
+
+You can hide messages either via the three-dots menu in the action bar just above the message text (you can configure a button for this via the same menu)
 or by multiple selecting messages in the message list.
-Basically this is the same as "leave on server" of the POP3 protocol
-with the advantage that you can show the messages again when needed.
 
 Alternatively, you can disable AUTO EXPUNGE, which will result in marking messages being deleted on the server (by setting the *deleted* flag), but not expunging (deleting) them.
 You can find this option in the debug panel, which can be shown by (temporarily) enabling debug mode in the miscellaneous settings.
 
 Note that it is possible to set the swipe left or right action to hide a message.
-There is a button in the behavior settings to quickly configure the swipe left and right actions for all IMAP account.
+There is a button in the behavior settings to quickly configure the swipe left and right actions for all IMAP accounts.
 
 <br />
 
@@ -5774,6 +5774,8 @@ Requested features should:
 * fit within the philosophy of the app (privacy-oriented, security-minded)
 * comply with common standards (IMAP, SMTP, etc.)
 * comply with the [Core app quality guidelines](https://developer.android.com/docs/quality-guidelines/core-app-quality)
+
+Features unrelated to email, including reading newsgroups and reading RSS feeds, fall outside the scope of the project.
 
 The goal of the design is to be minimalistic (no unnecessary menus, buttons, etc) and non distracting (no fancy colors, animations, etc).
 All displayed things should be useful in one or another way and should be carefully positioned for easy usage.
