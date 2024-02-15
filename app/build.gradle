@@ -3,7 +3,7 @@ apply plugin: 'com.bugsnag.android.gradle'
 apply plugin: 'kotlin-android'
 apply plugin: 'de.undercouch.download'
 
-def getVersionCode = { -> return 2158 }
+def getVersionCode = { -> return 2159 }
 def getRevision = { -> return "b" }
 def getReleaseName = { -> return "Ypupiara" }
 // https://en.wikipedia.org/wiki/List_of_dinosaur_genera
@@ -395,7 +395,7 @@ preBuild.dependsOn copyChangelog
 
 tasks.register('updateFAQ', Exec) {
     workingDir "${rootDir}"
-    commandLine 'sh', '-c', 'pandoc FAQ.md -o index.html'
+    commandLine 'sh', '-c', 'pandoc --standalone --metadata-file FAQ.yaml FAQ.md -o index.html'
 }
 
 tasks.register('updatePrivacy', Exec) {
