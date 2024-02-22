@@ -13,10 +13,9 @@
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     ul.task-list{list-style: none;}
   </style>
+  <link rel="shortcut icon" href="https://raw.githubusercontent.com/M66B/FairEmail/master/app/src/main/ic_launcher-web.png">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
+    body { font-family: Arial, sans-serif; }
   </style>
 </head>
 <body>
@@ -1340,6 +1339,7 @@ X-Google-Original-From: Somebody &lt;somebody+extra@example.org&gt;</code></pre>
 <li>Did you know that you can insert the email addresses of an Android contact group via the three dots overflow menu?</li>
 <li>Did you know that if you select text and reply, only the selected text will be quoted? (this works for reformatted messages only because of <a href="https://issuetracker.google.com/issues/36939405">this issue</a>)</li>
 <li>Did you know that you can long press the trash icons (both in the message and the bottom action bar) to permanently delete a message or conversation? (version 1.1368+)</li>
+<li>Did you know that you can long press the archive button in the bottom action bar to move a conversation? (version 1.2160+)</li>
 <li>Did you know that you can long press the send action to show the send dialog, even if it was disabled?</li>
 <li>Did you know that you can long press the full screen icon to show the original message text only?</li>
 <li>Did you know that you can long press the answer button to reply to the sender? (since version 1.1562; since version 1.1839 you can configure the action in the send settings)</li>
@@ -2016,6 +2016,8 @@ category:promotions</code></pre>
 <p><br /></p>
 <p><a name="faq125"></a> <strong>(125) What are the current experimental features?</strong></p>
 <p>🌎 <a href="https://translate.google.com/translate?sl=en&amp;u=https%3A%2F%2Fm66b.github.io%2FFairEmail%2F%23faq125">Google Translate</a></p>
+<p>Experimental features can be enabled in the miscellaneous-settings tab page.</p>
+<p><br /></p>
 <p><em>Send hard bounce (version 1.1477+)</em></p>
 <p>Send a <a href="https://tools.ietf.org/html/rfc3464">Delivery Status Notification</a> (=hard bounce) via the reply/answer menu.</p>
 <p>Hard bounces will mostly be processed automatically because they affect the reputation of the email provider. The bounce address (=<em>Return-Path</em> header) is mostly very specific, so the email server can determine the sending account.</p>
@@ -2056,6 +2058,9 @@ $NotDisplayed</code></pre>
 <p><br /></p>
 <p><em>Edit subject (1.2046+)</em></p>
 <p>The subject of a received message can be edited, also on the email server, via the horizontal three-dots button just above the message text near the left side of the screen.</p>
+<p><br /></p>
+<p><em>Markdown (1.2061+)</em></p>
+<p>Composing messages using <a href="https://en.wikipedia.org/wiki/Markdown">Markdown</a> can be enabled via the three-dots overflow menu of the message editor.</p>
 <p><br /></p>
 <p><a name="faq126"></a> <strong>(126) Can message previews be sent to my smartwatch?</strong></p>
 <p>🌎 <a href="https://translate.google.com/translate?sl=en&amp;u=https%3A%2F%2Fm66b.github.io%2FFairEmail%2F%23faq126">Google Translate</a></p>

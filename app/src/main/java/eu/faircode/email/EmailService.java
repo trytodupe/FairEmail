@@ -37,6 +37,7 @@ import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import com.sun.mail.gimap.GmailSSLProvider;
+import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -926,17 +927,26 @@ public class EmailService implements AutoCloseable {
     List<EntityFolder> getFolders() throws MessagingException {
         List<EntityFolder> folders = new ArrayList<>();
 
-        for (Folder ifolder : getStore().getDefaultFolder().list("*")) {
-            String fullName = ifolder.getFullName();
-            String[] attrs = ((IMAPFolder) ifolder).getAttributes();
-            String type = EntityFolder.getType(attrs, fullName, true);
-            Log.i(fullName + " attrs=" + TextUtils.join(" ", attrs) + " type=" + type);
+        try {
+            for (Folder ifolder : getStore().getDefaultFolder().list("*")) {
+                String fullName = ifolder.getFullName();
+                String[] attrs = ((IMAPFolder) ifolder).getAttributes();
+                String type = EntityFolder.getType(attrs, fullName, true);
+                Log.i(fullName + " attrs=" + TextUtils.join(" ", attrs) + " type=" + type);
 
-            if (type != null)
-                folders.add(new EntityFolder(fullName, type));
+                if (type != null)
+                    folders.add(new EntityFolder(fullName, type));
+            }
+
+            EntityFolder.guessTypes(folders);
+        } catch (MessagingException ex) {
+            if (ex.getMessage() != null &&
+                    ex.getMessage().contains("LIST processing failed")) {
+                Log.w(ex);
+                folders.add(new EntityFolder("Inbox", EntityFolder.INBOX));
+            } else
+                throw ex;
         }
-
-        EntityFolder.guessTypes(folders);
 
         return folders;
     }

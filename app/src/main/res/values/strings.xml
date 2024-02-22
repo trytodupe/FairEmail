@@ -460,6 +460,7 @@
     <string name="title_advanced_suggest_received">Suggest addresses found in received messages</string>
     <string name="title_advanced_suggest_frequently">Sort suggested addresses on frequency of use</string>
     <string name="title_advanced_suggest_account">Limit suggestions to current account</string>
+    <string name="title_advanced_auto_delete_local">Automatically delete local contacts older than and used fewer than:</string>
     <string name="title_advanced_alt_re_fwd">Alternative reply/forward prefix</string>
     <string name="title_advanced_send_chips">Show address bubbles</string>
     <string name="title_advanced_send_nav_color">Use the identity color for the bottom action bar</string>
@@ -579,6 +580,7 @@
     <string name="title_advanced_cards_shadow_border">Show border</string>
     <string name="title_advanced_cards_shadow_highlight">Use highlight color instead of accent color</string>
     <string name="title_advanced_tabular_dividers">Use divider lines when using tabular style</string>
+    <string name="title_advanced_tabular_unread_bg">Use a gray background color for unread messages when using table style</string>
     <string name="title_advanced_date_header">Group by date</string>
     <string name="title_advanced_date_week">Group by week instead of day</string>
     <string name="title_advanced_date_fixed">Show fixed date header at the top</string>
@@ -718,7 +720,7 @@
     <string name="title_advanced_auto_block_sender">Automatically block the sender when reporting spam</string>
     <string name="title_advanced_auto_hide_answer">Automatically hide the answer button when scrolling</string>
     <string name="title_advanced_swipe_reply">Swipe expanded messages to the right to reply</string>
-    <string name="title_advanced_move_thread_all">When moving a conversation, move all messages</string>
+    <string name="title_advanced_move_thread_all">When moving selected conversations, move all messages</string>
     <string name="title_advanced_move_thread_sent">When moving a conversation, also move sent messages</string>
     <string name="title_advanced_default_snooze">Default snooze/delay time</string>
     <string name="title_advanced_default_folder">Select default folder</string>
@@ -1738,6 +1740,7 @@
     <string name="title_image_dialog">Show image options</string>
     <string name="title_style_toolbar">Style toolbar</string>
     <string name="title_media_toolbar">Media toolbar</string>
+    <string name="title_markdown" translatable="false">Markdown</string>
     <string name="title_manage_android_contacts">Manage Android\'s contacts</string>
     <string name="title_manage_local_contacts">Manage local contacts</string>
     <string name="title_insert_contact_group">Insert contact group</string>

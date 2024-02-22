@@ -385,6 +385,7 @@
     <string name="title_advanced_suggest_received">Foreslå adresser fra modtagne beskeder</string>
     <string name="title_advanced_suggest_frequently">Sortér foreslåede adresser efter brugsfrekvens</string>
     <string name="title_advanced_suggest_account">Begræns forslag til aktuel konto</string>
+    <string name="title_advanced_auto_delete_local">Slet automatisk lokale kontakter ældre, og brugt færre, end:</string>
     <string name="title_advanced_alt_re_fwd">Alternativt besvarelses-/videresendelsespræfiks</string>
     <string name="title_advanced_send_chips">Vis adressebobler</string>
     <string name="title_advanced_send_nav_color">Brug identitetsfarven til den nederste handlingsbjælke</string>
@@ -493,6 +494,7 @@
     <string name="title_advanced_cards_shadow_border">Vis kant</string>
     <string name="title_advanced_cards_shadow_highlight">Brug fremhævningsfarve i stedet for accentfarve</string>
     <string name="title_advanced_tabular_dividers">Brug skillelinjer ifm. tabelform</string>
+    <string name="title_advanced_tabular_unread_bg" comment="title_advanced_tabular_unread_bg&#10;Title for option on display-setting tab page">Anvend grå baggrundsfarve til ulæste meddelelser ved brug af tabelstil</string>
     <string name="title_advanced_date_header">Gruppér efter dato</string>
     <string name="title_advanced_date_week">Gruppér efter uge i stedet for dag</string>
     <string name="title_advanced_date_fixed">Vis fast datohoved øverst</string>
@@ -626,7 +628,7 @@
     <string name="title_advanced_auto_block_sender">Blokér automatisk afsenderen ved spamanmeldelse</string>
     <string name="title_advanced_auto_hide_answer">Skjul automatisk svarknappen, når der rulles</string>
     <string name="title_advanced_swipe_reply">Stryg udvidede beskeder til højre for at besvare</string>
-    <string name="title_advanced_move_thread_all">Når en samtale flyttes, flyt alle beskeder</string>
+    <string name="title_advanced_move_thread_all">Når valgte samtaler flyttes, flyt alle beskeder</string>
     <string name="title_advanced_move_thread_sent">Når en samtale flyttes, flyt også sendte beskeder</string>
     <string name="title_advanced_default_snooze">Standard slumre-/forsinkelsestid</string>
     <string name="title_advanced_default_folder">Vælg standardmappe</string>
@@ -1067,6 +1069,7 @@
     <string name="title_edit_rules">Redigér regler</string>
     <string name="title_execute_rules">Eksekvere regler</string>
     <string name="title_export_messages">Eksportere beskeder</string>
+    <string name="title_import_messages">Importere beskeder</string>
     <string name="title_create_channel">Opret notifikationskanal</string>
     <string name="title_edit_channel">Redigér notifikationskanal</string>
     <string name="title_delete_channel">Slet notifikationskanal</string>

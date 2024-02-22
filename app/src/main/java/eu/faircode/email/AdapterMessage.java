@@ -262,6 +262,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
     private boolean shadow_unread;
     private boolean shadow_border;
     private boolean shadow_highlight;
+    private boolean tabular_unread_bg;
     private boolean threading;
     private boolean threading_unread;
     private boolean indentation;
@@ -621,6 +622,17 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                         }
 
                         private boolean onClick(MotionEvent event) {
+                            return onClick(event, false);
+                        }
+
+                        @Override
+                        public void onLongPress(@NonNull MotionEvent event) {
+                            boolean confirm_links = prefs.getBoolean("confirm_links", true);
+                            if (!confirm_links)
+                                onClick(event, true);
+                        }
+
+                        private boolean onClick(MotionEvent event, boolean longClick) {
                             Spannable buffer = (Spannable) tvBody.getText();
                             int off = Helper.getOffset(tvBody, buffer, event);
 
@@ -635,7 +647,8 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                                     Uri uri = Uri.parse(image[0].getSource());
                                     if (UriHelper.isHyperLink(uri)) {
                                         ripple(event);
-                                        if (onOpenLink(uri, null, EntityFolder.JUNK.equals(message.folderType)))
+                                        if (onOpenLink(uri, null,
+                                                longClick || EntityFolder.JUNK.equals(message.folderType)))
                                             return true;
                                     }
                                 }
@@ -654,7 +667,8 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                                     title = null;
 
                                 ripple(event);
-                                if (onOpenLink(uri, title, EntityFolder.JUNK.equals(message.folderType)))
+                                if (onOpenLink(uri, title,
+                                        longClick || EntityFolder.JUNK.equals(message.folderType)))
                                     return true;
                             }
 
@@ -665,17 +679,20 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                                     return true;
 
                                 ripple(event);
-                                onOpenImage(message.id, image[0].getSource(), EntityFolder.JUNK.equals(message.folderType));
+                                onOpenImage(message.id, image[0].getSource(),
+                                        longClick || EntityFolder.JUNK.equals(message.folderType));
                                 return true;
                             }
 
-                            DynamicDrawableSpan[] ddss = buffer.getSpans(off, off, DynamicDrawableSpan.class);
-                            if (ddss.length > 0) {
-                                int f = buffer.getSpanFlags(ddss[0]);
-                                properties.setValue("quotes", message.id, (f & Spanned.SPAN_USER) == 0);
-                                properties.setHeight(message.id, null);
-                                bindBody(message, false);
-                                return true;
+                            if (!longClick) {
+                                DynamicDrawableSpan[] ddss = buffer.getSpans(off, off, DynamicDrawableSpan.class);
+                                if (ddss.length > 0) {
+                                    int f = buffer.getSpanFlags(ddss[0]);
+                                    properties.setValue("quotes", message.id, (f & Spanned.SPAN_USER) == 0);
+                                    properties.setHeight(message.id, null);
+                                    bindBody(message, false);
+                                    return true;
+                                }
                             }
 
                             return false;
@@ -1999,7 +2016,9 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                     int fg = (shadow_highlight ? colorUnreadHighlight : colorAccent);
                     color = ColorUtils.blendARGB(colorCardBackground, fg, 0.125f);
                 }
-            } else if (split)
+            } else if (!cards && tabular_unread_bg && message.unseen > 0)
+                color = ColorUtils.setAlphaComponent(colorSeparator, 127);
+            else if (split)
                 color = ColorUtils.setAlphaComponent(textColorHighlightInverse, 127);
             else if (flags_background && flagged && !expanded)
                 color = ColorUtils.setAlphaComponent(mcolor, 127);
@@ -2980,12 +2999,13 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                                 }
 
                                 @Override
-                                public boolean onOpenLink(String url) {
+                                public boolean onOpenLink(String url, boolean always) {
                                     if (parentFragment == null)
                                         return false;
 
                                     Uri uri = Uri.parse(url);
-                                    return ViewHolder.this.onOpenLink(uri, null, EntityFolder.JUNK.equals(message.folderType));
+                                    return ViewHolder.this.onOpenLink(uri, null,
+                                            always || EntityFolder.JUNK.equals(message.folderType));
                                 }
 
                                 @Override
@@ -8021,6 +8041,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
         this.shadow_unread = prefs.getBoolean("shadow_unread", false);
         this.shadow_border = prefs.getBoolean("shadow_border", true);
         this.shadow_highlight = prefs.getBoolean("shadow_highlight", false);
+        this.tabular_unread_bg = prefs.getBoolean("tabular_unread_bg", true);
         this.threading = prefs.getBoolean("threading", true);
         this.threading_unread = threading && prefs.getBoolean("threading_unread", false);
         this.indentation = prefs.getBoolean("indentation", false);

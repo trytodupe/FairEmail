@@ -94,7 +94,7 @@
     <string name="title_blocked_senders">Remitentes bloqueados</string>
     <string name="title_unblock_all">Desbloquear todos</string>
     <string name="title_unblock_all_remark">Esto restablecerá todas las listas y opciones que podrían resultar en el bloqueo de remitentes</string>
-    <string name="title_unblock_all_hint" comment="title_unblock_all_hint&#10;Remark for the unblock all dialog box">¡Tenga en cuenta que la aplicación no puede evitar que el servidor de correo mueva mensajes a la carpeta de correo no deseado!</string>
+    <string name="title_unblock_all_hint">¡Tenga en cuenta que la aplicación no puede evitar que el servidor de correo mueva mensajes a la carpeta de correo no deseado!</string>
     <plurals name="title_ask_block_sender">
         <item quantity="one">¿Bloquear remitente de %1$s mensaje?</item>
         <item quantity="other">¿Bloquear remitente de %1$s mensajes?</item>
@@ -385,6 +385,7 @@
     <string name="title_advanced_suggest_received">Sugerir direcciones encontradas en mensajes recibidos</string>
     <string name="title_advanced_suggest_frequently">Ordenar direcciones sugeridas por frecuencia de uso</string>
     <string name="title_advanced_suggest_account">Limitar sugerencias a la cuenta actual</string>
+    <string name="title_advanced_auto_delete_local">Eliminar automáticamente los contactos locales más antiguos que y utilizados menos de:</string>
     <string name="title_advanced_alt_re_fwd">Prefijo alternativo de respuesta/reenvío</string>
     <string name="title_advanced_send_chips">Mostrar burbujas de dirección</string>
     <string name="title_advanced_send_nav_color">Usar el color de identidad para la barra de acción inferior</string>
@@ -626,7 +627,7 @@
     <string name="title_advanced_auto_block_sender">Bloquear automáticamente al remitente al reportar como spam</string>
     <string name="title_advanced_auto_hide_answer">Ocultar automáticamente el botón de respuesta al desplazarse</string>
     <string name="title_advanced_swipe_reply">Deslice los mensajes expandidos a la derecha para responder</string>
-    <string name="title_advanced_move_thread_all">Al mover una conversación, mover todos los mensajes</string>
+    <string name="title_advanced_move_thread_all">Al mover las conversaciones seleccionadas, mover todos los mensajes</string>
     <string name="title_advanced_move_thread_sent">Al mover una conversación, también mover mensajes enviados</string>
     <string name="title_advanced_default_snooze">Tiempo de posponer/retraso por defecto</string>
     <string name="title_advanced_default_folder">Seleccionar carpeta por defecto</string>
@@ -1066,6 +1067,7 @@
     <string name="title_edit_rules">Editar reglas</string>
     <string name="title_execute_rules">Ejecutar reglas</string>
     <string name="title_export_messages">Exportar mensajes</string>
+    <string name="title_import_messages">Importar mensajes</string>
     <string name="title_create_channel">Crear canal de notificación</string>
     <string name="title_edit_channel">Editar canal de notificación</string>
     <string name="title_delete_channel">Eliminar canal de notificación</string>

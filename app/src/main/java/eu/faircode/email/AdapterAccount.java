@@ -79,11 +79,13 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
     private Fragment parentFragment;
     private boolean settings;
     private boolean compact;
+    private boolean show_folders;
 
     private Context context;
     private LifecycleOwner owner;
     private LayoutInflater inflater;
 
+    private int dp24;
     private int colorStripeWidth;
     private int colorWarning;
     private int colorUnread;
@@ -91,6 +93,7 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
     private int textColorTertiary;
     private boolean debug;
 
+    private List<TupleAccountFolder> all = new ArrayList<>();
     private List<TupleAccountFolder> items = new ArrayList<>();
 
     private NumberFormat NF = NumberFormat.getNumberInstance();
@@ -197,6 +200,9 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
         }
 
         private void bindTo(TupleAccountFolder account) {
+            int start = (account.folderName == null ? 0 : dp24);
+            view.setPaddingRelative(start, 0, 0, 0);
+
             if (account.folderName == null) {
                 view.setActivated(account.tbd != null);
                 view.setAlpha(account.synchronize ? 1.0f : Helper.LOW_LIGHT);
@@ -854,14 +860,17 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
         }
     }
 
-    AdapterAccount(final Fragment parentFragment, boolean settings, boolean compact) {
+    AdapterAccount(final Fragment parentFragment, boolean settings, boolean compact, boolean folders) {
         this.parentFragment = parentFragment;
         this.settings = settings;
         this.compact = compact;
+        this.show_folders = folders;
 
         this.context = parentFragment.getContext();
         this.owner = parentFragment.getViewLifecycleOwner();
         this.inflater = LayoutInflater.from(context);
+
+        this.dp24 = Helper.dp2pixels(context, 24);
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         boolean color_stripe_wide = prefs.getBoolean("color_stripe_wide", false);
@@ -891,12 +900,24 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
     public void set(@NonNull List<TupleAccountFolder> accounts) {
         Log.i("Set accounts=" + accounts.size());
 
-        if (accounts.size() > 0)
-            TupleAccountFolder.sort(accounts, true, context);
+        this.all = accounts;
 
-        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffCallback(items, accounts), false);
+        List<TupleAccountFolder> filtered;
+        if (show_folders)
+            filtered = all;
+        else {
+            filtered = new ArrayList<>();
+            for (TupleAccountFolder account : accounts)
+                if (account.folderName == null)
+                    filtered.add(account);
+        }
 
-        items = accounts;
+        if (filtered.size() > 0)
+            TupleAccountFolder.sort(filtered, true, context);
+
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffCallback(items, filtered), false);
+
+        items = filtered;
 
         diff.dispatchUpdatesTo(new ListUpdateCallback() {
             @Override
@@ -930,6 +951,13 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
     void setCompact(boolean compact) {
         if (this.compact != compact)
             this.compact = compact;
+    }
+
+    void setShowFolders(boolean show_folders) {
+        if (this.show_folders != show_folders) {
+            this.show_folders = show_folders;
+            set(all);
+        }
     }
 
     private static class DiffCallback extends DiffUtil.Callback {
