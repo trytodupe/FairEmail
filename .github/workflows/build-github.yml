@@ -232,12 +232,13 @@ jobs:
           mkdir -p signed-apk
           echo "LIST: " ./app/build/outputs/apk/github/release/
           ls -l ./app/build/outputs/apk/github/release/
-          cp ./app/build/outputs/apk/github/release/* ./signed-apk/
+          cp ./app/build/outputs/apk/github/release/*.apk ./signed-apk/ || true;
+          cp ./app/build/outputs/apk/github/release/*.json ./signed-apk/ || true;
           echo "LIST: " ./signed-apk/
-          ls -l ./signed-apk/
+          ls -l ./signed-apk/ || true;
           mv ./signed-apk/${{ env.PRG_NAME }}-${{ env.PRG_VERSION }}*-${{ env.PRG_FLAVOR }}-release-unsigned.apk ./signed-apk/${{ env.PRG_NAME }}-${{ env.PRG_VERSION }}-${{ env.PRG_FLAVOR }}-release.apk
           echo "LIST: " ${{ env.PRG_NAME }}-${{ env.PRG_VERSION }}-${{ env.PRG_FLAVOR }}-release.apk
-          ls -l ./signed-apk/
+          ls -l ./signed-apk/ || true;
 
       - uses: deep-soft/sign-android-release@v1
         name: Sign app APK
