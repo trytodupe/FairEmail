@@ -464,7 +464,7 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
                         Log.e(outbox.name, ex);
                         EntityLog.log(this, "Send " + Log.formatThrowable(ex, false));
 
-                        boolean unrecoverable = (op.tries > RETRY_MAX ||
+                        boolean unrecoverable = (op.tries >= RETRY_MAX ||
                                 ex instanceof OutOfMemoryError ||
                                 ex instanceof MessageRemovedException ||
                                 ex instanceof FileNotFoundException ||
