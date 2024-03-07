@@ -5523,10 +5523,12 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                 tvReformatted.setVisibility(View.GONE);
             }
 
+            boolean junk = EntityFolder.JUNK.equals(message.folderType);
+
             boolean current = properties.getValue(full ? "full" : "images", message.id);
             boolean asked = properties.getValue(full ? "full_asked" : "images_asked", message.id);
-            boolean confirm = prefs.getBoolean(full ? "confirm_html" : "confirm_images", true);
-            boolean ask = prefs.getBoolean(full ? "ask_html" : "ask_images", true);
+            boolean confirm = prefs.getBoolean(full ? "confirm_html" : "confirm_images", true) || junk;
+            boolean ask = prefs.getBoolean(full ? "ask_html" : "ask_images", true) || junk;
             if (current || asked || !confirm || !ask) {
                 if (current && message.from != null) {
                     SharedPreferences.Editor editor = prefs.edit();
@@ -5549,11 +5551,18 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
 
             View dview = LayoutInflater.from(context).inflate(
                     full ? R.layout.dialog_show_full : R.layout.dialog_show_images, null);
+            CheckBox cbAlwaysImages = dview.findViewById(R.id.cbAlwaysImages); // Full only
             CheckBox cbNotAgainSender = dview.findViewById(R.id.cbNotAgainSender);
             CheckBox cbNotAgainDomain = dview.findViewById(R.id.cbNotAgainDomain);
             CheckBox cbNotAgain = dview.findViewById(R.id.cbNotAgain);
 
-            if (message.from == null || message.from.length == 0) {
+            if (junk) {
+                if (full)
+                    cbAlwaysImages.setVisibility(View.GONE);
+                cbNotAgainSender.setVisibility(View.GONE);
+                cbNotAgainDomain.setVisibility(View.GONE);
+                cbNotAgain.setVisibility(View.GONE);
+            } else if (message.from == null || message.from.length == 0) {
                 cbNotAgainSender.setVisibility(View.GONE);
                 cbNotAgainDomain.setVisibility(View.GONE);
             } else {
@@ -5592,7 +5601,6 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
 
             if (full) {
                 TextView tvDark = dview.findViewById(R.id.tvDark);
-                CheckBox cbAlwaysImages = dview.findViewById(R.id.cbAlwaysImages);
 
                 cbAlwaysImages.setChecked(prefs.getBoolean("html_always_images", false));
 
@@ -5622,7 +5630,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
             }
 
             // TODO: dialog fragment
-            final Dialog dialog = new AlertDialog.Builder(context)
+            final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                     .setView(dview)
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
@@ -5630,35 +5638,40 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                             properties.setValue(full ? "full" : "images", message.id, true);
                             properties.setValue(full ? "full_asked" : "images_asked", message.id, true);
 
-                            SharedPreferences.Editor editor = prefs.edit();
-                            if (message.from != null)
-                                for (Address sender : message.from) {
-                                    String from = ((InternetAddress) sender).getAddress();
-                                    if (TextUtils.isEmpty(from))
-                                        continue;
-                                    int at = from.indexOf('@');
-                                    String domain = (at < 0 ? from : from.substring(at));
-                                    editor.putBoolean(from + (full ? ".show_full" : ".show_images"),
-                                            cbNotAgainSender.isChecked());
-                                    editor.putBoolean(domain + (full ? ".show_full" : ".show_images"),
-                                            cbNotAgainSender.isChecked() && cbNotAgainDomain.isChecked());
-                                }
-                            editor.putBoolean(full ? "ask_html" : "ask_images", !cbNotAgain.isChecked());
-                            editor.apply();
+                            if (!junk) {
+                                SharedPreferences.Editor editor = prefs.edit();
+                                if (message.from != null)
+                                    for (Address sender : message.from) {
+                                        String from = ((InternetAddress) sender).getAddress();
+                                        if (TextUtils.isEmpty(from))
+                                            continue;
+                                        int at = from.indexOf('@');
+                                        String domain = (at < 0 ? from : from.substring(at));
+                                        editor.putBoolean(from + (full ? ".show_full" : ".show_images"),
+                                                cbNotAgainSender.isChecked());
+                                        editor.putBoolean(domain + (full ? ".show_full" : ".show_images"),
+                                                cbNotAgainSender.isChecked() && cbNotAgainDomain.isChecked());
+                                    }
+                                editor.putBoolean(full ? "ask_html" : "ask_images", !cbNotAgain.isChecked());
+                                editor.apply();
+                            }
 
                             onShowConfirmed(message, full, true);
                         }
                     })
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .setNeutralButton(R.string.title_setup, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            context.startActivity(new Intent(context, ActivitySetup.class)
-                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                                    .putExtra("tab", "privacy"));
-                        }
-                    })
-                    .create();
+                    .setNegativeButton(android.R.string.cancel, null);
+
+            if (!EntityFolder.JUNK.equals(message.folderType))
+                builder.setNeutralButton(R.string.title_setup, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        context.startActivity(new Intent(context, ActivitySetup.class)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                .putExtra("tab", "privacy"));
+                    }
+                });
+
+            Dialog dialog = builder.create();
 
             owner.getLifecycle().addObserver(new LifecycleObserver() {
                 @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
@@ -5797,13 +5810,16 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
         }
 
         private void onActionOpenFull(final TupleMessageEx message) {
+            boolean junk = EntityFolder.JUNK.equals(message.folderType);
             boolean open_full_confirmed = prefs.getBoolean("open_full_confirmed", false);
-            if (open_full_confirmed)
+            if (open_full_confirmed && !junk)
                 onActionOpenFullConfirmed(message);
             else {
                 LayoutInflater inflater = LayoutInflater.from(context);
                 View dview = inflater.inflate(R.layout.dialog_ask_full, null, false);
                 final CheckBox cbNotAgain = dview.findViewById(R.id.cbNotAgain);
+
+                cbNotAgain.setVisibility(junk ? View.GONE : View.VISIBLE);
 
                 new AlertDialog.Builder(context)
                         .setView(dview)
@@ -6402,137 +6418,154 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
 
         private boolean onOpenLink(Uri uri, String title, boolean always_confirm) {
             Log.i("Opening uri=" + uri + " title=" + title + " always confirm=" + always_confirm);
-            if (UriHelper.isHyperLink(uri))
-                uri = Uri.parse(uri.toString().trim().replaceAll("\\s+", "+"));
-
-            if (ProtectedContent.isProtectedContent(uri)) {
-                Bundle args = new Bundle();
-                args.putParcelable("uri", uri);
-
-                FragmentDialogBase dialog = new ProtectedContent.FragmentDialogDecrypt();
-                dialog.setArguments(args);
-                dialog.show(parentFragment.getParentFragmentManager(), "decrypt");
-                return true;
-            }
 
             try {
-                String url = uri.getQueryParameter("url");
-                if (!TextUtils.isEmpty(url)) {
-                    Uri alt = Uri.parse(url);
-                    if (isActivate(alt))
-                        uri = alt;
-                }
+                if (UriHelper.isHyperLink(uri))
+                    uri = Uri.parse(uri.toString().trim().replaceAll("\\s+", "+"));
 
-                Uri sanitized = UriHelper.sanitize(context, uri);
-                if (sanitized != null && isActivate(sanitized))
-                    uri = sanitized;
-                else if (title != null) {
-                    Uri alt = Uri.parse(title);
-                    if (isActivate(alt))
-                        uri = alt;
-                }
-            } catch (Throwable ignored) {
-            }
-
-            if (isActivate(uri)) {
-                try {
-                    if (ActivityBilling.activatePro(context, uri))
-                        ToastEx.makeText(context, R.string.title_pro_valid, Toast.LENGTH_LONG).show();
-                    else
-                        ToastEx.makeText(context, R.string.title_pro_invalid, Toast.LENGTH_LONG).show();
-                } catch (NoSuchAlgorithmException ex) {
-                    Log.e(ex);
-                    ToastEx.makeText(context, Log.formatThrowable(ex), Toast.LENGTH_LONG).show();
-                }
-            } else {
-                String scheme = uri.getScheme();
-                if ("full".equals(scheme)) {
-                    TupleMessageEx message = getMessage();
-                    if (message != null)
-                        onShow(message, true);
-                    return (message != null);
-                } else if ("external".equals(scheme)) {
-                    TupleMessageEx message = getMessage();
-                    if (message == null)
-                        return false;
-
+                if (ProtectedContent.isProtectedContent(uri)) {
                     Bundle args = new Bundle();
-                    args.putLong("id", message.id);
+                    args.putParcelable("uri", uri);
 
-                    new SimpleTask<Uri>() {
-                        @Override
-                        protected Uri onExecute(Context context, Bundle args) throws Throwable {
-                            long id = args.getLong("id");
-
-                            File source = EntityMessage.getFile(context, id);
-
-                            File dir = Helper.ensureExists(context, "shared");
-                            File target = new File(dir, id + ".html");
-
-                            Helper.copy(source, target);
-
-                            return FileProviderEx.getUri(context, BuildConfig.APPLICATION_ID, target);
-                        }
-
-                        @Override
-                        protected void onExecuted(Bundle args, Uri uri) {
-                            Helper.share(context, uri, "text/html", null);
-                        }
-
-                        @Override
-                        protected void onException(Bundle args, Throwable ex) {
-                            Log.unexpectedError(parentFragment.getParentFragmentManager(), ex);
-                        }
-                    }.execute(context, owner, args, "message:external");
-
+                    FragmentDialogBase dialog = new ProtectedContent.FragmentDialogDecrypt();
+                    dialog.setArguments(args);
+                    dialog.show(parentFragment.getParentFragmentManager(), "decrypt");
                     return true;
                 }
 
-                if ("cid".equals(uri.getScheme()) || "data".equals(uri.getScheme()))
-                    return false;
-
-                boolean confirm_links = prefs.getBoolean("confirm_links", true);
-
-                String chost = FragmentDialogOpenLink.getConfirmHost(uri);
-                boolean confirm_link = (chost == null || prefs.getBoolean(chost + ".confirm_link", true));
-                if (always_confirm || (confirm_links && confirm_link)) {
-                    Bundle args = new Bundle();
-                    args.putParcelable("uri", uri);
-                    args.putString("title", title);
-                    args.putBoolean("always_confirm", always_confirm);
-
-                    FragmentDialogOpenLink fragment = new FragmentDialogOpenLink();
-                    fragment.setArguments(args);
-                    fragment.show(parentFragment.getParentFragmentManager(), "open:link");
-                } else {
-                    boolean link_view = prefs.getBoolean(chost + ".link_view", false);
-                    boolean link_sanitize = prefs.getBoolean(chost + ".link_sanitize", false);
-
-                    if (link_sanitize && UriHelper.isHyperLink(uri)) {
-                        Uri sanitized = UriHelper.sanitize(context, uri);
-                        if (sanitized != null)
-                            uri = sanitized;
-                        Log.i("Open sanitized=" + uri);
+                try {
+                    String url = uri.getQueryParameter("url");
+                    if (!TextUtils.isEmpty(url)) {
+                        Uri alt = Uri.parse(url);
+                        if (isActivate(alt))
+                            uri = alt;
                     }
 
-                    if (link_view) {
-                        Log.i("Open view=" + uri);
-                        Intent view = new Intent(Intent.ACTION_VIEW, UriHelper.fix(uri));
-                        Intent chooser = Intent.createChooser(view, context.getString(R.string.title_select_app));
-                        try {
-                            context.startActivity(chooser);
-                        } catch (ActivityNotFoundException ex) {
-                            Log.w(ex);
-                            Helper.view(context, uri, true, true);
-                        }
+                    Uri sanitized = UriHelper.sanitize(context, uri);
+                    if (sanitized != null && isActivate(sanitized))
+                        uri = sanitized;
+                    else if (title != null) {
+                        Uri alt = Uri.parse(title);
+                        if (isActivate(alt))
+                            uri = alt;
+                    }
+                } catch (Throwable ignored) {
+                }
+
+                if (isActivate(uri)) {
+                    try {
+                        if (ActivityBilling.activatePro(context, uri))
+                            ToastEx.makeText(context, R.string.title_pro_valid, Toast.LENGTH_LONG).show();
+                        else
+                            ToastEx.makeText(context, R.string.title_pro_invalid, Toast.LENGTH_LONG).show();
+                    } catch (NoSuchAlgorithmException ex) {
+                        Log.e(ex);
+                        ToastEx.makeText(context, Log.formatThrowable(ex), Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    String scheme = uri.getScheme();
+                    if ("full".equals(scheme)) {
+                        TupleMessageEx message = getMessage();
+                        if (message != null)
+                            onShow(message, true);
+                        return (message != null);
+                    } else if ("external".equals(scheme)) {
+                        TupleMessageEx message = getMessage();
+                        if (message == null)
+                            return false;
+
+                        Bundle args = new Bundle();
+                        args.putLong("id", message.id);
+
+                        new SimpleTask<Uri>() {
+                            @Override
+                            protected Uri onExecute(Context context, Bundle args) throws Throwable {
+                                long id = args.getLong("id");
+
+                                File source = EntityMessage.getFile(context, id);
+
+                                File dir = Helper.ensureExists(context, "shared");
+                                File target = new File(dir, id + ".html");
+
+                                Helper.copy(source, target);
+
+                                return FileProviderEx.getUri(context, BuildConfig.APPLICATION_ID, target);
+                            }
+
+                            @Override
+                            protected void onExecuted(Bundle args, Uri uri) {
+                                Helper.share(context, uri, "text/html", null);
+                            }
+
+                            @Override
+                            protected void onException(Bundle args, Throwable ex) {
+                                Log.unexpectedError(parentFragment.getParentFragmentManager(), ex);
+                            }
+                        }.execute(context, owner, args, "message:external");
+
+                        return true;
+                    }
+
+                    if ("cid".equals(uri.getScheme()) || "data".equals(uri.getScheme()))
+                        return false;
+
+                    boolean confirm_links = prefs.getBoolean("confirm_links", true);
+
+                    String chost = FragmentDialogOpenLink.getConfirmHost(uri);
+                    boolean confirm_link = (chost == null || prefs.getBoolean(chost + ".confirm_link", true));
+                    if (always_confirm || (confirm_links && confirm_link)) {
+                        Bundle args = new Bundle();
+                        args.putParcelable("uri", uri);
+                        args.putString("title", title);
+                        args.putBoolean("always_confirm", always_confirm);
+
+                        FragmentDialogOpenLink fragment = new FragmentDialogOpenLink();
+                        fragment.setArguments(args);
+                        fragment.show(parentFragment.getParentFragmentManager(), "open:link");
                     } else {
-                        boolean tabs = prefs.getBoolean("open_with_tabs", true);
-                        Helper.view(context, UriHelper.guessScheme(uri), !tabs, !tabs);
+                        boolean link_view = prefs.getBoolean(chost + ".link_view", false);
+                        boolean link_sanitize = prefs.getBoolean(chost + ".link_sanitize", false);
+
+                        if (link_sanitize && UriHelper.isHyperLink(uri)) {
+                            Uri sanitized = UriHelper.sanitize(context, uri);
+                            if (sanitized != null)
+                                uri = sanitized;
+                            Log.i("Open sanitized=" + uri);
+                        }
+
+                        if (link_view) {
+                            Log.i("Open view=" + uri);
+                            Intent view = new Intent(Intent.ACTION_VIEW, UriHelper.fix(uri));
+                            Intent chooser = Intent.createChooser(view, context.getString(R.string.title_select_app));
+                            try {
+                                context.startActivity(chooser);
+                            } catch (ActivityNotFoundException ex) {
+                                Log.w(ex);
+                                Helper.view(context, uri, true, true);
+                            }
+                        } else {
+                            boolean tabs = prefs.getBoolean("open_with_tabs", true);
+                            Helper.view(context, UriHelper.guessScheme(uri), !tabs, !tabs);
+                        }
                     }
                 }
-            }
 
-            return true;
+                return true;
+            } catch (Throwable ex) {
+                /*
+                    Exception java.lang.NullPointerException:
+                      at eu.faircode.email.AdapterMessage$ViewHolder.onOpenLink (AdapterMessage.java:6506)
+                      at eu.faircode.email.AdapterMessage$ViewHolder.access$900 (AdapterMessage.java:354)
+                      at eu.faircode.email.AdapterMessage$ViewHolder$2$1.onClick (AdapterMessage.java:670)
+                      at eu.faircode.email.AdapterMessage$ViewHolder$2$1.onLongPress (AdapterMessage.java:632)
+                      at android.view.GestureDetector.dispatchLongPress (GestureDetector.java:1014)
+                      at android.view.GestureDetector.-$$Nest$mdispatchLongPress
+                      at android.view.GestureDetector$GestureHandler.handleMessage (GestureDetector.java:358)
+                      at android.os.Handler.dispatchMessage (Handler.java:106)
+                 */
+                Log.e(ex);
+                return false;
+            }
         }
 
         private boolean isActivate(Uri uri) {

@@ -6,7 +6,16 @@ For support you can use the contact form.
 
 Zby
 
-1.2162 - 2024-02-22
+Next version
+
+* Added option to show a star for accounts/folders with newly received unread messages (since last viewed)
+* Added UceProtect
+* Small improvements and minor bug fixes
+* Updated build tools
+* Updated Public Suffix List
+* Updated translations
+
+1.2162 - 2024-02-22 *
 
 * Added option for a gray background color for unread messages when using table style
 * Small improvements and minor bug fixes

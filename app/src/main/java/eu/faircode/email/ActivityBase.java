@@ -166,11 +166,16 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
             d.setTint(Color.WHITE);
             d.draw(canvas);
 
-            int colorPrimary = colorPrimaryDark;
-            if (colorPrimary != 0 && Color.alpha(colorPrimary) != 255) {
-                Log.w("Task color primary=" + Integer.toHexString(colorPrimary));
-                colorPrimary = ColorUtils.setAlphaComponent(colorPrimary, 255);
-            }
+            boolean task_description = prefs.getBoolean("task_description", true);
+            int colorPrimary;
+            if (task_description) {
+                colorPrimary = colorPrimaryDark;
+                if (colorPrimary != 0 && Color.alpha(colorPrimary) != 255) {
+                    Log.w("Task color primary=" + Integer.toHexString(colorPrimary));
+                    colorPrimary = ColorUtils.setAlphaComponent(colorPrimary, 255);
+                }
+            } else
+                colorPrimary = getColor(R.color.lightBluePrimary);
 
             ActivityManager.TaskDescription td = new ActivityManager.TaskDescription(
                     null, bm, colorPrimary);
@@ -825,15 +830,33 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
     }
 
     public void performBack() {
-        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-            // https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/app/Activity.java#3896
-            ActionBar ab = getSupportActionBar();
-            if (ab != null && ab.collapseActionView())
-                return;
-            FragmentManager fm = getSupportFragmentManager();
-            if (!fm.isStateSaved() && fm.popBackStackImmediate())
-                return;
-        }
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+            try {
+                // https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/app/Activity.java#3896
+                ActionBar ab = getSupportActionBar();
+                if (ab != null && ab.collapseActionView())
+                    return;
+                FragmentManager fm = getSupportFragmentManager();
+                if (!fm.isStateSaved() && fm.popBackStackImmediate())
+                    return;
+            } catch (Throwable ex) {
+                Log.e(ex);
+            /*
+                Exception java.lang.IllegalArgumentException: Unknown cmd: 2
+                  at androidx.fragment.app.BackStackRecord.executePopOps (BackStackRecord.java:478)
+                  at androidx.fragment.app.FragmentManager.executeOps (FragmentManager.java:2006)
+                  at androidx.fragment.app.FragmentManager.executeOpsTogether (FragmentManager.java:1895)
+                  at androidx.fragment.app.FragmentManager.removeRedundantOperationsAndExecute (FragmentManager.java:1839)
+                  at androidx.fragment.app.FragmentManager.popBackStackImmediate (FragmentManager.java:891)
+                  at androidx.fragment.app.FragmentManager.popBackStackImmediate (FragmentManager.java:797)
+                  at eu.faircode.email.ActivityBase.performBack (ActivityBase.java:834)
+                  at eu.faircode.email.ActivityBilling.performBack (ActivityBilling.java:71)
+                  at eu.faircode.email.ActivityView.onExit (ActivityView.java:1316)
+                  at eu.faircode.email.ActivityView.access$2200 (ActivityView.java:107)
+                  at eu.faircode.email.ActivityView$17.handleOnBackPressed (ActivityView.java:775)
+                  at androidx.activity.OnBackPressedDispatcher.onBackPressed (OnBackPressedDispatcher.kt:276)
+             */
+            }
         finish();
     }
 

@@ -6,7 +6,32 @@ For support you can use [the contact form](https://contact.faircode.eu/?product=
 
 ### [Zby](https://en.wikipedia.org/wiki/Zby)
 
-### 1.2162 - 2024-02-22
+### Next version
+
+* Added sorting on unread/starred and starred/unread messages
+* Small improvements and minor bug fixes
+* Updated [AndroidX](https://developer.android.com/jetpack/androidx/versions/all-channel)
+* Updated [Public Suffix List](https://github.com/publicsuffix/list)
+* Updated [translations](https://crowdin.com/project/open-source-email)
+
+### 1.2165 - 2024-03-05
+
+* Fixed widget incompatibility (< Android 11)
+
+### 1.2164 - 2024-03-05
+
+* Fixed widget incompatibility
+
+### 1.2163 - 2024-03-05
+
+* Added option to show a star for accounts/folders with newly received unread messages (since last viewed)
+* Added [UceProtect](https://www.uceprotect.net/en/) blocklists (receive-settings tab page)
+* Small improvements and minor bug fixes
+* Updated build tools
+* Updated [Public Suffix List](https://github.com/publicsuffix/list)
+* Updated [translations](https://crowdin.com/project/open-source-email)
+
+### 1.2162 - 2024-02-22 *
 
 * Added option for a gray background color for unread messages when using table style
 * Small improvements and minor bug fixes

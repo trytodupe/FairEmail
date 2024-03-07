@@ -571,6 +571,7 @@
     <string name="title_advanced_nav_message_count">Show number of locally stored messages in the navigation menu</string>
     <string name="title_advanced_nav_unseen_drafts">Show number of unread drafts in the navigation menu</string>
     <string name="title_advanced_nav_pinned_count">Show the number of unread messages in the pinned navigation menu</string>
+    <string name="title_advanced_show_unexposed">Show a star for accounts/folders with newly received unread messages</string>
     <string name="title_advanced_startup">Show on start screen</string>
     <string name="title_advanced_cards">Use card style instead of tabular style</string>
     <string name="title_advanced_category">The account category can be configured in the advanced account options via the main settings screen</string>
@@ -904,6 +905,7 @@
     <string name="title_advanced_autostart" translatable="false">Autostart app</string>
     <string name="title_advanced_emergency" translatable="false">Write emergency file</string>
     <string name="title_advanced_work_manager" translatable="false">Initialize work manager</string>
+    <string name="title_advanced_task_description" translatable="false">Set task description</string>
     <string name="title_advanced_external_storage" translatable="false">Use external storage</string>
     <string name="title_advanced_integrity" translatable="false">sqlite integrity check</string>
     <string name="title_advanced_wal" translatable="false">sqlite WAL</string>
@@ -963,7 +965,8 @@
     <string name="title_advanced_portrait_mode" translatable="false">Portrait mode</string>
     <string name="title_advanced_landscape_mode" translatable="false">Landscape mode</string>
     <string name="title_advanced_delete_confirmation" translatable="false">Permanent deletion confirmation</string>
-    <string name="title_advanced_deletion_confirmation_hint" translatable="false">If you turn this off, please do not complain if you accidentally delete messages irreversibly</string>
+    <string name="title_advanced_delete_notification" translatable="false">Delete permanently from notifications</string>
+    <string name="title_advanced_deletion_confirmation_hint" translatable="false">If you change this setting, please do not complain if you accidentally deleted messages irreversibly</string>
     <string name="title_advanced_dmarc_viewer" translatable="false">DMARC viewer</string>
     <string name="title_advanced_global_keywords" translatable="false">Global keywords</string>
     <string name="title_advanced_test_iab" translatable="false">Test IAB</string>
@@ -1027,6 +1030,7 @@
     <string name="title_advanced_rlah_hint">Assuming no roaming within the EU</string>
     <string name="title_advanced_usage_hint">This will increase battery, data and storage space usage</string>
     <string name="title_advanced_plain_hint">Enabling this will limit data usage, but messages will be shown without styling</string>
+    <string name="title_advanced_plain_remark">The plain text part does not always contain the full message!</string>
     <string name="title_advanced_tcp_keep_alive_hint">Enabling this can cause connection problems on some devices and may increase battery usage</string>
     <string name="title_advanced_validate_hint">This can result in not synchronizing messages, for example when using a VPN, but also in other situations</string>
     <string name="title_advanced_timeout_hint">The read/write timeout will be set to the double of the connection timeout. Higher values will result in more battery use.</string>
@@ -1076,7 +1080,6 @@
     <string name="title_advanced_display_harmful_hint">Disabling this option might be harmful to your privacy</string>
     <string name="title_advanced_display_hidden_hint">This can result in odd looking and double texts</string>
     <string name="title_advanced_display_pin_hint">A PIN takes precedence over biometrics authentication</string>
-    <string name="title_advanced_display_autolock_nav_hint">There will be a grace time of %1$d seconds</string>
     <string name="title_advanced_user_agent_hint">Some servers do not accept a generic user agent string</string>
     <string name="title_advanced_safe_browsing_hint">The Google server knows which addresses are being looked up</string>
 
@@ -1908,6 +1911,8 @@
     <string name="title_sort_on_time">Time</string>
     <string name="title_sort_on_unread">Unread</string>
     <string name="title_sort_on_starred">Starred</string>
+    <string name="title_sort_on_unread_starred">Unread, starred</string>
+    <string name="title_sort_on_starred_unread">Starred, unread</string>
     <string name="title_sort_on_priority">Priority</string>
     <string name="title_sort_on_sender">Sender</string>
     <string name="title_sort_on_subject">Subject</string>

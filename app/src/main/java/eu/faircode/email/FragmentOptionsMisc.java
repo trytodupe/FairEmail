@@ -168,6 +168,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
     private SwitchCompat swAutostart;
     private SwitchCompat swEmergency;
     private SwitchCompat swWorkManager;
+    private SwitchCompat swTaskDescription;
     private SwitchCompat swExternalStorage;
     private TextView tvExternalStorageFolder;
     private SwitchCompat swIntegrity;
@@ -231,6 +232,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
     private SwitchCompat swAdjacentPortrait;
     private SwitchCompat swAdjacentLandscape;
     private SwitchCompat swDeleteConfirmation;
+    private SwitchCompat swDeleteNotification;
     private SwitchCompat swDmarcViewer;
     private EditText etKeywords;
     private SwitchCompat swTestIab;
@@ -275,7 +277,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             "crash_reports", "cleanup_attachments",
             "watchdog", "experiments", "main_log", "main_log_memory", "protocol", "log_level", "debug", "leak_canary",
             "test1", "test2", "test3", "test4", "test5",
-            "emergency_file", "work_manager", // "external_storage",
+            "emergency_file", "work_manager", "task_description", // "external_storage",
             "sqlite_integrity_check", "wal", "sqlite_checkpoints", "sqlite_analyze", "sqlite_auto_vacuum", "sqlite_sync_extra", "sqlite_cache",
             "oauth_tabs",
             "chunk_size", "thread_range",
@@ -291,7 +293,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             "webp", "animate_images",
             "easy_correct", "paste_plain", "infra", "tld_flags", "json_ld", "dup_msgids", "thread_byref", "save_user_flags", "mdn",
             "app_chooser", "app_chooser_share", "adjacent_links", "adjacent_documents", "adjacent_portrait", "adjacent_landscape",
-            "delete_confirmation", "global_keywords", "test_iab"
+            "delete_confirmation", "delete_notification", "global_keywords", "test_iab"
     ));
 
     private final static String[] RESET_QUESTIONS = new String[]{
@@ -409,6 +411,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
         swAutostart = view.findViewById(R.id.swAutostart);
         swEmergency = view.findViewById(R.id.swEmergency);
         swWorkManager = view.findViewById(R.id.swWorkManager);
+        swTaskDescription = view.findViewById(R.id.swTaskDescription);
         swExternalStorage = view.findViewById(R.id.swExternalStorage);
         tvExternalStorageFolder = view.findViewById(R.id.tvExternalStorageFolder);
         swIntegrity = view.findViewById(R.id.swIntegrity);
@@ -472,6 +475,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
         swAdjacentPortrait = view.findViewById(R.id.swAdjacentPortrait);
         swAdjacentLandscape = view.findViewById(R.id.swAdjacentLandscape);
         swDeleteConfirmation = view.findViewById(R.id.swDeleteConfirmation);
+        swDeleteNotification = view.findViewById(R.id.swDeleteNotification);
         swDmarcViewer = view.findViewById(R.id.swDmarcViewer);
         etKeywords = view.findViewById(R.id.etKeywords);
         swTestIab = view.findViewById(R.id.swTestIab);
@@ -1094,6 +1098,13 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             }
         });
 
+        swTaskDescription.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton v, boolean isChecked) {
+                prefs.edit().putBoolean("task_description", isChecked).apply();
+            }
+        });
+
         swExternalStorage.setEnabled(Helper.getExternalFilesDir(getContext()) != null);
         swExternalStorage.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -1641,6 +1652,13 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
                 prefs.edit().putBoolean("delete_confirmation", checked).apply();
+            }
+        });
+
+        swDeleteNotification.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+                prefs.edit().putBoolean("delete_notification", checked).apply();
             }
         });
 
@@ -2306,6 +2324,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             swAutostart.setChecked(Helper.isComponentEnabled(getContext(), ReceiverAutoStart.class));
             swEmergency.setChecked(prefs.getBoolean("emergency_file", true));
             swWorkManager.setChecked(prefs.getBoolean("work_manager", true));
+            swTaskDescription.setChecked(prefs.getBoolean("task_description", true));
             swExternalStorage.setChecked(prefs.getBoolean("external_storage", false));
 
             swIntegrity.setChecked(prefs.getBoolean("sqlite_integrity_check", true));
@@ -2393,6 +2412,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             swAdjacentPortrait.setChecked(prefs.getBoolean("adjacent_portrait", false));
             swAdjacentLandscape.setChecked(prefs.getBoolean("adjacent_landscape", false));
             swDeleteConfirmation.setChecked(prefs.getBoolean("delete_confirmation", true));
+            swDeleteNotification.setChecked(prefs.getBoolean("delete_notification", false));
             swDmarcViewer.setChecked(Helper.isComponentEnabled(getContext(), ActivityDMARC.class));
             etKeywords.setText(prefs.getString("global_keywords", null));
             swTestIab.setChecked(prefs.getBoolean("test_iab", false));

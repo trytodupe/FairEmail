@@ -487,6 +487,7 @@
     <string name="title_advanced_nav_message_count">Mostrar número de mensagens armazenadas localmente no menu de navegação</string>
     <string name="title_advanced_nav_unseen_drafts">Mostrar o número de rascunhos não lidos no menu de navegação</string>
     <string name="title_advanced_nav_pinned_count">Mostrar o número de mensagens não lidas no menu de navegação fixado</string>
+    <string name="title_advanced_show_unexposed">Mostrar uma estrela para contas/pastas com mensagens recentes, não lidas</string>
     <string name="title_advanced_startup">Mostrar no ecrã de bloqueio</string>
     <string name="title_advanced_cards">Usar estilo de cartões em vez do estilo tabular</string>
     <string name="title_advanced_category">A categoria da conta pode ser configurada nas opções avançadas da conta através da tela de configurações principais</string>
@@ -496,7 +497,7 @@
     <string name="title_advanced_cards_shadow_border">Mostrar contorno</string>
     <string name="title_advanced_cards_shadow_highlight">Usar a cor destacada em vez da cor de ênfase</string>
     <string name="title_advanced_tabular_dividers">Usar linhas do divisor quando o estilo tabular seja utilizado</string>
-    <string name="title_advanced_tabular_unread_bg" comment="title_advanced_tabular_unread_bg&#10;Title for option on display-setting tab page">Use cor de fundo cinza para mensagens não lidas quando usar estilo de tabela</string>
+    <string name="title_advanced_tabular_unread_bg">Use cor de fundo cinza para mensagens não lidas quando usar estilo de tabela</string>
     <string name="title_advanced_date_header">Agrupar por data</string>
     <string name="title_advanced_date_week">Agrupar por semana em vez de dia</string>
     <string name="title_advanced_date_fixed">Mostrar cabeçalho de data fixo no topo</string>
@@ -821,6 +822,7 @@
     <string name="title_advanced_rlah_hint">Presume que não há roaming dentro da UE</string>
     <string name="title_advanced_usage_hint">Isso aumentará o uso de bateria, dados e espaço de armazenamento</string>
     <string name="title_advanced_plain_hint">Activar esta opção irá reduzir a utilização de dados, mas as mensagens serão mostradas sem formatação</string>
+    <string name="title_advanced_plain_remark">A parte com texto simples, nem sempre contém a mensagem completa!</string>
     <string name="title_advanced_tcp_keep_alive_hint">Habilitar isto pode causar problemas de ligação em alguns dispositivos e aumentar o uso da bateria</string>
     <string name="title_advanced_validate_hint">Isto pode resultar em problemas na sincronização de mensagens, por exemplo, ao utilizar uma VPN, mas também noutras situações</string>
     <string name="title_advanced_timeout_hint">O tempo de leitura/gravação será definido para o dobro do tempo limite de ligação. Valores maiores resultarão em mais uso de bateria.</string>
@@ -865,7 +867,6 @@
     <string name="title_advanced_display_harmful_hint">A desactivação desta opção pode ser lesiva para a sua privacidade</string>
     <string name="title_advanced_display_hidden_hint">Pode resultar em textos mal formatados e em duplicado</string>
     <string name="title_advanced_display_pin_hint">O PIN tem prioridade relativamente à autenticação biométrica</string>
-    <string name="title_advanced_display_autolock_nav_hint">Haverá um tempo de carência de %1$d segundos</string>
     <string name="title_advanced_user_agent_hint">Alguns servidores não aceitam um texto genérico para o \'user agent\'</string>
     <string name="title_advanced_safe_browsing_hint">O servidor do Google reconhece quais endereços estão a ser visitados</string>
     <string name="title_advanced_badge_hint">Disponível apenas em launchers suportados</string>
@@ -1588,6 +1589,8 @@ Portanto, este problema só pode ser resolvido pelo seu provedor de e-mail - a i
     <string name="title_sort_on_time">Data</string>
     <string name="title_sort_on_unread">Não lida</string>
     <string name="title_sort_on_starred">Com estrela</string>
+    <string name="title_sort_on_unread_starred" comment="title_sort_on_unread_starred&#10;&#10;Title for menu item to sort on unread messages first, and after that on starred messages.&#10;&#10;Please ensure that the translation for &quot;unread&quot; and &quot;starred&quot; match those of the menu items for sorting on &quot;unread&quot; or &quot;starred&quot; messages only. You can search for &quot;sort_on&quot; at the top left.&#10;&#10;Please keep a comma between &quot;unread&quot; and &quot;starred&quot;, which is meant to indicate &quot;first this, then that&quot;.">Não lido, favorito</string>
+    <string name="title_sort_on_starred_unread">Favorito, não lido</string>
     <string name="title_sort_on_priority">Prioridade</string>
     <string name="title_sort_on_sender">Remetente</string>
     <string name="title_sort_on_subject">Assunto</string>
