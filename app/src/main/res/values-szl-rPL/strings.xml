@@ -451,6 +451,8 @@
     <string name="title_advanced_discard_delete">Po odrzuceniu wersji roboczej usuń ją trwale</string>
     <string name="title_advanced_reply_move">Przy odpowiadaniu na wiadomość, zapisz odpowiedź w tym samym folderze</string>
     <string name="title_advanced_reply_move_inbox">Również dla wiadomości w skrzynce odbiorczej</string>
+    <string name="title_advanced_send_retry_max">Maksymalna ilość prób wysłania</string>
+    <string name="title_advanced_send_retry_hint">Wysyłanie będzie ponawiane przy zmianie połączenia</string>
     <string name="title_advanced_auto_link">Automatycznie utwórz linki</string>
     <string name="title_advanced_plain_only">Domyślnie wysyłaj czystym tekstem</string>
     <string name="title_advanced_plain_only_reply">Automatycznie używaj zwykłego tekstu tylko przy odpowiadaniu na wiadomość ze zwykłym tekstem</string>
@@ -1197,6 +1199,7 @@
     <string name="title_subject_forward_alt">Fwd: %1$s</string>
     <string name="title_seen">Oznacz jako przeczytane</string>
     <string name="title_unseen">Oznacz jako nieprzeczytane</string>
+    <string name="title_seen_unseen" comment="title_seen_unseen&#10;Title for (swipe) action to toggle the read/unread status of a message&#10;Please try to keep it short, so it fits in a pop-up menu, like &quot;Mark un/read&quot;.">Oznacz przeczytane/nieprzeczytane</string>
     <string name="title_toggle_seen">Przeczytane/nieprzeczytane</string>
     <string name="title_hide">Ukryj</string>
     <string name="title_unhide">Pokaż</string>
@@ -1612,7 +1615,7 @@
     <string name="title_sort_on_time">Czas</string>
     <string name="title_sort_on_unread">Nieprzeczytane</string>
     <string name="title_sort_on_starred">Oznaczona</string>
-    <string name="title_sort_on_unread_starred" comment="title_sort_on_unread_starred&#10;&#10;Title for menu item to sort on unread messages first, and after that on starred messages.&#10;&#10;Please ensure that the translation for &quot;unread&quot; and &quot;starred&quot; match those of the menu items for sorting on &quot;unread&quot; or &quot;starred&quot; messages only. You can search for &quot;sort_on&quot; at the top left.&#10;&#10;Please keep a comma between &quot;unread&quot; and &quot;starred&quot;, which is meant to indicate &quot;first this, then that&quot;.">Nieprzeczytane, z gwiazdką</string>
+    <string name="title_sort_on_unread_starred">Nieprzeczytane, z gwiazdką</string>
     <string name="title_sort_on_starred_unread">Z gwiazdką, nieprzeczytane</string>
     <string name="title_sort_on_priority">Priorytet</string>
     <string name="title_sort_on_sender">Nadawca</string>

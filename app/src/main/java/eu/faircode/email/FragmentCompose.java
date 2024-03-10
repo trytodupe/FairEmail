@@ -256,7 +256,6 @@ public class FragmentCompose extends FragmentBase {
     private TextView tvPlainTextOnly;
     private EditTextCompose etBody;
     private ImageView ivMarkdown;
-    private ImageButton ibTemplate;
     private TextView tvNoInternet;
     private TextView tvSignature;
     private CheckBox cbSignature;
@@ -416,7 +415,6 @@ public class FragmentCompose extends FragmentBase {
         tvPlainTextOnly = view.findViewById(R.id.tvPlainTextOnly);
         etBody = view.findViewById(R.id.etBody);
         ivMarkdown = view.findViewById(R.id.ivMarkdown);
-        ibTemplate = view.findViewById(R.id.ibTemplate);
         tvNoInternet = view.findViewById(R.id.tvNoInternet);
         tvSignature = view.findViewById(R.id.tvSignature);
         cbSignature = view.findViewById(R.id.cbSignature);
@@ -814,14 +812,6 @@ public class FragmentCompose extends FragmentBase {
                     } finally {
                         inserted = false;
                     }
-            }
-        });
-
-        ibTemplate.setVisibility(BuildConfig.DEBUG ? View.VISIBLE : View.GONE);
-        ibTemplate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onMenuAnswerInsert(v);
             }
         });
 
@@ -6372,10 +6362,13 @@ public class FragmentCompose extends FragmentBase {
 
             DB db = DB.getInstance(getContext());
 
+            Map<Long, EntityAttachment> map = new HashMap<>();
+            if (last_attachments != null)
+                for (EntityAttachment attachment : last_attachments)
+                    map.put(attachment.id, attachment);
+
             db.attachment().liveAttachments(data.draft.id).observe(getViewLifecycleOwner(),
                     new Observer<List<EntityAttachment>>() {
-                        private Integer count = null;
-
                         @Override
                         public void onChanged(@Nullable List<EntityAttachment> attachments) {
                             if (attachments == null)
@@ -6423,43 +6416,98 @@ public class FragmentCompose extends FragmentBase {
                                     downloading = true;
                             }
 
-                            Log.i("Attachments=" + attachments.size() + " downloading=" + downloading);
-
                             rvAttachment.setTag(downloading);
                             checkInternet();
 
-                            if (count != null && count > attachments.size()) {
+                            try {
                                 boolean updated = false;
                                 Editable edit = etBody.getEditableText();
-
                                 ImageSpan[] spans = edit.getSpans(0, edit.length(), ImageSpan.class);
-                                for (int i = 0; i < spans.length && !updated; i++) {
-                                    ImageSpan span = spans[i];
-                                    String source = span.getSource();
-                                    if (source != null && source.startsWith("cid:")) {
-                                        String cid = "<" + source.substring(4) + ">";
-                                        boolean found = false;
-                                        for (EntityAttachment attachment : attachments)
-                                            if (cid.equals(attachment.cid)) {
-                                                found = true;
+                                if (spans == null)
+                                    spans = new ImageSpan[0];
+
+                                for (EntityAttachment attachment : attachments) {
+                                    EntityAttachment prev = map.get(attachment.id);
+                                    if (prev == null) // New attachment
+                                        continue;
+                                    map.remove(attachment.id);
+
+                                    if (!prev.available && attachment.available) // Attachment downloaded
+                                        for (ImageSpan span : spans) {
+                                            String source = span.getSource();
+                                            if (source != null && source.startsWith("cid:")) {
+                                                String cid = "<" + source.substring(4) + ">";
+                                                if (cid.equals(attachment.cid)) {
+                                                    Bundle args = new Bundle();
+                                                    args.putLong("id", working);
+                                                    args.putString("source", source);
+                                                    args.putInt("zoom", zoom);
+
+                                                    new SimpleTask<Drawable>() {
+                                                        @Override
+                                                        protected Drawable onExecute(Context context, Bundle args) throws Throwable {
+                                                            long id = args.getLong("id");
+                                                            String source = args.getString("source");
+                                                            int zoom = args.getInt("zoom");
+                                                            return ImageHelper.decodeImage(context, id, source, true, zoom, 1.0f, etBody);
+                                                        }
+
+                                                        @Override
+                                                        protected void onExecuted(Bundle args, Drawable d) {
+                                                            String source = args.getString("source");
+                                                            Editable edit = etBody.getEditableText();
+                                                            ImageSpan[] spans = edit.getSpans(0, edit.length(), ImageSpan.class);
+                                                            for (ImageSpan span : spans)
+                                                                if (source != null && source.equals(span.getSource())) {
+                                                                    int start = edit.getSpanStart(span);
+                                                                    int end = edit.getSpanEnd(span);
+                                                                    edit.removeSpan(span);
+                                                                    if (d == null)
+                                                                        edit.delete(start, end);
+                                                                    else
+                                                                        edit.setSpan(new ImageSpan(d, source), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                                                    etBody.setText(edit);
+                                                                    break;
+                                                                }
+                                                        }
+
+                                                        @Override
+                                                        protected void onException(Bundle args, Throwable ex) {
+                                                            // Ignored
+                                                        }
+                                                    }.execute(FragmentCompose.this, args, "attachment:downloaded");
+
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                }
+
+                                for (EntityAttachment removed : map.values())
+                                    for (ImageSpan span : spans) {
+                                        String source = span.getSource();
+                                        if (source != null && source.startsWith("cid:")) {
+                                            String cid = "<" + source.substring(4) + ">";
+                                            if (cid.equals(removed.cid)) {
+                                                updated = true;
+                                                int start = edit.getSpanStart(span);
+                                                int end = edit.getSpanEnd(span);
+                                                edit.removeSpan(span);
+                                                edit.delete(start, end);
                                                 break;
                                             }
-
-                                        if (!found) {
-                                            updated = true;
-                                            int start = edit.getSpanStart(span);
-                                            int end = edit.getSpanEnd(span);
-                                            edit.removeSpan(span);
-                                            edit.delete(start, end);
                                         }
                                     }
-                                }
 
                                 if (updated)
                                     etBody.setText(edit);
-                            }
 
-                            count = attachments.size();
+                                map.clear();
+                                for (EntityAttachment attachment : attachments)
+                                    map.put(attachment.id, attachment);
+                            } catch (Throwable ex) {
+                                Log.e(ex);
+                            }
                         }
                     });
 
