@@ -79,6 +79,7 @@ import biweekly.component.VEvent;
 import biweekly.property.Method;
 
 public class ServiceSend extends ServiceBase implements SharedPreferences.OnSharedPreferenceChangeListener {
+    private int retry_max = RETRY_MAX_DEFAULT;
     private TupleUnsent lastUnsent = null;
     private Network lastActive = null;
     private boolean lastSuitable = false;
@@ -91,7 +92,6 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
     private static final ExecutorService executor =
             Helper.getBackgroundExecutor(1, "send");
 
-    private static final int RETRY_MAX = 3;
     private static final long RETRY_WAIT = 5000L; // milliseconds
     private static final int CONNECTIVITY_DELAY = 5000; // milliseconds
     private static final int PROGRESS_UPDATE_INTERVAL = 1000; // milliseconds
@@ -100,11 +100,16 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
     static final int PI_SEND = 1;
     static final int PI_FIX = 2;
 
+    static final int RETRY_MAX_DEFAULT = 3;
+
     @Override
     public void onCreate() {
         EntityLog.log(this, "Service send create");
         super.onCreate();
         startForeground(NotificationHelper.NOTIFICATION_SEND, getNotificationService(false));
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        retry_max = prefs.getInt("send_retry_max", RETRY_MAX_DEFAULT);
 
         owner = new TwoStateOwner(this, "send");
 
@@ -175,6 +180,7 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
             }
         });
 
+        lastActive = ConnectionHelper.getActiveNetwork(this);
         lastSuitable = ConnectionHelper.getNetworkState(this).isSuitable();
         if (lastSuitable)
             owner.start();
@@ -464,20 +470,19 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
                         Log.e(outbox.name, ex);
                         EntityLog.log(this, "Send " + Log.formatThrowable(ex, false));
 
-                        boolean unrecoverable = (op.tries >= RETRY_MAX ||
-                                ex instanceof OutOfMemoryError ||
+                        boolean unrecoverable = (ex instanceof OutOfMemoryError ||
                                 ex instanceof MessageRemovedException ||
                                 ex instanceof FileNotFoundException ||
                                 (ex instanceof AuthenticationFailedException && !ConnectionHelper.isIoError(ex)) ||
                                 ex instanceof SendFailedException ||
                                 ex instanceof IllegalArgumentException);
+                        int tries_left = (unrecoverable ? 0 : retry_max - op.tries);
 
                         db.operation().setOperationError(op.id, Log.formatThrowable(ex));
                         if (message != null) {
                             db.message().setMessageError(message.id, Log.formatThrowable(ex));
 
                             try {
-                                int tries_left = (unrecoverable ? 0 : RETRY_MAX - op.tries);
                                 NotificationManager nm = Helper.getSystemService(this, NotificationManager.class);
                                 if (NotificationHelper.areNotificationsEnabled(nm)) {
                                     NotificationCompat.Builder builder = getNotificationError(
@@ -525,11 +530,13 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
                             }
                         }
 
-                        if (unrecoverable) {
-                            Log.w("Unrecoverable");
+                        if (tries_left <= 0) {
+                            Log.w("Send tries left=" + tries_left +
+                                    " unrecoverable=" + unrecoverable);
                             db.operation().deleteOperation(op.id);
                             ops.remove(op);
                         } else {
+                            Log.i("Send retry wait");
                             Thread.sleep(RETRY_WAIT);
                             throw ex;
                         }
