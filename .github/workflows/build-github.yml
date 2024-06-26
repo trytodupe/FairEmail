@@ -137,7 +137,7 @@ jobs:
 # zip source begin
       - name: Create Archive source
 #        if: inputs.create-archive-all == true
-        uses: deep-soft/zip-release@v2
+        uses: deep-soft/zip-release@v3
         with:
           type: 'zip'
           filename: '${{ env.TAG_NAME }}-${{ env.TAG_VERSION }}-${{ env.PRG_FLAVOR }}-src.zip'
@@ -191,7 +191,7 @@ jobs:
 # zip release begin
       - name: Create Archive All
         if: inputs.create-archive-all == true
-        uses: deep-soft/zip-release@v2
+        uses: deep-soft/zip-release@v3
         with:
           type: 'zip'
           filename: '${{ env.TAG_NAME }}-${{ env.TAG_VERSION }}-${{ env.PRG_FLAVOR }}-all.zip'
