@@ -80,23 +80,38 @@ public class FragmentOptionsIntegrations extends FragmentBase implements SharedP
     private EditText etOpenAi;
     private TextInputLayout tilOpenAi;
     private EditText etOpenAiModel;
+    private SwitchCompat swOpenMultiModal;
     private TextView tvOpenAiTemperature;
     private SeekBar sbOpenAiTemperature;
-    private SwitchCompat swOpenAiModeration;
+    private EditText etOpenAiSummarize;
+    private EditText etOpenAiAnswer;
+    private EditText etOpenAiSystem;
     private ImageButton ibOpenAi;
+    private SwitchCompat swGemini;
+    private TextView tvGeminiPrivacy;
+    private EditText etGemini;
+    private TextInputLayout tilGemini;
+    private EditText etGeminiModel;
+    private TextView tvGeminiTemperature;
+    private SeekBar sbGeminiTemperature;
+    private EditText etGeminiSummarize;
+    private EditText etGeminiAnswer;
+    private ImageButton ibGemini;
 
     private CardView cardVirusTotal;
     private CardView cardSend;
     private CardView cardOpenAi;
+    private CardView cardGemini;
 
     private NumberFormat NF = NumberFormat.getNumberInstance();
 
     private final static List<String> RESET_OPTIONS = Collections.unmodifiableList(Arrays.asList(
-            "lt_enabled", "lt_sentence", "lt_auto", "lt_picky", "lt_highlight", "lt_description", "lt_uri", "lt_user", "lt_key",
+            "lt_enabled", "lt_sentence", "lt_auto", "lt_picky", "lt_highlight", "lt_description", "lt_uri", "lt_user",
             "deepl_enabled",
-            "vt_enabled", "vt_apikey",
+            "vt_enabled",
             "send_enabled", "send_host", "send_dlimit", "send_tlimit",
-            "openai_enabled", "openai_uri", "openai_apikey", "openai_model", "openai_temperature", "openai_moderation"
+            "openai_enabled", "openai_uri", "openai_model", "openai_multimodal", "openai_temperature", "openai_summarize", "openai_answer", "openai_system",
+            "gemini_enabled", "gemini_uri", "gemini_model", "gemini_temperature", "gemini_summarize", "gemini_answer"
     ));
 
     @Override
@@ -122,29 +137,48 @@ public class FragmentOptionsIntegrations extends FragmentBase implements SharedP
         etLanguageToolUser = view.findViewById(R.id.etLanguageToolUser);
         tilLanguageToolKey = view.findViewById(R.id.tilLanguageToolKey);
         ibLanguageTool = view.findViewById(R.id.ibLanguageTool);
+
         swDeepL = view.findViewById(R.id.swDeepL);
         tvDeepLPrivacy = view.findViewById(R.id.tvDeepLPrivacy);
         ibDeepL = view.findViewById(R.id.ibDeepL);
+
         swVirusTotal = view.findViewById(R.id.swVirusTotal);
         tvVirusTotalPrivacy = view.findViewById(R.id.tvVirusTotalPrivacy);
         tilVirusTotal = view.findViewById(R.id.tilVirusTotal);
         ibVirusTotal = view.findViewById(R.id.ibVirusTotal);
+
         swSend = view.findViewById(R.id.swSend);
         etSend = view.findViewById(R.id.etSend);
         ibSend = view.findViewById(R.id.ibSend);
+
         swOpenAi = view.findViewById(R.id.swOpenAi);
         tvOpenAiPrivacy = view.findViewById(R.id.tvOpenAiPrivacy);
         etOpenAi = view.findViewById(R.id.etOpenAi);
         tilOpenAi = view.findViewById(R.id.tilOpenAi);
         etOpenAiModel = view.findViewById(R.id.etOpenAiModel);
+        swOpenMultiModal = view.findViewById(R.id.swOpenMultiModal);
         tvOpenAiTemperature = view.findViewById(R.id.tvOpenAiTemperature);
         sbOpenAiTemperature = view.findViewById(R.id.sbOpenAiTemperature);
-        swOpenAiModeration = view.findViewById(R.id.swOpenAiModeration);
+        etOpenAiSummarize = view.findViewById(R.id.etOpenAiSummarize);
+        etOpenAiAnswer = view.findViewById(R.id.etOpenAiAnswer);
+        etOpenAiSystem = view.findViewById(R.id.etOpenAiSystem);
         ibOpenAi = view.findViewById(R.id.ibOpenAi);
+
+        swGemini = view.findViewById(R.id.swGemini);
+        tvGeminiPrivacy = view.findViewById(R.id.tvGeminiPrivacy);
+        etGemini = view.findViewById(R.id.etGemini);
+        tilGemini = view.findViewById(R.id.tilGemini);
+        etGeminiModel = view.findViewById(R.id.etGeminiModel);
+        tvGeminiTemperature = view.findViewById(R.id.tvGeminiTemperature);
+        sbGeminiTemperature = view.findViewById(R.id.sbGeminiTemperature);
+        etGeminiSummarize = view.findViewById(R.id.etGeminiSummarize);
+        etGeminiAnswer = view.findViewById(R.id.etGeminiAnswer);
+        ibGemini = view.findViewById(R.id.ibGemini);
 
         cardVirusTotal = view.findViewById(R.id.cardVirusTotal);
         cardSend = view.findViewById(R.id.cardSend);
         cardOpenAi = view.findViewById(R.id.cardOpenAi);
+        cardGemini = view.findViewById(R.id.cardGemini);
 
         setOptions();
 
@@ -393,8 +427,13 @@ public class FragmentOptionsIntegrations extends FragmentBase implements SharedP
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
                 prefs.edit().putBoolean("openai_enabled", checked).apply();
                 etOpenAiModel.setEnabled(checked);
+                swOpenMultiModal.setEnabled(checked);
                 sbOpenAiTemperature.setEnabled(checked);
-                swOpenAiModeration.setEnabled(checked);
+                etOpenAiSummarize.setEnabled(checked);
+                etOpenAiAnswer.setEnabled(checked);
+                etOpenAiSystem.setEnabled(checked);
+                if (checked)
+                    swGemini.setChecked(false);
             }
         });
 
@@ -449,6 +488,7 @@ public class FragmentOptionsIntegrations extends FragmentBase implements SharedP
             }
         });
 
+        etOpenAiModel.setHint(OpenAI.DEFAULT_MODEL);
         etOpenAiModel.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -470,6 +510,13 @@ public class FragmentOptionsIntegrations extends FragmentBase implements SharedP
             }
         });
 
+        swOpenMultiModal.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean checked) {
+                prefs.edit().putBoolean("openai_multimodal", checked).apply();
+            }
+        });
+
         sbOpenAiTemperature.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -488,10 +535,68 @@ public class FragmentOptionsIntegrations extends FragmentBase implements SharedP
             }
         });
 
-        swOpenAiModeration.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        etOpenAiSummarize.setHint(OpenAI.DEFAULT_SUMMARY_PROMPT);
+        etOpenAiSummarize.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
-                prefs.edit().putBoolean("openai_moderation", checked).apply();
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Do nothing
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Do nothing
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String prompt = s.toString().trim();
+                if (TextUtils.isEmpty(prompt))
+                    prefs.edit().remove("openai_summarize").apply();
+                else
+                    prefs.edit().putString("openai_summarize", prompt).apply();
+            }
+        });
+
+        etOpenAiAnswer.setHint(OpenAI.DEFAULT_ANSWER_PROMPT);
+        etOpenAiAnswer.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Do nothing
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Do nothing
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String prompt = s.toString().trim();
+                if (TextUtils.isEmpty(prompt))
+                    prefs.edit().remove("openai_answer").apply();
+                else
+                    prefs.edit().putString("openai_answer", prompt).apply();
+            }
+        });
+
+        etOpenAiSystem.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Do nothing
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Do nothing
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String prompt = s.toString().trim();
+                if (TextUtils.isEmpty(prompt))
+                    prefs.edit().remove("openai_system").apply();
+                else
+                    prefs.edit().putString("openai_system", prompt).apply();
             }
         });
 
@@ -502,12 +607,166 @@ public class FragmentOptionsIntegrations extends FragmentBase implements SharedP
             }
         });
 
-        // Initialize
-        FragmentDialogTheme.setBackground(getContext(), view, false);
+        swGemini.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+                prefs.edit().putBoolean("gemini_enabled", checked).apply();
+                etGeminiModel.setEnabled(checked);
+                sbGeminiTemperature.setEnabled(checked);
+                etGeminiSummarize.setEnabled(checked);
+                etGeminiAnswer.setEnabled(checked);
+                if (checked)
+                    swOpenAi.setChecked(false);
+            }
+        });
 
+        tvGeminiPrivacy.getPaint().setUnderlineText(true);
+        tvGeminiPrivacy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Helper.view(v.getContext(), Uri.parse(BuildConfig.GEMINI_PRIVACY), true);
+            }
+        });
+
+        etGemini.setHint(BuildConfig.GEMINI_ENDPOINT);
+        etGemini.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Do nothing
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Do nothing
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String apikey = s.toString().trim();
+                if (TextUtils.isEmpty(apikey))
+                    prefs.edit().remove("gemini_uri").apply();
+                else
+                    prefs.edit().putString("gemini_uri", apikey).apply();
+            }
+        });
+
+        tilGemini.getEditText().addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Do nothing
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Do nothing
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String apikey = s.toString().trim();
+                if (TextUtils.isEmpty(apikey))
+                    prefs.edit().remove("gemini_apikey").apply();
+                else
+                    prefs.edit().putString("gemini_apikey", apikey).apply();
+            }
+        });
+
+        etGeminiModel.setHint(Gemini.DEFAULT_MODEL);
+        etGeminiModel.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Do nothing
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Do nothing
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String model = s.toString().trim();
+                if (TextUtils.isEmpty(model))
+                    prefs.edit().remove("gemini_model").apply();
+                else
+                    prefs.edit().putString("gemini_model", model).apply();
+            }
+        });
+
+        sbGeminiTemperature.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float temp = progress / 10f;
+                prefs.edit().putFloat("gemini_temperature", temp).apply();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // Do nothing
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // Do nothing
+            }
+        });
+
+        etGeminiSummarize.setHint(Gemini.DEFAULT_SUMMARY_PROMPT);
+        etGeminiSummarize.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Do nothing
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Do nothing
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String prompt = s.toString().trim();
+                if (TextUtils.isEmpty(prompt))
+                    prefs.edit().remove("gemini_summarize").apply();
+                else
+                    prefs.edit().putString("gemini_summarize", prompt).apply();
+            }
+        });
+
+        etGeminiAnswer.setHint(Gemini.DEFAULT_ANSWER_PROMPT);
+        etGeminiAnswer.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Do nothing
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Do nothing
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String prompt = s.toString().trim();
+                if (TextUtils.isEmpty(prompt))
+                    prefs.edit().remove("gemini_answer").apply();
+                else
+                    prefs.edit().putString("gemini_answer", prompt).apply();
+            }
+        });
+
+        ibGemini.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Helper.viewFAQ(v.getContext(), 204);
+            }
+        });
+
+        // Initialize
         cardVirusTotal.setVisibility(BuildConfig.PLAY_STORE_RELEASE ? View.GONE : View.VISIBLE);
         cardSend.setVisibility(BuildConfig.PLAY_STORE_RELEASE ? View.GONE : View.VISIBLE);
         cardOpenAi.setVisibility(TextUtils.isEmpty(BuildConfig.OPENAI_ENDPOINT) ? View.GONE : View.VISIBLE);
+        cardGemini.setVisibility(TextUtils.isEmpty(BuildConfig.GEMINI_ENDPOINT) ? View.GONE : View.VISIBLE);
 
         PreferenceManager.getDefaultSharedPreferences(getContext()).registerOnSharedPreferenceChangeListener(this);
 
@@ -532,7 +791,15 @@ public class FragmentOptionsIntegrations extends FragmentBase implements SharedP
                 "send_host".equals(key) ||
                 "openai_uri".equals(key) ||
                 "openai_apikey".equals(key) ||
-                "openai_model".equals(key))
+                "openai_model".equals(key) ||
+                "openai_summarize".equals(key) ||
+                "openai_answer".equals(key) ||
+                "openai_system".equals(key) ||
+                "gemini_uri".equals(key) ||
+                "gemini_apikey".equals(key) ||
+                "gemini_model".equals(key) ||
+                "gemini_summarize".equals(key) ||
+                "gemini_answer".equals(key))
             return;
 
         getMainHandler().removeCallbacks(update);
@@ -582,24 +849,50 @@ public class FragmentOptionsIntegrations extends FragmentBase implements SharedP
             etLanguageTool.setText(prefs.getString("lt_uri", null));
             etLanguageToolUser.setText(prefs.getString("lt_user", null));
             tilLanguageToolKey.getEditText().setText(prefs.getString("lt_key", null));
+
             swDeepL.setChecked(prefs.getBoolean("deepl_enabled", false));
+
             swVirusTotal.setChecked(prefs.getBoolean("vt_enabled", false));
             tilVirusTotal.getEditText().setText(prefs.getString("vt_apikey", null));
+
             swSend.setChecked(prefs.getBoolean("send_enabled", false));
             etSend.setText(prefs.getString("send_host", null));
+
             swOpenAi.setChecked(prefs.getBoolean("openai_enabled", false));
             etOpenAi.setText(prefs.getString("openai_uri", null));
             tilOpenAi.getEditText().setText(prefs.getString("openai_apikey", null));
             etOpenAiModel.setText(prefs.getString("openai_model", null));
             etOpenAiModel.setEnabled(swOpenAi.isChecked());
 
-            float temperature = prefs.getFloat("openai_temperature", 0.5f);
+            swOpenMultiModal.setChecked(prefs.getBoolean("openai_multimodal", false));
+            swOpenMultiModal.setEnabled(swOpenAi.isChecked());
+
+            float temperature = prefs.getFloat("openai_temperature", OpenAI.DEFAULT_TEMPERATURE);
             tvOpenAiTemperature.setText(getString(R.string.title_advanced_openai_temperature, NF.format(temperature)));
             sbOpenAiTemperature.setProgress(Math.round(temperature * 10));
             sbOpenAiTemperature.setEnabled(swOpenAi.isChecked());
+            etOpenAiSummarize.setText(prefs.getString("openai_summarize", null));
+            etOpenAiSummarize.setEnabled(swOpenAi.isChecked());
+            etOpenAiAnswer.setText(prefs.getString("openai_answer", null));
+            etOpenAiAnswer.setEnabled(swOpenAi.isChecked());
+            etOpenAiSystem.setText(prefs.getString("openai_system", null));
+            etOpenAiSystem.setEnabled(swOpenAi.isChecked());
 
-            swOpenAiModeration.setChecked(prefs.getBoolean("openai_moderation", false));
-            swOpenAiModeration.setEnabled(swOpenAi.isChecked());
+            swGemini.setChecked(prefs.getBoolean("gemini_enabled", false));
+            etGemini.setText(prefs.getString("gemini_uri", null));
+            tilGemini.getEditText().setText(prefs.getString("gemini_apikey", null));
+            etGeminiModel.setText(prefs.getString("gemini_model", null));
+            etGeminiModel.setEnabled(swGemini.isChecked());
+
+            temperature = prefs.getFloat("gemini_temperature", Gemini.DEFAULT_TEMPERATURE);
+            tvGeminiTemperature.setText(getString(R.string.title_advanced_openai_temperature, NF.format(temperature)));
+            sbGeminiTemperature.setProgress(Math.round(temperature * 10));
+            sbGeminiTemperature.setEnabled(swGemini.isChecked());
+
+            etGeminiSummarize.setText(prefs.getString("gemini_summarize", null));
+            etGeminiSummarize.setEnabled(swGemini.isChecked());
+            etGeminiAnswer.setText(prefs.getString("gemini_answer", null));
+            etGeminiAnswer.setEnabled(swGemini.isChecked());
         } catch (Throwable ex) {
             Log.e(ex);
         }

@@ -72,7 +72,6 @@
     <string name="title_notification_sending">جارٍ إرسال الرسالة</string>
     <string name="title_notification_waiting">في انتظار اتصال مناسب</string>
     <string name="title_notification_idle">خامل</string>
-    <string name="title_notification_failed">\'%1$s\' فشل</string>
     <string name="title_notification_alert">تنبيه الخادم: \'%1$s\'</string>
     <string name="title_notification_sending_left">المحاولات المتبقية: %1$d</string>
     <string name="title_notification_sending_retry">سيتم إعادة الإرسال عند تغيير الاتصال بالإنترنت أو السحب للأسفل على صندوق الصادر</string>
@@ -123,7 +122,6 @@
     <string name="title_setup_quick_smtp">خادم SMTP لإرسال الرسائل</string>
     <string name="title_setup_quick_certificates">شهادات الخادم</string>
     <string name="title_setup_wizard">المساعد</string>
-    <string name="title_setup_wizard_intro"></string>
     <string name="title_setup_wizard_tutorials">الدروس</string>
     <string name="title_setup_wizard_multiple">يمكن استخدام المعالج عدة مرات لإعداد حسابات متعددة</string>
     <string name="title_setup_wizard_new">أحتاج إلى عنوان بريد إلكتروني جديد</string>
@@ -271,8 +269,6 @@
     <string name="title_setup_reset_full">إظهار الرسائل الأصلية</string>
     <string name="title_check_gmail_oauth">سوف تستمر حسابات جيميل الخاصة بك في العمل بعد 30 مايو 2022</string>
     <string name="title_check_gmail_password">بعض حسابات الجيميل الخاصة بك قد تتوقف عن العمل بعد 30 مايو 2022</string>
-    <string name="title_check_outlook_oauth">ستستمر حسابات Outlook في العمل بعد 1 أكتوبر 2022</string>
-    <string name="title_check_outlook_password">قد تتوقف بعض حسابات Outlook الخاصة بك عن العمل بعد 1 أكتوبر 2022</string>
     <string name="title_advanced_hint_title">خيارات أكثر تقدماً</string>
     <string name="title_advanced_hint_message">        أنت تنتقل إلى الخيارات الأكثر تقدماً.
         جميع الخيارات تستخدم القيم القياسية الشائعة، التي لا تحتاج إلى تغييرها إلا إذا كان لديك تفضيلات مختلفة.
@@ -334,7 +330,6 @@
     <string name="title_advanced_two_col">استخدام عمودين</string>
     <string name="title_advanced_min_screen_size">الحد الأدنى لحجم الشاشة لتقسيم الشاشة</string>
     <string name="title_advanced_close_pane">طي الصف أو العمود عند إغلاق محادثة</string>
-    <string name="title_advanced_open_pane">ابدأ بصفين أو عمودين</string>
     <string name="title_advanced_hide_toolbar">إخفاء شريط الأدوات العلوي عند تصفح الرسائل</string>
     <string name="title_advanced_nav_options">إظهار خيارات قائمة التنقل</string>
     <string name="title_advanced_nav_categories">إظهار فئات الحساب في قائمة التنقل</string>
@@ -717,6 +712,7 @@
         <item>Unified folders</item>
         <item>Primary account folders</item>
         <item>الحسابات</item>
+        <item>Primary inbox</item>
     </string-array>
     <string-array name="downloadNames">
         <item>16 كيلوبايت</item>

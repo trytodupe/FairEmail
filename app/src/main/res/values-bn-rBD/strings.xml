@@ -60,7 +60,6 @@
     <string name="title_notification_sending">বার্তাসমূহ প্রেরণ হচ্ছে</string>
     <string name="title_notification_waiting">উপযুক্ত সংযোগের জন্য অপেক্ষা করা হচ্ছে</string>
     <string name="title_notification_idle">নিষ্ক্রিয়</string>
-    <string name="title_notification_failed">\'%1$s\' ব্যর্থ</string>
     <string name="title_notification_sending_left">চেষ্টা বাকিঃ %1$d</string>
     <string name="title_notification_sending_failed">%1$s এর কাছে প্রেরণ ব্যর্থ হয়েছে</string>
     <string name="title_notification_redacted">পুনঃনির্মাণঃ বায়োমেট্রিক বা পিন প্রমাণীকরণ চালু</string>
@@ -132,6 +131,7 @@
         <item>Unified folders</item>
         <item>Primary account folders</item>
         <item>অ্যাকাউন্ট</item>
+        <item>Primary inbox</item>
     </string-array>
     <!-- https://en.wikipedia.org/wiki/Display_resolution -->
     <!-- https://en.wikipedia.org/wiki/Comparison_of_high-definition_smartphone_displays -->

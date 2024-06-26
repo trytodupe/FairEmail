@@ -62,10 +62,14 @@ public class FairEmailLoggingProvider extends TinylogLoggingProvider {
     }
 
     static void setup(Context context) {
-        System.setProperty("tinylog.directory",
-                Helper.ensureExists(context, "logs").getAbsolutePath());
+        try {
+            System.setProperty("tinylog.directory",
+                    Helper.ensureExists(context, "logs").getAbsolutePath());
 
-        setLevel(context);
+            setLevel(context);
+        } catch (Throwable ex) {
+            Log.e(ex);
+        }
     }
 
     static void setLevel(Context context) {
@@ -73,6 +77,8 @@ public class FairEmailLoggingProvider extends TinylogLoggingProvider {
         boolean debug = prefs.getBoolean("debug", false);
 
         FairEmailLoggingProvider provider = (FairEmailLoggingProvider) ProviderRegistry.getLoggingProvider();
+        if (provider == null)
+            return;
 
         if (debug)
             provider.activeLevel = Level.DEBUG;

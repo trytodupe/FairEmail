@@ -75,15 +75,7 @@ public interface DaoMessage {
             "   OR (NOT :found AND :type IS NULL AND folder.unified)" +
             "   OR (NOT :found AND folder.type = :type)" +
             "   THEN message.received ELSE 0 END) AS dummy" +
-            " FROM (SELECT * FROM message" +
-            "  WHERE message.thread IN" +
-            "  (SELECT DISTINCT mm.thread FROM folder ff" +
-            "   JOIN message mm ON mm.folder = ff.id" +
-            "   WHERE ((:found AND mm.ui_found)" +
-            "   OR (NOT :found AND :type IS NULL AND ff.unified)" +
-            "   OR (NOT :found AND :type IS NOT NULL AND ff.type = :type))" +
-            "   AND (NOT mm.ui_hide OR :debug))" +
-            "   ORDER BY received DESC) AS message" + // group_concat
+            " FROM message" +
             " JOIN account_view AS account ON account.id = message.account" +
             " LEFT JOIN identity_view AS identity ON identity.id = message.identity" +
             " JOIN folder_view AS folder ON folder.id = message.folder" +
@@ -95,6 +87,7 @@ public interface DaoMessage {
             " HAVING (SUM((:found AND message.ui_found)" +
             " OR (NOT :found AND :type IS NULL AND folder.unified)" +
             " OR (NOT :found AND :type IS NOT NULL AND folder.type = :type)) > 0)" + // thread can be the same in different accounts
+            " AND SUM(NOT message.ui_hide OR :debug) > 0" +
             " AND (NOT :filter_seen OR SUM(1 - message.ui_seen) > 0)" +
             " AND (NOT :filter_unflagged OR COUNT(message.id) - SUM(1 - message.ui_flagged) > 0)" +
             " AND (NOT :filter_unknown OR SUM(message.avatar IS NOT NULL AND message.sender <> identity.email) > 0)" +
@@ -112,6 +105,7 @@ public interface DaoMessage {
             "   WHEN 'size' = :sort1 THEN -SUM(message.total)" +
             "   WHEN 'attachments' = :sort1 THEN -SUM(message.attachments)" +
             "   WHEN 'snoozed' = :sort1 THEN SUM(CASE WHEN message.ui_snoozed IS NULL THEN 0 ELSE 1 END) = 0" +
+            "   WHEN 'touched' = :sort1 THEN IFNULL(-message.last_touched, 0)" +
             "   ELSE 0" +
             "  END" +
             ", CASE" +
@@ -158,13 +152,7 @@ public interface DaoMessage {
             "   (:found AND folder.type <> '" + EntityFolder.ARCHIVE + "' AND NOT (" + is_outgoing + "))" +
             "   OR (NOT :found AND folder.id = :folder)" +
             "   THEN message.received ELSE 0 END) AS dummy" +
-            " FROM (SELECT * FROM message" +
-            " WHERE message.thread IN" +
-            "  (SELECT DISTINCT mm.thread FROM message mm" +
-            "   WHERE mm.folder = :folder" +
-            "   AND (NOT mm.ui_hide OR :debug)" +
-            "   AND (NOT :found OR mm.ui_found))" +
-            "   ORDER BY received DESC) AS message" + // group_concat
+            " FROM message" +
             " JOIN account_view AS account ON account.id = message.account" +
             " LEFT JOIN identity_view AS identity ON identity.id = message.identity" +
             " JOIN folder_view AS folder ON folder.id = message.folder" +
@@ -174,7 +162,10 @@ public interface DaoMessage {
             " AND (NOT message.ui_hide OR :debug)" +
             " AND (NOT :found OR message.ui_found = :found)" +
             " GROUP BY CASE WHEN message.thread IS NULL OR NOT :threading THEN message.id ELSE message.thread END" +
-            " HAVING (NOT :filter_seen OR SUM(1 - message.ui_seen) > 0 OR " + is_outbox + ")" +
+            " HAVING (SUM((:found AND message.ui_found)" +
+            " OR (NOT :found AND message.folder = :folder)) > 0)" +
+            " AND SUM(NOT message.ui_hide OR :debug) > 0" +
+            " AND (NOT :filter_seen OR SUM(1 - message.ui_seen) > 0 OR " + is_outbox + ")" +
             " AND (NOT :filter_unflagged OR COUNT(message.id) - SUM(1 - message.ui_flagged) > 0 OR " + is_outbox + ")" +
             " AND (NOT :filter_unknown OR SUM(message.avatar IS NOT NULL AND message.sender <> identity.email) > 0" +
             "   OR " + is_outbox + " OR " + is_drafts + " OR " + is_sent + ")" +
@@ -191,6 +182,7 @@ public interface DaoMessage {
             "   WHEN 'size' = :sort1 THEN -SUM(message.total)" +
             "   WHEN 'attachments' = :sort1 THEN -SUM(message.attachments)" +
             "   WHEN 'snoozed' = :sort1 THEN SUM(CASE WHEN message.ui_snoozed IS NULL THEN 0 ELSE 1 END) = 0" +
+            "   WHEN 'touched' = :sort1 THEN IFNULL(-message.last_touched, 0)" +
             "   ELSE 0" +
             "  END" +
             ", CASE" +
@@ -343,6 +335,12 @@ public interface DaoMessage {
             " ORDER BY message.received DESC")
     List<Long> getMessageIdsByFolder(Long folder);
 
+    @Query("SELECT identity, COUNT(*) AS count" +
+            " FROM message" +
+            " WHERE folder = :folder" +
+            " GROUP BY identity")
+    List<TupleIdentityCount> getIdentitiesByFolder(long folder);
+
     @Transaction
     @Query("SELECT message.id FROM message" +
             " JOIN folder_view AS folder ON folder.id = message.folder" +
@@ -381,9 +379,10 @@ public interface DaoMessage {
             " AND (:size IS NULL OR total > :size)" +
             " AND (:after IS NULL OR received > :after)" +
             " AND (:before IS NULL OR received < :before)" +
+            " AND (:touched IS NULL OR last_touched > :touched)" +
             " AND NOT message.folder IN (:exclude)" +
             " GROUP BY message.id" +
-            " ORDER BY received DESC" +
+            " ORDER BY CASE WHEN :touched IS NULL THEN received ELSE last_touched END DESC" +
             " LIMIT :limit OFFSET :offset")
     List<TupleMatch> matchMessages(
             Long account, Long folder, long[] exclude, String find,
@@ -391,7 +390,7 @@ public interface DaoMessage {
             boolean unseen, boolean flagged, boolean hidden, boolean encrypted, boolean with_attachments, boolean with_notes,
             int type_count, String[] types,
             Integer size,
-            Long after, Long before,
+            Long after, Long before, Long touched,
             int limit, int offset);
 
     @Query("SELECT id" +
@@ -761,6 +760,15 @@ public interface DaoMessage {
     @Query("UPDATE message SET fts = :fts WHERE id = :id AND NOT (fts IS :fts)")
     int setMessageFts(long id, boolean fts);
 
+    @Query("UPDATE message SET `to` = :to WHERE id = :id AND NOT (`to` IS :to)")
+    int setMessageTo(long id, String to);
+
+    @Query("UPDATE message SET `cc` = :cc WHERE id = :id AND NOT (`cc` IS :cc)")
+    int setMessageCc(long id, String cc);
+
+    @Query("UPDATE message SET `bcc` = :bcc WHERE id = :id AND NOT (`bcc` IS :bcc)")
+    int setMessageBcc(long id, String bcc);
+
     @Query("UPDATE message SET received = :received WHERE id = :id AND NOT (received IS :received)")
     int setMessageReceived(long id, long received);
 
@@ -837,6 +845,9 @@ public interface DaoMessage {
             " AND (NOT (received IS :sent) OR NOT (sent IS :sent))")
     int setMessageSent(long id, Long sent);
 
+    @Query("UPDATE message SET warning = :warning WHERE id = :id AND NOT (warning IS :warning)")
+    int setMessageWarning(long id, String warning);
+
     @Query("UPDATE message SET error = :error WHERE id = :id AND NOT (error IS :error)")
     int setMessageError(long id, String error);
 
@@ -912,7 +923,10 @@ public interface DaoMessage {
     int setMessageVerified(long id, boolean verified);
 
     @Query("UPDATE message SET last_attempt = :last_attempt WHERE id = :id AND NOT (last_attempt IS :last_attempt)")
-    int setMessageLastAttempt(long id, long last_attempt);
+    int setMessageLastAttempt(long id, Long last_attempt);
+
+    @Query("UPDATE message SET last_touched = :last_touched WHERE id = :id AND NOT (last_touched IS :last_touched)")
+    int setMessageLastTouched(long id, Long last_touched);
 
     @Query("UPDATE message SET ui_ignored = 1" +
             " WHERE NOT ui_ignored" +
@@ -1028,21 +1042,21 @@ public interface DaoMessage {
             " WHERE folder = :folder" +
             " AND received < :keep_time" +
             " AND NOT uid IS NULL" +
-            " AND (ui_seen OR :unseen)" +
+            " AND (ui_seen OR received < :keep_unread_time OR :unseen)" +
             " AND NOT ui_flagged" +
             " AND stored < :sync_time" + // moved, browsed
             " AND (ui_snoozed IS NULL OR ui_snoozed =" + Long.MAX_VALUE + ")")
-    List<Long> getMessagesBefore(long folder, long sync_time, long keep_time, boolean unseen);
+    List<Long> getMessagesBefore(long folder, long sync_time, long keep_time, long keep_unread_time, boolean unseen);
 
     @Query("DELETE FROM message" +
             " WHERE folder = :folder" +
             " AND received < :keep_time" +
             " AND NOT uid IS NULL" +
-            " AND (ui_seen OR :unseen)" +
+            " AND (ui_seen OR received < :keep_unread_time OR :unseen)" +
             " AND NOT ui_flagged" +
             " AND stored < :sync_time" + // moved, browsed
             " AND (ui_snoozed IS NULL OR ui_snoozed = " + Long.MAX_VALUE + ")")
-    int deleteMessagesBefore(long folder, long sync_time, long keep_time, boolean unseen);
+    int deleteMessagesBefore(long folder, long sync_time, long keep_time, long keep_unread_time, boolean unseen);
 
     @Transaction
     @Query("DELETE FROM message" +
@@ -1054,4 +1068,172 @@ public interface DaoMessage {
             "    ORDER BY received DESC" +
             "    LIMIT :keep)")
     int deleteMessagesKeep(long folder, int keep);
+
+    @Transaction
+    @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH)
+    @Query("SELECT message.*" +
+            ", account.pop AS accountProtocol, account.name AS accountName, account.category AS accountCategory, COALESCE(identity.color, folder.color, account.color) AS accountColor" +
+            ", account.notify AS accountNotify, account.summary AS accountSummary, account.leave_deleted AS accountLeaveDeleted, account.auto_seen AS accountAutoSeen" +
+            ", folder.name AS folderName, folder.color AS folderColor, folder.display AS folderDisplay, folder.type AS folderType, NULL AS folderInheritedType, folder.unified AS folderUnified, folder.read_only AS folderReadOnly" +
+            ", IFNULL(identity.display, identity.name) AS identityName, identity.email AS identityEmail, identity.color AS identityColor, identity.synchronize AS identitySynchronize" +
+            ", '[' || substr(group_concat(message.`from`, ','), 0, 2048) || ']' AS senders" +
+            ", '[' || substr(group_concat(message.`to`, ','), 0, 2048) || ']' AS recipients" +
+            ", COUNT(message.id) AS count" +
+            ", SUM(1 - message.ui_seen) AS unseen" +
+            ", SUM(1 - message.ui_flagged) AS unflagged" +
+            ", SUM(folder.type = '" + EntityFolder.DRAFTS + "') AS drafts" +
+            ", COUNT(DISTINCT" +
+            "   CASE WHEN NOT message.hash IS NULL THEN message.hash" +
+            "   WHEN NOT message.msgid IS NULL THEN message.msgid" +
+            "   ELSE message.id END) AS visible" +
+            ", COUNT(DISTINCT" +
+            "   CASE WHEN message.ui_seen THEN NULL" +
+            "   WHEN NOT message.hash IS NULL THEN message.hash" +
+            "   WHEN NOT message.msgid IS NULL THEN message.msgid" +
+            "   ELSE message.id END) AS visible_unseen" +
+            ", SUM(message.attachments) AS totalAttachments" +
+            ", SUM(message.total) AS totalSize" +
+            ", message.priority AS ui_priority" +
+            ", message.importance AS ui_importance" +
+            ", MAX(CASE WHEN" +
+            "   (:found AND folder.type <> '" + EntityFolder.ARCHIVE + "' AND NOT (" + is_outgoing + "))" +
+            "   OR (NOT :found AND :type IS NULL AND folder.unified)" +
+            "   OR (NOT :found AND folder.type = :type)" +
+            "   THEN message.received ELSE 0 END) AS dummy" +
+            " FROM (SELECT * FROM message" +
+            "  WHERE message.thread IN" +
+            "  (SELECT DISTINCT mm.thread FROM folder ff" +
+            "   JOIN message mm ON mm.folder = ff.id" +
+            "   WHERE ((:found AND mm.ui_found)" +
+            "   OR (NOT :found AND :type IS NULL AND ff.unified)" +
+            "   OR (NOT :found AND :type IS NOT NULL AND ff.type = :type))" +
+            "   AND (NOT mm.ui_hide OR :debug))" +
+            "   ORDER BY received DESC) AS message" + // group_concat
+            " JOIN account_view AS account ON account.id = message.account" +
+            " LEFT JOIN identity_view AS identity ON identity.id = message.identity" +
+            " JOIN folder_view AS folder ON folder.id = message.folder" +
+            " WHERE account.`synchronize`" +
+            " AND (:threading OR (:type IS NULL AND (folder.unified OR :found)) OR (:type IS NOT NULL AND folder.type = :type))" +
+            " AND (NOT message.ui_hide OR :debug)" +
+            " AND (NOT :found OR message.ui_found = :found)" +
+            " GROUP BY account.id, CASE WHEN message.thread IS NULL OR NOT :threading THEN message.id ELSE message.thread END" +
+            " HAVING (SUM((:found AND message.ui_found)" +
+            " OR (NOT :found AND :type IS NULL AND folder.unified)" +
+            " OR (NOT :found AND :type IS NOT NULL AND folder.type = :type)) > 0)" + // thread can be the same in different accounts
+            " AND SUM(NOT message.ui_hide OR :debug) > 0" +
+            " AND (NOT :filter_seen OR SUM(1 - message.ui_seen) > 0)" +
+            " AND (NOT :filter_unflagged OR COUNT(message.id) - SUM(1 - message.ui_flagged) > 0)" +
+            " AND (NOT :filter_unknown OR SUM(message.avatar IS NOT NULL AND message.sender <> identity.email) > 0)" +
+            " AND (NOT :filter_snoozed OR message.ui_snoozed IS NULL OR " + is_drafts + ")" +
+            " AND (NOT :filter_deleted OR NOT message.ui_deleted)" +
+            " AND (:filter_language IS NULL OR SUM(message.language = :filter_language) > 0)" +
+            " ORDER BY CASE WHEN :found THEN 0 ELSE -IFNULL(message.importance, 1) END" +
+            ", CASE WHEN :group_category THEN account.category ELSE '' END COLLATE NOCASE" +
+            ", CASE" +
+            "   WHEN 'unread' = :sort1 THEN SUM(1 - message.ui_seen) = 0" +
+            "   WHEN 'starred' = :sort1 THEN COUNT(message.id) - SUM(1 - message.ui_flagged) = 0" +
+            "   WHEN 'priority' = :sort1 THEN -IFNULL(message.priority, 1)" +
+            "   WHEN 'sender' = :sort1 THEN LOWER(message.sender)" +
+            "   WHEN 'subject' = :sort1 THEN LOWER(message.subject)" +
+            "   WHEN 'size' = :sort1 THEN -SUM(message.total)" +
+            "   WHEN 'attachments' = :sort1 THEN -SUM(message.attachments)" +
+            "   WHEN 'snoozed' = :sort1 THEN SUM(CASE WHEN message.ui_snoozed IS NULL THEN 0 ELSE 1 END) = 0" +
+            "   WHEN 'touched' = :sort1 THEN IFNULL(-message.last_touched, 0)" +
+            "   ELSE 0" +
+            "  END" +
+            ", CASE" +
+            "   WHEN 'unread' = :sort2 THEN SUM(1 - message.ui_seen) = 0" +
+            "   WHEN 'starred' = :sort2 THEN COUNT(message.id) - SUM(1 - message.ui_flagged) = 0" +
+            "   ELSE 0" +
+            "  END" +
+            ", CASE WHEN :ascending THEN message.received ELSE -message.received END")
+    DataSource.Factory<Integer, TupleMessageEx> pagedUnifiedLegacy(
+            String type,
+            boolean threading, boolean group_category,
+            String sort1, String sort2, boolean ascending,
+            boolean filter_seen, boolean filter_unflagged, boolean filter_unknown, boolean filter_snoozed, boolean filter_deleted, String filter_language,
+            boolean found,
+            boolean debug);
+
+    @Transaction
+    @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH)
+    @Query("SELECT message.*" +
+            ", account.pop AS accountProtocol, account.name AS accountName, account.category AS accountCategory, COALESCE(identity.color, folder.color, account.color) AS accountColor" +
+            ", account.notify AS accountNotify, account.summary AS accountSummary, account.leave_deleted AS accountLeaveDeleted, account.auto_seen AS accountAutoSeen" +
+            ", folder.name AS folderName, folder.color AS folderColor, folder.display AS folderDisplay, folder.type AS folderType, f.inherited_type AS folderInheritedType, folder.unified AS folderUnified, folder.read_only AS folderReadOnly" +
+            ", IFNULL(identity.display, identity.name) AS identityName, identity.email AS identityEmail, identity.color AS identityColor, identity.synchronize AS identitySynchronize" +
+            ", '[' || substr(group_concat(message.`from`, ','), 0, 2048) || ']' AS senders" +
+            ", '[' || substr(group_concat(message.`to`, ','), 0, 2048) || ']' AS recipients" +
+            ", COUNT(message.id) AS count" +
+            ", SUM(1 - message.ui_seen) AS unseen" +
+            ", SUM(1 - message.ui_flagged) AS unflagged" +
+            ", SUM(folder.type = '" + EntityFolder.DRAFTS + "') AS drafts" +
+            ", COUNT(DISTINCT" +
+            "   CASE WHEN NOT message.hash IS NULL THEN message.hash" +
+            "   WHEN NOT message.msgid IS NULL THEN message.msgid" +
+            "   ELSE message.id END) AS visible" +
+            ", COUNT(DISTINCT" +
+            "   CASE WHEN message.ui_seen THEN NULL" +
+            "   WHEN NOT message.hash IS NULL THEN message.hash" +
+            "   WHEN NOT message.msgid IS NULL THEN message.msgid" +
+            "   ELSE message.id END) AS visible_unseen" +
+            ", SUM(message.attachments) AS totalAttachments" +
+            ", SUM(message.total) AS totalSize" +
+            ", message.priority AS ui_priority" +
+            ", message.importance AS ui_importance" +
+            ", MAX(CASE WHEN" +
+            "   (:found AND folder.type <> '" + EntityFolder.ARCHIVE + "' AND NOT (" + is_outgoing + "))" +
+            "   OR (NOT :found AND folder.id = :folder)" +
+            "   THEN message.received ELSE 0 END) AS dummy" +
+            " FROM (SELECT * FROM message" +
+            " WHERE message.thread IN" +
+            "  (SELECT DISTINCT mm.thread FROM message mm" +
+            "   WHERE mm.folder = :folder" +
+            "   AND (NOT mm.ui_hide OR :debug)" +
+            "   AND (NOT :found OR mm.ui_found))" +
+            "   ORDER BY received DESC) AS message" + // group_concat
+            " JOIN account_view AS account ON account.id = message.account" +
+            " LEFT JOIN identity_view AS identity ON identity.id = message.identity" +
+            " JOIN folder_view AS folder ON folder.id = message.folder" +
+            " JOIN folder_view AS f ON f.id = :folder" +
+            " WHERE (message.account = f.account OR message.account = identity.account OR " + is_outbox + ")" +
+            " AND (:threading OR folder.id = :folder)" +
+            " AND (NOT message.ui_hide OR :debug)" +
+            " AND (NOT :found OR message.ui_found = :found)" +
+            " GROUP BY CASE WHEN message.thread IS NULL OR NOT :threading THEN message.id ELSE message.thread END" +
+            " HAVING (SUM((:found AND message.ui_found)" +
+            " OR (NOT :found AND message.folder = :folder)) > 0)" +
+            " AND SUM(NOT message.ui_hide OR :debug) > 0" +
+            " AND (NOT :filter_seen OR SUM(1 - message.ui_seen) > 0 OR " + is_outbox + ")" +
+            " AND (NOT :filter_unflagged OR COUNT(message.id) - SUM(1 - message.ui_flagged) > 0 OR " + is_outbox + ")" +
+            " AND (NOT :filter_unknown OR SUM(message.avatar IS NOT NULL AND message.sender <> identity.email) > 0" +
+            "   OR " + is_outbox + " OR " + is_drafts + " OR " + is_sent + ")" +
+            " AND (NOT :filter_snoozed OR message.ui_snoozed IS NULL OR " + is_outbox + " OR " + is_drafts + ")" +
+            " AND (NOT :filter_deleted OR NOT message.ui_deleted)" +
+            " AND (:filter_language IS NULL OR SUM(message.language = :filter_language) > 0 OR " + is_outbox + ")" +
+            " ORDER BY CASE WHEN :found THEN 0 ELSE -IFNULL(message.importance, 1) END" +
+            ", CASE" +
+            "   WHEN 'unread' = :sort1 THEN SUM(1 - message.ui_seen) = 0" +
+            "   WHEN 'starred' = :sort1 THEN COUNT(message.id) - SUM(1 - message.ui_flagged) = 0" +
+            "   WHEN 'priority' = :sort1 THEN -IFNULL(message.priority, 1)" +
+            "   WHEN 'sender' = :sort1 THEN LOWER(message.sender)" +
+            "   WHEN 'subject' = :sort1 THEN LOWER(message.subject)" +
+            "   WHEN 'size' = :sort1 THEN -SUM(message.total)" +
+            "   WHEN 'attachments' = :sort1 THEN -SUM(message.attachments)" +
+            "   WHEN 'snoozed' = :sort1 THEN SUM(CASE WHEN message.ui_snoozed IS NULL THEN 0 ELSE 1 END) = 0" +
+            "   WHEN 'touched' = :sort1 THEN IFNULL(-message.last_touched, 0)" +
+            "   ELSE 0" +
+            "  END" +
+            ", CASE" +
+            "   WHEN 'unread' = :sort2 THEN SUM(1 - message.ui_seen) = 0" +
+            "   WHEN 'starred' = :sort2 THEN COUNT(message.id) - SUM(1 - message.ui_flagged) = 0" +
+            "   ELSE 0" +
+            "  END" +
+            ", CASE WHEN :ascending THEN message.received ELSE -message.received END")
+    DataSource.Factory<Integer, TupleMessageEx> pagedFolderLegacy(
+            long folder, boolean threading,
+            String sort1, String sort2, boolean ascending,
+            boolean filter_seen, boolean filter_unflagged, boolean filter_unknown, boolean filter_snoozed, boolean filter_deleted, String filter_language,
+            boolean found,
+            boolean debug);
 }

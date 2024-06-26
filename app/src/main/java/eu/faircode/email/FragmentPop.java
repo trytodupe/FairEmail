@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -89,6 +90,9 @@ public class FragmentPop extends FragmentBase {
     private ViewButtonColor btnColor;
     private TextView tvColorPro;
 
+    private Button btnAvatar;
+    private TextView tvAvatarPro;
+
     private Button btnCalendar;
     private TextView tvCalendarPro;
 
@@ -126,13 +130,15 @@ public class FragmentPop extends FragmentBase {
 
     private long id = -1;
     private int auth = AUTH_TYPE_PASSWORD;
+    private String avatar = null;
     private String calendar = null;
     private boolean saving = false;
 
     private static final int REQUEST_COLOR = 1;
-    private static final int REQUEST_CALENDAR = 2;
-    private static final int REQUEST_SAVE = 3;
-    private static final int REQUEST_DELETE = 4;
+    private static final int REQUEST_AVATAR = 2;
+    private static final int REQUEST_CALENDAR = 3;
+    private static final int REQUEST_SAVE = 4;
+    private static final int REQUEST_DELETE = 5;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -168,6 +174,9 @@ public class FragmentPop extends FragmentBase {
         etCategory = view.findViewById(R.id.etCategory);
         btnColor = view.findViewById(R.id.btnColor);
         tvColorPro = view.findViewById(R.id.tvColorPro);
+
+        btnAvatar = view.findViewById(R.id.btnAvatar);
+        tvAvatarPro = view.findViewById(R.id.tvAvatarPro);
 
         btnCalendar = view.findViewById(R.id.btnCalendar);
         tvCalendarPro = view.findViewById(R.id.tvCalendarPro);
@@ -281,6 +290,21 @@ public class FragmentPop extends FragmentBase {
 
         Helper.linkPro(tvColorPro);
 
+        btnAvatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                intent.setType("image/*");
+                Helper.openAdvanced(v.getContext(), intent);
+                startActivityForResult(intent, REQUEST_AVATAR);
+            }
+        });
+
+        Helper.linkPro(tvAvatarPro);
+
         grpCalendar.setVisibility(BuildConfig.PLAY_STORE_RELEASE ? View.GONE : View.VISIBLE);
         btnCalendar.setEnabled(Helper.hasPermission(getContext(), Manifest.permission.WRITE_CALENDAR));
         btnCalendar.setOnClickListener(new View.OnClickListener() {
@@ -338,7 +362,7 @@ public class FragmentPop extends FragmentBase {
 
         etInterval.setHint(Integer.toString(EntityAccount.DEFAULT_POLL_INTERVAL));
 
-        adapterSwipe = new ArrayAdapter<>(getContext(), R.layout.spinner_item1, android.R.id.text1, getSwipeActions());
+        adapterSwipe = new ArrayAdapter<>(getContext(), R.layout.spinner_item1, android.R.id.text1, getSwipeActions(getContext()));
         adapterSwipe.setDropDownViewResource(R.layout.spinner_item1_dropdown);
 
         spLeft.setAdapter(adapterSwipe);
@@ -363,7 +387,6 @@ public class FragmentPop extends FragmentBase {
 
         // Initialize
         Helper.setViewsEnabled(view, false);
-        FragmentDialogTheme.setBackground(getContext(), view, false);
 
         if (!DnsHelper.hasDnsSec()) {
             Helper.hide(cbDnsSec);
@@ -388,6 +411,15 @@ public class FragmentPop extends FragmentBase {
         grpError.setVisibility(View.GONE);
 
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Workaround odd focus issue
+        if (scroll != null)
+            scroll.requestChildFocus(null, null);
     }
 
     private void onSave(boolean should) {
@@ -415,6 +447,7 @@ public class FragmentPop extends FragmentBase {
         args.putString("name", etName.getText().toString());
         args.putString("category", etCategory.getText().toString());
         args.putInt("color", btnColor.getColor());
+        args.putString("avatar", avatar);
         args.putString("calendar", calendar);
 
         args.putBoolean("synchronize", cbSynchronize.isChecked());
@@ -474,6 +507,7 @@ public class FragmentPop extends FragmentBase {
                 String name = args.getString("name");
                 String category = args.getString("category");
                 Integer color = args.getInt("color");
+                String avatar = args.getString("avatar");
                 String calendar = args.getString("calendar");
 
                 boolean synchronize = args.getBoolean("synchronize");
@@ -566,6 +600,8 @@ public class FragmentPop extends FragmentBase {
                     if (!Objects.equals(account.category, category))
                         return true;
                     if (!Objects.equals(account.color, color))
+                        return true;
+                    if (!Objects.equals(account.avatar, avatar))
                         return true;
                     if (!Objects.equals(account.calendar, calendar))
                         return true;
@@ -670,6 +706,7 @@ public class FragmentPop extends FragmentBase {
                     account.name = name;
                     account.category = category;
                     account.color = color;
+                    account.avatar = avatar;
                     account.calendar = calendar;
 
                     account.synchronize = synchronize;
@@ -751,6 +788,8 @@ public class FragmentPop extends FragmentBase {
 
                 args.putBoolean("saved", true);
 
+                FairEmailBackupAgent.dataChanged(context);
+
                 return false;
             }
 
@@ -791,8 +830,9 @@ public class FragmentPop extends FragmentBase {
             @Override
             protected void onException(Bundle args, Throwable ex) {
                 if (ex instanceof IllegalArgumentException)
-                    Snackbar.make(view, new ThrowableWrapper(ex).getSafeMessage(), Snackbar.LENGTH_LONG)
-                            .setGestureInsetBottomIgnored(true).show();
+                    Helper.setSnackbarOptions(
+                                    Snackbar.make(view, new ThrowableWrapper(ex).getSafeMessage(), Snackbar.LENGTH_LONG))
+                            .show();
                 else {
                     tvError.setText(Log.formatThrowable(ex, false));
                     grpError.setVisibility(View.VISIBLE);
@@ -814,6 +854,7 @@ public class FragmentPop extends FragmentBase {
     public void onSaveInstanceState(Bundle outState) {
         outState.putString("fair:password", tilPassword == null ? null : tilPassword.getEditText().getText().toString());
         outState.putInt("fair:auth", auth);
+        outState.putString("fair:avatar", avatar);
         outState.putString("fair:calendar", calendar);
         super.onSaveInstanceState(outState);
     }
@@ -890,7 +931,7 @@ public class FragmentPop extends FragmentBase {
                     cbClientDelete.setChecked(account == null ? false : account.client_delete);
                     cbClientDelete.setEnabled(!cbLeaveServer.isChecked());
                     cbLeaveDeleted.setChecked(account == null ? true : account.leave_deleted);
-                    cbLeaveDevice.setChecked(account == null ? false : account.leave_on_device);
+                    cbLeaveDevice.setChecked(account == null ? true : account.leave_on_device);
 
                     if (account != null && account.max_messages != null)
                         etMax.setText(Integer.toString(account.max_messages));
@@ -903,7 +944,7 @@ public class FragmentPop extends FragmentBase {
 
                     cbIdentity.setChecked(account == null);
 
-                    List<EntityFolder> folders = getSwipeActions();
+                    List<EntityFolder> folders = getSwipeActions(getContext());
                     for (int pos = 0; pos < folders.size(); pos++) {
                         EntityFolder folder = folders.get(pos);
 
@@ -919,6 +960,7 @@ public class FragmentPop extends FragmentBase {
                     }
 
                     auth = (account == null ? AUTH_TYPE_PASSWORD : account.auth_type);
+                    avatar = (account == null ? null : account.avatar);
                     calendar = (account == null ? null : account.calendar);
 
                     new SimpleTask<EntityAccount>() {
@@ -941,6 +983,7 @@ public class FragmentPop extends FragmentBase {
                 } else {
                     tilPassword.getEditText().setText(savedInstanceState.getString("fair:password"));
                     auth = savedInstanceState.getInt("fair:auth");
+                    avatar = savedInstanceState.getString("fair:avatar");
                     calendar = savedInstanceState.getString("fair:calendar");
                 }
 
@@ -1015,6 +1058,12 @@ public class FragmentPop extends FragmentBase {
                             startActivity(new Intent(getContext(), ActivityBilling.class));
                     }
                     break;
+                case REQUEST_AVATAR:
+                    if (resultCode == RESULT_OK && data != null)
+                        onImageSelected(data.getData());
+                    else
+                        avatar = null;
+                    break;
                 case REQUEST_CALENDAR:
                     if (resultCode == RESULT_OK && data != null) {
                         if (ActivityBilling.isPro(getContext())) {
@@ -1053,6 +1102,29 @@ public class FragmentPop extends FragmentBase {
         }
     }
 
+    private void onImageSelected(Uri uri) {
+        final Context context = getContext();
+
+        if (!ActivityBilling.isPro(context)) {
+            startActivity(new Intent(context, ActivityBilling.class));
+            return;
+        }
+
+        try {
+            NoStreamException.check(uri, context);
+
+            context.getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (!Helper.isPersisted(context, uri, true, false))
+                throw new IllegalStateException("No permission granted to access selected image " + uri);
+
+            avatar = uri.toString();
+        } catch (NoStreamException ex) {
+            ex.report(getActivity());
+        } catch (Throwable ex) {
+            Log.unexpectedError(getParentFragmentManager(), ex);
+        }
+    }
+
     private void onDelete() {
         Bundle args = new Bundle();
         args.putLong("id", id);
@@ -1088,7 +1160,7 @@ public class FragmentPop extends FragmentBase {
         }.execute(this, args, "account:delete");
     }
 
-    private List<EntityFolder> getSwipeActions() {
+    private List<EntityFolder> getSwipeActions(Context context) {
         List<EntityFolder> folders = new ArrayList<>();
 
         EntityFolder ask = new EntityFolder();
@@ -1098,8 +1170,18 @@ public class FragmentPop extends FragmentBase {
 
         EntityFolder seen = new EntityFolder();
         seen.id = EntityMessage.SWIPE_ACTION_SEEN;
-        seen.name = getString(R.string.title_seen);
+        seen.name = getString(R.string.title_seen_unseen);
         folders.add(seen);
+
+        EntityFolder snooze = new EntityFolder();
+        snooze.id = EntityMessage.SWIPE_ACTION_SNOOZE;
+        snooze.name = getString(R.string.title_snooze_now);
+        folders.add(snooze);
+
+        EntityFolder hide = new EntityFolder();
+        hide.id = EntityMessage.SWIPE_ACTION_HIDE;
+        hide.name = getString(R.string.title_hide);
+        folders.add(hide);
 
         EntityFolder flag = new EntityFolder();
         flag.id = EntityMessage.SWIPE_ACTION_FLAG;
@@ -1111,15 +1193,12 @@ public class FragmentPop extends FragmentBase {
         importance.name = getString(R.string.title_set_importance);
         folders.add(importance);
 
-        EntityFolder snooze = new EntityFolder();
-        snooze.id = EntityMessage.SWIPE_ACTION_SNOOZE;
-        snooze.name = getString(R.string.title_snooze_now);
-        folders.add(snooze);
-
-        EntityFolder hide = new EntityFolder();
-        hide.id = EntityMessage.SWIPE_ACTION_HIDE;
-        hide.name = getString(R.string.title_hide);
-        folders.add(hide);
+        if (AI.isAvailable(context)) {
+            EntityFolder summarize = new EntityFolder();
+            summarize.id = EntityMessage.SWIPE_ACTION_SUMMARIZE;
+            summarize.name = context.getString(R.string.title_summarize);
+            folders.add(summarize);
+        }
 
         EntityFolder junk = new EntityFolder();
         junk.id = EntityMessage.SWIPE_ACTION_JUNK;

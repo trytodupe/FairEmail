@@ -22,6 +22,7 @@ package eu.faircode.email;
 import static androidx.core.app.NotificationCompat.DEFAULT_LIGHTS;
 import static androidx.core.app.NotificationCompat.DEFAULT_SOUND;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
@@ -395,7 +396,7 @@ class NotificationHelper {
         if (notify_screen_on &&
                 !(BuildConfig.DEBUG ||
                         Build.VERSION.SDK_INT <= Build.VERSION_CODES.TIRAMISU ||
-                        Helper.hasPermission(context, "android.permission.TURN_SCREEN_ON")))
+                        Helper.hasPermission(context, Manifest.permission.TURN_SCREEN_ON)))
             notify_screen_on = false;
 
         Log.i("Notify messages=" + messages.size() +
@@ -706,10 +707,15 @@ class NotificationHelper {
         boolean delete_notification = prefs.getBoolean("delete_notification", false);
 
         // Get contact info
+        Long latest = null;
         Map<Long, Address[]> messageFrom = new HashMap<>();
         Map<Long, ContactInfo[]> messageInfo = new HashMap<>();
         for (int m = 0; m < messages.size() && m < MAX_NOTIFICATION_DISPLAY; m++) {
             TupleMessageEx message = messages.get(m);
+
+            if (latest == null || latest < message.received)
+                latest = message.received;
+
             ContactInfo[] info = ContactInfo.get(context,
                     message.account, message.folderType, message.bimi_selector,
                     message.isForwarder() ? message.submitter : message.from);
@@ -779,6 +785,9 @@ class NotificationHelper {
                                     ? NotificationCompat.CATEGORY_EMAIL : NotificationCompat.CATEGORY_STATUS)
                             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                             .setAllowSystemGeneratedContextualActions(false);
+
+            if (latest != null)
+                builder.setWhen(latest).setShowWhen(true);
 
             if (group != 0 && messages.size() > 0)
                 builder.setSubText(messages.get(0).accountName);
@@ -1002,7 +1011,7 @@ class NotificationHelper {
                 if (notify_preview_all)
                     try {
                         File file = message.getFile(context);
-                        preview = HtmlHelper.getFullText(file);
+                        preview = HtmlHelper.getFullText(file, true);
                         if (preview != null && preview.length() > MAX_PREVIEW)
                             preview = preview.substring(0, MAX_PREVIEW);
                     } catch (Throwable ex) {

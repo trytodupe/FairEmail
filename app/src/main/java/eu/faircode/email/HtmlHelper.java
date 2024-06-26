@@ -103,9 +103,7 @@ import org.w3c.dom.stylesheets.MediaList;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URI;
 import java.text.DateFormat;
@@ -449,6 +447,11 @@ public class HtmlHelper {
     }
 
     private static int getMaxFormatTextSize(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean ignore_formatted_size = prefs.getBoolean("ignore_formatted_size", false);
+        if (ignore_formatted_size)
+            return Integer.MAX_VALUE;
+
         ActivityManager am = Helper.getSystemService(context, ActivityManager.class);
         int mc = am.getMemoryClass();
         if (mc >= 256)
@@ -1543,6 +1546,8 @@ public class HtmlHelper {
 
     static void autoLink(Document document, boolean outbound) {
         // https://en.wikipedia.org/wiki/List_of_URI_schemes
+        // https://en.wikipedia.org/wiki/Geo_URI_scheme
+        // https://developers.google.com/maps/documentation/urls/android-intents
         // xmpp:[<user>]@<host>[:<port>]/[<resource>][?<query>]
         // geo:<lat>,<lon>[,<alt>][;u=<uncertainty>]
         // tel:<phonenumber>
@@ -1555,7 +1560,10 @@ public class HtmlHelper {
                                 .replace("(?i:http|https|rtsp)://",
                                         "(((?i:http|https)://)|((?i:xmpp):))") +
                         "|" +
-                        "(?i:geo:\\d+,\\d+(,\\d+)?(;u=\\d+)?)" +
+                        "(?i:geo:(-?\\d+(\\.\\d+)?),(-?\\d+(\\.\\d+)?)(,-?\\d+(\\.\\d+)?)?" +
+                        "(;u=\\d+)?" + // Uncertainty
+                        "(\\?z=\\d+)?" + // Zoom
+                        "(\\?q=.+)?)" + // Google Maps query
                         "|" +
                         "(?i:tel:" + Patterns.PHONE.pattern() + ")" +
                         (BuildConfig.DEBUG ? "|(" + GPA_PATTERN + ")" : ""));
@@ -2381,6 +2389,7 @@ public class HtmlHelper {
         }
 
         // Images
+        List<Uri> uris = new ArrayList<>();
         for (Element img : document.select("img")) {
             img.removeAttr("x-tracking");
 
@@ -2393,7 +2402,14 @@ public class HtmlHelper {
             if (host == null || hosts.contains(host))
                 continue;
 
+            if (uris.contains(uri)) {
+                Log.i("Removing duplicate tracking image uri=" + uri);
+                img.remove();
+                continue;
+            }
+
             if (isTrackingPixel(img) || isTrackingHost(context, host, disconnect_images)) {
+                uris.add(uri);
                 img.attr("src", sb.toString());
                 img.attr("alt", context.getString(R.string.title_legend_tracking_pixel));
                 img.attr("height", "24");
@@ -2409,8 +2425,11 @@ public class HtmlHelper {
         if ("cloudmagic-smart-beacon".equals(img.className()))
             return true;
 
-        String width = img.attr("width").trim();
-        String height = img.attr("height").trim();
+        // Canary Mail
+        // <img id="..." alt="" width="0px" src="https://receipts.canarymail.io/track/..._....png" height="0px">
+
+        String width = img.attr("width").replace("px", "").trim();
+        String height = img.attr("height").replace("px", "").trim();
 
         if (TextUtils.isEmpty(width) || TextUtils.isEmpty(height))
             return false;
@@ -2449,21 +2468,8 @@ public class HtmlHelper {
                         Uri uri = FileProviderEx.getUri(context, BuildConfig.APPLICATION_ID, file, attachment.name);
                         img.attr("src", uri.toString());
                         Log.i("Inline image uri=" + uri);
-                    } else {
-                        try (InputStream is = new FileInputStream(file)) {
-                            byte[] bytes = new byte[(int) file.length()];
-                            if (is.read(bytes) != bytes.length)
-                                throw new IOException("length");
-
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("data:");
-                            sb.append(attachment.type);
-                            sb.append(";base64,");
-                            sb.append(Base64.encodeToString(bytes, Base64.NO_WRAP));
-
-                            img.attr("src", sb.toString());
-                        }
-                    }
+                    } else
+                        img.attr("src", ImageHelper.getDataUri(file, attachment.type));
                 }
             }
         }
@@ -2606,29 +2612,29 @@ public class HtmlHelper {
         return truncate(preview, PREVIEW_SIZE);
     }
 
-    static String getFullText(String body) {
+    static String getFullText(String body, boolean hidden) {
         try {
             if (body == null)
                 return null;
             Document d = JsoupEx.parse(body);
-            return _getText(d);
+            return _getText(d, hidden);
         } catch (OutOfMemoryError ex) {
             Log.e(ex);
             return null;
         }
     }
 
-    static String getFullText(File file) throws IOException {
+    static String getFullText(File file, boolean hidden) throws IOException {
         try {
             Document d = JsoupEx.parse(file);
-            return _getText(d);
+            return _getText(d, hidden);
         } catch (OutOfMemoryError ex) {
             Log.e(ex);
             return null;
         }
     }
 
-    private static String _getText(Document d) {
+    private static String _getText(Document d, boolean hidden) {
         truncate(d, MAX_FULL_TEXT_SIZE);
 
         for (Element e : d.select("*")) {
@@ -2649,7 +2655,7 @@ public class HtmlHelper {
                         .trim()
                         .toLowerCase(Locale.ROOT)
                         .replaceAll("\\s+", " ");
-                if ("display".equals(key) && "none".equals(value)) {
+                if (!hidden && "display".equals(key) && "none".equals(value)) {
                     e.remove();
                     break;
                 }
@@ -2854,6 +2860,53 @@ public class HtmlHelper {
                 return FilterResult.CONTINUE;
             }
         });
+    }
+
+    static void removeQuotes(Document d) {
+        Elements quotes = d.body().select(".fairemail_quote");
+        if (quotes.size() > 0) {
+            quotes.remove();
+            return;
+        }
+
+        // Gmail
+        quotes = d.body().select(".gmail_quote");
+        if (quotes.size() > 0) {
+            quotes.remove();
+            return;
+        }
+
+        // Outlook: <div id="appendonsend">
+        quotes = d.body().select("div#appendonsend");
+        if (quotes.size() > 0) {
+            quotes.nextAll().remove();
+            quotes.remove();
+            return;
+        }
+
+        // ms-outlook-mobile
+        quotes = d.body().select("div#divRplyFwdMsg");
+        if (quotes.size() > 0) {
+            quotes.nextAll().remove();
+            quotes.remove();
+            return;
+        }
+
+        // Microsoft Word 15
+        quotes = d.body().select("div#mail-editor-reference-message-container");
+        if (quotes.size() > 0) {
+            quotes.remove();
+            return;
+        }
+
+        // Web.de: <div id="aqm-original"
+        quotes = d.body().select("div#aqm-original");
+        if (quotes.size() > 0) {
+            quotes.remove();
+            return;
+        }
+
+        d.select("blockquote").remove();
     }
 
     static String truncate(String text, int at) {
@@ -3770,6 +3823,8 @@ public class HtmlHelper {
                                 boolean dashed = "true".equals(element.attr("x-dashed"));
                                 float stroke = context.getResources().getDisplayMetrics().density;
                                 float dash = (dashed ? line_dash_length : 0f);
+                                if (ssb.length() > 0 && ssb.charAt(ssb.length() - 1) != '\n')
+                                    ssb.append('\n');
                                 ssb.append("\uFFFC");  // Object replacement character
                                 setSpan(ssb, new LineSpan(colorSeparator, stroke, dash), start, ssb.length());
                                 break;

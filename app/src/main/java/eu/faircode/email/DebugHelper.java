@@ -73,6 +73,7 @@ import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.biometric.BiometricManager;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.emoji2.text.EmojiCompat;
@@ -274,10 +275,9 @@ public class DebugHelper {
         sb.append(String.format("MIUI: %s\r\n", miui == null ? "-" : miui));
 
         boolean reporting = prefs.getBoolean("crash_reports", false);
-        if (reporting || Log.isTestRelease()) {
-            String uuid = prefs.getString("uuid", null);
-            sb.append(String.format("Bugsnag UUID: %s\r\n", uuid == null ? "-" : uuid));
-        }
+        String uuid = (reporting || Log.isTestRelease()
+                ? prefs.getString("uuid", null) : null);
+        sb.append(String.format("Bugsnag UUID: %s\r\n", uuid == null ? "-" : uuid));
 
         try {
             ApplicationInfo app = pm.getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
@@ -429,7 +429,7 @@ public class DebugHelper {
         ActivityManager am = Helper.getSystemService(context, ActivityManager.class);
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
         am.getMemoryInfo(mi);
-        sb.append(String.format("Memory class: %d/%d Large: %s MB Total: %s Low: %b\r\n",
+        sb.append(String.format("Memory class: %d/%d MB Large: %s Total: %s Low: %b\r\n",
                 am.getMemoryClass(), am.getLargeMemoryClass(),
                 largeHeap == null ? "?" : Boolean.toString(largeHeap),
                 Helper.humanReadableByteCount(mi.totalMem),
@@ -470,6 +470,7 @@ public class DebugHelper {
         float density = context.getResources().getDisplayMetrics().density;
         sb.append(String.format("Density 1dp=%f\r\n", density));
         sb.append(String.format("Resolution: %.2f x %.2f dp\r\n", dim.x / density, dim.y / density));
+        //sb.append(String.format("Max. texture: %d px\r\n", Helper.getMaxTextureSize()));
 
         Configuration config = context.getResources().getConfiguration();
 
@@ -518,9 +519,10 @@ public class DebugHelper {
                 WebViewEx.isFeatureSupported(context, WebViewFeature.ALGORITHMIC_DARKENING)));
         try {
             PackageInfo pkg = WebViewCompat.getCurrentWebViewPackage(context);
-            sb.append(String.format("WebView %d/%s\r\n",
+            sb.append(String.format("WebView %d/%s has=%b\r\n",
                     pkg == null ? -1 : pkg.versionCode,
-                    pkg == null ? null : pkg.versionName));
+                    pkg == null ? null : pkg.versionName,
+                    Helper.hasWebView(context)));
         } catch (Throwable ex) {
             sb.append(ex).append("\r\n");
         }
@@ -891,6 +893,7 @@ public class DebugHelper {
                                         identity.display + " " + identity.email +
                                         (identity.self ? "" : " !self") +
                                         " [" + (identity.provider == null ? "" : identity.provider) +
+                                        ":" + identity.user +
                                         ":" + ServiceAuthenticator.getAuthTypeName(identity.auth_type) + "]" +
                                         (TextUtils.isEmpty(identity.sender_extra_regex) ? "" : " regex=" + identity.sender_extra_regex) +
                                         (!identity.sender_extra ? "" : " edit" +
@@ -1164,6 +1167,10 @@ public class DebugHelper {
                 size += write(os, "cert_strict=" + cert_strict + (cert_strict ? " !!!" : "") + "\r\n");
                 size += write(os, "cert_transparency=" + cert_transparency + (cert_transparency ? " !!!" : "") + "\r\n");
                 size += write(os, "open_safe=" + open_safe + "\r\n");
+
+                for (String key : prefs.getAll().keySet())
+                    if (key.startsWith("dns_"))
+                        size += write(os, key + "=" + prefs.getAll().get(key)+"\r\n");
 
                 size += write(os, "\r\n");
                 size += write(os, Log.getCiphers().toString());
@@ -1544,6 +1551,11 @@ public class DebugHelper {
                 size += write(os, String.format("Date/time long=%s\r\n",
                         Helper.getDateTimeInstance(context, SimpleDateFormat.LONG, SimpleDateFormat.LONG).format(now)));
 
+                BiometricManager bm = BiometricManager.from(context);
+                boolean secure = (bm.canAuthenticate(BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+                        == BiometricManager.BIOMETRIC_SUCCESS);
+                size += write(os, String.format("Device credentials allowed=%b\r\n", secure));
+
                 for (Class<?> cls : new Class[]{
                         ActivitySendSelf.class,
                         ActivitySearch.class,
@@ -1622,7 +1634,7 @@ public class DebugHelper {
                                 sb.append(scheme);
                             }
 
-                            if (tabs && BuildConfig.DEBUG)
+                            if (tabs && BuildConfig.DEBUG && false)
                                 try {
                                     boolean bindable = context.bindService(serviceIntent, new CustomTabsServiceConnection() {
                                         @Override

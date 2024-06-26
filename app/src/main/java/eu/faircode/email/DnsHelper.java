@@ -33,13 +33,16 @@ import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import org.minidns.AbstractDnsClient;
+import org.minidns.DnsCache;
 import org.minidns.DnsClient;
+import org.minidns.cache.LruCache;
 import org.minidns.dane.DaneVerifier;
 import org.minidns.dnsmessage.DnsMessage;
 import org.minidns.dnsqueryresult.DnsQueryResult;
 import org.minidns.dnsqueryresult.StandardDnsQueryResult;
 import org.minidns.dnssec.DnssecClient;
 import org.minidns.dnssec.DnssecResultNotAuthenticException;
+import org.minidns.dnssec.DnssecUnverifiedReason;
 import org.minidns.dnssec.DnssecValidationFailedException;
 import org.minidns.dnsserverlookup.AbstractDnsServerLookupMechanism;
 import org.minidns.hla.DnssecResolverApi;
@@ -62,7 +65,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -75,6 +77,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -182,7 +185,7 @@ public class DnsHelper {
                 throw new IllegalArgumentException(type);
         }
 
-        ResolverApi resolver = DnssecResolverApi.INSTANCE;
+        ResolverApi resolver = (dnssec ? DnssecResolverApi.INSTANCE : ResolverApi.INSTANCE);
         AbstractDnsClient client = resolver.getClient();
 
         if (false) {
@@ -215,9 +218,10 @@ public class DnsHelper {
             throw ex;
         }
 
-        boolean secure = (data.getUnverifiedReasons() != null);
+        Set<DnssecUnverifiedReason> unverifiedReasons = data.getUnverifiedReasons();
+        boolean secure = (unverifiedReasons == null || unverifiedReasons.isEmpty());
         Log.i("DNS secure=" + secure + " dnssec=" + dnssec);
-        if (secure && dnssec) {
+        if (!secure && dnssec) {
             DnssecResultNotAuthenticException ex = data.getDnssecResultNotAuthenticException();
             if (ex != null)
                 throw ex;
@@ -369,9 +373,12 @@ public class DnsHelper {
         if (!hasDnsSec())
             return;
 
+        List<String> log = new ArrayList<>();
+
         Handler handler = new Handler() {
             @Override
             public void publish(LogRecord record) {
+                log.add(record.getMessage());
                 Log.w("DANE " + record.getMessage());
             }
 
@@ -388,10 +395,21 @@ public class DnsHelper {
         try {
             Logger.getLogger(clazz).addHandler(handler);
             Log.w("DANE verify " + server + ":" + port);
-            boolean verified = new DaneVerifier().verifyCertificateChain(chain, server, port);
+
+            DnssecClient client = DnssecResolverApi.INSTANCE.getDnssecClient();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                client.setDataSource(new AndroidDataSource());
+
+            client.getDataSource().setTimeout(LOOKUP_TIMEOUT * 1000);
+
+            client.setUseHardcodedDnsServers(false);
+
+            boolean verified = new DaneVerifier(client).verifyCertificateChain(chain, server, port);
             Log.w("DANE verified=" + verified + " " + server + ":" + port);
             if (!verified)
-                throw new CertificateException("DANE missing or invalid");
+                throw new CertificateException("DANE missing or invalid",
+                        new CertificateException(TextUtils.join("\n", log)));
         } catch (CertificateException ex) {
             throw ex;
         } catch (Throwable ex) {
@@ -453,15 +471,28 @@ public class DnsHelper {
     }
 
     static void clear(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = prefs.edit();
-        for (String key : prefs.getAll().keySet())
-            if (key != null && key.startsWith("dns."))
-                editor.remove(key);
-        editor.apply();
+        try {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences.Editor editor = prefs.edit();
+            for (String key : prefs.getAll().keySet())
+                if (key != null && key.startsWith("dns."))
+                    editor.remove(key);
+            editor.apply();
+
+            for (ResolverApi resolver : new ResolverApi[]{DnssecResolverApi.INSTANCE, ResolverApi.INSTANCE}) {
+                AbstractDnsClient client = resolver.getClient();
+                DnsCache cache = client.getCache();
+                if (cache instanceof LruCache)
+                    ((LruCache) cache).clear();
+            }
+        } catch (Throwable ex) {
+            Log.e(ex);
+        }
     }
 
     static boolean hasDnsSec() {
+        if (BuildConfig.PLAY_STORE_RELEASE)
+            return false;
         // DNSSEC causes crashes in libc
         return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O);
     }
@@ -566,7 +597,7 @@ public class DnsHelper {
                 request.connect();
 
                 int status = request.getResponseCode();
-                if (status != HttpURLConnection.HTTP_OK)
+                if (status != HttpsURLConnection.HTTP_OK)
                     throw new IOException("Error " + status + ": " + request.getResponseMessage());
 
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();

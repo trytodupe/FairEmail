@@ -57,7 +57,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -114,7 +113,7 @@ public class FragmentOptionsPrivacy extends FragmentBase implements SharedPrefer
 
     private final static int BIP39_WORDS = 6;
 
-    private final static List<String> RESET_OPTIONS = Collections.unmodifiableList(Arrays.asList(
+    final static List<String> RESET_OPTIONS = Collections.unmodifiableList(Arrays.asList(
             "confirm_links", "sanitize_links", "adguard", "adguard_auto_update",
             "check_links_dbl", "confirm_files",
             "confirm_images", "ask_images", "html_always_images", "confirm_html", "ask_html",
@@ -253,11 +252,6 @@ public class FragmentOptionsPrivacy extends FragmentBase implements SharedPrefer
                     protected Void onExecute(Context context, Bundle args) throws Throwable {
                         Adguard.download(context);
                         return null;
-                    }
-
-                    @Override
-                    protected void onExecuted(Bundle args, Void data) {
-                        prefs.edit().putLong("adguard_last", new Date().getTime()).apply();
                     }
 
                     @Override
@@ -528,11 +522,6 @@ public class FragmentOptionsPrivacy extends FragmentBase implements SharedPrefer
                     }
 
                     @Override
-                    protected void onExecuted(Bundle args, Void data) {
-                        prefs.edit().putLong("disconnect_last", new Date().getTime()).apply();
-                    }
-
-                    @Override
                     protected void onException(Bundle args, Throwable ex) {
                         Log.unexpectedError(getParentFragmentManager(), ex, !(ex instanceof IOException));
                     }
@@ -610,8 +599,6 @@ public class FragmentOptionsPrivacy extends FragmentBase implements SharedPrefer
         });
 
         // Initialize
-        FragmentDialogTheme.setBackground(getContext(), view, false);
-
         StringBuilder sb = new StringBuilder();
         for (String value : EmailService.getId(getContext()).values()) {
             if (sb.length() > 0)

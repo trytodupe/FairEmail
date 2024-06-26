@@ -20,7 +20,6 @@ package eu.faircode.email;
 */
 
 import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
 import android.text.style.ImageSpan;
 
 import androidx.annotation.NonNull;
@@ -30,7 +29,7 @@ import org.jsoup.nodes.Element;
 public class ImageSpanEx extends ImageSpan {
     private final int width;
     private final int height;
-    private final boolean tracking;
+    private final String tracking;
 
     public ImageSpanEx(@NonNull Drawable drawable, @NonNull Element img) {
         super(drawable, img.attr("src"));
@@ -60,7 +59,7 @@ public class ImageSpanEx extends ImageSpan {
 
         this.width = _width;
         this.height = _height;
-        this.tracking = !TextUtils.isEmpty(img.attr("x-tracking"));
+        this.tracking = img.attr("x-tracking");
     }
 
     public int getWidth() {
@@ -71,7 +70,7 @@ public class ImageSpanEx extends ImageSpan {
         return this.height;
     }
 
-    public boolean getTracking() {
+    public String getTracking() {
         return this.tracking;
     }
 }

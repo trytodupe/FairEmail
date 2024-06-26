@@ -14,6 +14,10 @@
     <string name="app_cake_required">Op syn minst fereaske ûnthâld: %1$s</string>
     <string name="app_updated">Lêst bywurke: %1$s</string>
     <string name="app_download">Download fan: %1$s</string>
+    <string name="app_motd">        Under Android 14/15 beta, kin somtiden de melding ‘App reageert niet’ ferskine.
+        Google wurket oan in oplossing.
+        Jou asjebleaft net de skuld oan de app foar dit Android-probleem!
+    </string>
     <string name="channel_service">Beweitsje</string>
     <string name="channel_send">Ferstjoere</string>
     <string name="channel_notification">E-mailbericht</string>
@@ -113,7 +117,7 @@ It blokkearjen fan in ôfstjoerderdomein makket gebrûk fan filterregels, wat in
     <string name="title_notification_sending">Berjochten ferstjoere</string>
     <string name="title_notification_waiting">Wachtsje op in geskikte ferbining</string>
     <string name="title_notification_idle">Ynaktyf</string>
-    <string name="title_notification_failed">‘%1$s’ mislearre</string>
+    <string name="title_notification_failed">Account ‘%1$s’ is mislearre</string>
     <string name="title_notification_alert">Serverwarskôging: ‘%1$s’</string>
     <string name="title_notification_sending_left">Restearjende besykjen: %1$d</string>
     <string name="title_notification_sending_retry">Ferstjoeren wurdt opnij probearre by wizigingen fan ynternetferbining of nei it nei ûnderen lûke fan Postfek ÚT</string>
@@ -193,6 +197,7 @@ It blokkearjen fan in ôfstjoerderdomein makket gebrûk fan filterregels, wat in
     <string name="title_setup_gmail_password">Ik wol in account autorisearje mei in wachtwurd yn stee fan in account op it apparaat</string>
     <string name="title_setup_office_auth">De flater ‘AUTENTIKAASJE is mislearre’ kin feroarsake wurde troch dat IMAP/SMTP troch de systeembehearder útskeakele is</string>
     <string name="title_setup_office_auth_5_7_3">Probearje de ‘Oare provider’-assistint.</string>
+    <string name="title_setup_office_auth_5_7_139">Probearje de ‘Outlook/Hotmail/Live’-ynstelassistint.</string>
     <string name="title_setup_oauth_rationale">Autorisearje tagong ta jo %1$s-account</string>
     <string name="title_setup_oauth_update">Autorisearje in besteand account opnij (oars in nij account oanmeitsje)</string>
     <string name="title_setup_oauth_updated">Accountautorisaasje is bywurke</string>
@@ -236,6 +241,7 @@ It blokkearjen fan in ôfstjoerderdomein makket gebrûk fan filterregels, wat in
     <string name="title_setup_doze_stopped">Syngronisaasje stoppe?</string>
     <string name="title_setup_doze_device">Dit is wierskynlik nedich foar dit apparaat</string>
     <string name="title_setup_alarm_12">De app sil net goed wurkje</string>
+    <string name="title_setup_fg_15">De app kin net automatysk starten wurde</string>
     <string name="title_setup_inexact">Alarms &amp; oantinkens binne útskeakele</string>
     <string name="title_setup_background">Eftergrûnbeheiningen binne ynskeakele</string>
     <string name="title_setup_data">Gegevensbesparring is ynskeakele</string>
@@ -322,8 +328,7 @@ It blokkearjen fan in ôfstjoerderdomein makket gebrûk fan filterregels, wat in
     <string name="title_setup_reset_full">Orizjinele berjochten toane</string>
     <string name="title_check_gmail_oauth">Jo Gmail-accounts sille wurkje bliuwe nei 30 maaie 2022</string>
     <string name="title_check_gmail_password">Guon fan jo Gmail-accounts wurkje mooglik net mear nei 30 maaie 2022</string>
-    <string name="title_check_outlook_oauth">Jo Outlook-accounts sille wurkje bliuwe nei 30 maaie 2022</string>
-    <string name="title_check_outlook_password">Guon fan jo Outlook-accounts wurkje mooglik net mear nei 30 maaie 2022</string>
+    <string name="title_check_outlook_password">Guon fan jo Outlook-/Hotmail-/Live-accounts sille nei 16 septimber 2024 net mear wurkje</string>
     <string name="title_advanced_hint_title">Mear avansearre opsjes</string>
     <string name="title_advanced_hint_message">        Jo navigearje nei de mear avansearre opsjes.
         Alle opsjes hawwe faak standertwearden brûkt dy’t wizige wurde kinne as jo in oare foarkar hawwe.
@@ -390,6 +395,7 @@ It blokkearjen fan in ôfstjoerderdomein makket gebrûk fan filterregels, wat in
     <string name="title_advanced_send_nav_color">Brûk de identiteitskleur foar de ûnderste aksjebalke</string>
     <string name="title_advanced_send_reminders">Oantinkens toane</string>
     <string name="title_advanced_send_delayed">Ferstjoeren fan berjochten útstelle</string>
+    <string name="title_advanced_send_top">Ferstjoerknop boppeyn toane</string>
     <string name="title_advanced_attach_new">Meitsje in nij konsept foar dielde adressen en bestannen</string>
     <string name="title_advanced_answer_caption">Ynstellingen fan de antwurdknop</string>
     <string name="title_advanced_answer_default">Koart drukken fan de antwurdknop sil:</string>
@@ -424,6 +430,9 @@ It blokkearjen fan in ôfstjoerderdomein makket gebrûk fan filterregels, wat in
     <string name="title_advanced_reply_move_inbox">Ek foar berjochten yn Postfek YN</string>
     <string name="title_advanced_send_retry_max">Maksimaal tal ferstjoerbesykjen</string>
     <string name="title_advanced_send_retry_hint">Ferstjoeren sil opnij probearre wurde by wizigingen yn de ferbining</string>
+    <string name="title_advanced_send_partial">Unjildige adressen by ferstjoeren negearje</string>
+    <string name="title_advanced_send_partial_hint">As guon adressen ûnjildich binne, wurdt der dochs in berjocht nei de oare adressen stjoerd</string>
+    <string name="title_advanced_sent_partially">It berjocht is net nei alle ûntfangers ferstjoerd</string>
     <string name="title_advanced_auto_link">Automatysk keppelingen meitsje</string>
     <string name="title_advanced_plain_only">Ferstjoer standert platte tekst</string>
     <string name="title_advanced_plain_only_reply">Automatysk allinnich platte tekst by beäntwurdzjen fan in berjocht mei allinnich platte tekst</string>
@@ -474,7 +483,6 @@ It blokkearjen fan in ôfstjoerderdomein makket gebrûk fan filterregels, wat in
     <string name="title_advanced_two_col">Brûk twa kolommen</string>
     <string name="title_advanced_min_screen_size">Minimale skermgrutte foar it splitsen fan it skerm</string>
     <string name="title_advanced_close_pane">Rige of kolom ynklappe by it sluten fan in petear</string>
-    <string name="title_advanced_open_pane">Begjin mei twa kolommen of rigen</string>
     <string name="title_advanced_column_width">Berjochtkolombreedte / rigehichte: %1$s %%</string>
     <string name="title_advanced_hide_toolbar">Boppeste arkbalke ferstopje by it skowen fan berjochten</string>
     <string name="title_advanced_nav_options">Navigaasjemenuopties</string>
@@ -577,7 +585,6 @@ It blokkearjen fan in ôfstjoerderdomein makket gebrûk fan filterregels, wat in
     <string name="title_advanced_actionbar_swap">Jiskefet- en argivearknop wikselje</string>
     <string name="title_advanced_actionbar_color">Accountkleur as eftergrûnkleur foar petearbalke foar petearen brûke</string>
     <string name="title_advanced_category_header">Op accountkategory groepearje</string>
-    <string name="title_advanced_navbar_colorize">Kleurje de Android-navigaasjebalke yn</string>
     <string name="title_advanced_list_count">It tal berjochten of petearen yn de boppeste aksjebalke toane</string>
     <string name="title_advanced_bundled_fonts">Bondele lettertypen brûke</string>
     <string name="title_advanced_narrow_fonts">Smelle lettertypen brûke</string>
@@ -632,6 +639,7 @@ It blokkearjen fan in ôfstjoerderdomein makket gebrûk fan filterregels, wat in
     <string name="title_advanced_swipe_reply">Fei útklapte berjochten nei rjochts om te beäntwurdzjen</string>
     <string name="title_advanced_move_thread_all">By it ferpleatsen fan selektearre petearen, alle berjochten ferpleatse</string>
     <string name="title_advanced_move_thread_sent">Wannear’t in petear ferpleatst wurdt, ek ferstjoerde berjochten ferpleatse</string>
+    <string name="title_advanced_swipe_trash_all">By it feien fan in petear nei it jiskefet, alle berjochten nei it jiskefet ferpleats</string>
     <string name="title_advanced_default_snooze">Standert slommerdoer/fertragingstiid</string>
     <string name="title_advanced_default_folder">Standert map selektearje</string>
     <string name="title_advanced_notifications">Notifikaasjes beheare</string>
@@ -750,6 +758,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_advanced_haptic_feedback">Haptysk kommentaar by wichtige aksjes</string>
     <string name="title_advanced_language">Taal</string>
     <string name="title_advanced_language_system">Systeem</string>
+    <string name="title_advanced_integrations_hint">De ûndersteande cloudtsjinsten binne gjin ûnderdiel fan de app. Alle betellingen geane daliks nei de cloudtsjinst en net nei de app-ûntwikkeler.</string>
     <string name="title_advanced_lt">LanguageTool-yntegraasje</string>
     <string name="title_advanced_lt_sentence">Kontrolearje elke sin</string>
     <string name="title_advanced_lt_auto">Alinea nei in nije rigel kontrolearje</string>
@@ -764,6 +773,13 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_advanced_openai_model">Model</string>
     <string name="title_advanced_openai_temperature">Temperatuer: %1$s</string>
     <string name="title_advanced_openai_moderation">Ynhâldsbehear</string>
+    <string name="title_advanced_gemini">Gemini-yntegraasje</string>
+    <string name="title_advanced_multi_modal">Multimodaal</string>
+    <string name="title_advanced_summarize_prompt">Opdracht gearfetsje</string>
+    <string name="title_advanced_answer_prompt">Opdracht antwurdzje</string>
+    <string name="title_advanced_system_instructions">Systeemynstruksjes</string>
+    <string name="title_advanced_default_prompt">Standert ynfier</string>
+    <string name="title_advanced_entered_text">Ynfierde tekst</string>
     <string name="title_advanced_sdcard">Ik wol in SD-kaart brûke</string>
     <string name="title_advanced_watchdog">Periodyk kontrolearje oft FairEmail noch aktyf is</string>
     <string name="title_advanced_updates">Kontrolearje op GitHub-fernijingen</string>
@@ -775,6 +791,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_advanced_crash_reports">Flaterrapporten ferstjoere</string>
     <string name="title_advanced_cleanup_attachments">Bylagen fan âlde berjochten fuortsmite</string>
     <string name="title_advanced_cleanup">Skjinmeitsje</string>
+    <string name="title_advanced_google_backup">Gegevensback-up fan Android brûke</string>
     <string name="title_advanced_app">App-ynstellingen</string>
     <string name="title_advanced_more">Mear opsjes</string>
     <string name="title_advanced_main_log">Haadlochboek</string>
@@ -820,7 +837,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_advanced_metered_warning">Utskeakeljen fan dizze opsje sil it ûntfangen en ferstjoeren fan berjochten op mobile ynternetferbiningen útskeakelje</string>
     <string name="title_advanced_rlah_hint">Utgeande fan gjin ‘roaming’ binnen de EU</string>
     <string name="title_advanced_usage_hint">Dit sil gebrûk fan de batterij, gegevens en opslachromte ferheegje</string>
-    <string name="title_advanced_plain_hint">Dit ynskeakelje sil it gegevensgebrûk beheine, mar berjochten sille werjûn wurde sûnder opmaak</string>
+    <string name="title_advanced_plain_hint">Dit ynskeakelje sil it gegevensgebrûk beheine, mar berjochten sille werjûn wurde sûnder opmaak en sûnder ôfbyldingen</string>
     <string name="title_advanced_plain_remark">It plattetekstdiel befettet net altyd it folsleine berjocht!</string>
     <string name="title_advanced_tcp_keep_alive_hint">Dit ynskeakelje kin ferbiningsproblemen feroarsaakje op guon apparaten en kin it batterijferbrûk ferheegje</string>
     <string name="title_advanced_validate_hint">Dit kin resultearje yn berjochten dy’t net syngronisearje, bygelyks as jo in VPN brûke, mar ek yn oare situaasjes</string>
@@ -839,6 +856,9 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_advanced_threading_hint">Relatearre berjochten groepearje</string>
     <string name="title_advanced_indentation_hint">Allinnich foar kaartstyl</string>
     <string name="title_advanced_highlight_hint">De aksintkleur fan it tema wurdt brûkt foar markearring</string>
+    <string name="title_advanced_free">Dizze cloudtsjinst is fergees te brûken</string>
+    <string name="title_advanced_free_tier">Dizze cloudtsjinst hat in ferges nivo</string>
+    <string name="title_advanced_paid_service">Dizze cloudtsjinst fereasket betelling</string>
     <string name="title_advanced_privacy_risk">Der is mooglik in privacyrisiko</string>
     <string name="title_advanced_name_email_hint">Nammen wurde allinnich toand wannear beskikber</string>
     <string name="title_advanced_preview_hint">Allinnich beskikber as berjochttekst download waard</string>
@@ -860,6 +880,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_advanced_autoclose_hint">Petearen automatysk slute as alle berjochten argivearre, ferstjoerd of fuortsmiten binne</string>
     <string name="title_advanced_sender_hint">De measte providers stean oanpaste ôfstjoeradressen net ta</string>
     <string name="title_advanced_bcc_hint">It adres wurdt net werjûn, mar wurdt tafoege by it ferstjoeren</string>
+    <string name="title_advanced_envelope_from_hint">Dit adres sil brûkt wurde foar SMTP MAIL FROM</string>
     <string name="title_advanced_internal_hint">Der wurdt in warskôging jûn as jo nei in oar domein ferstjoere</string>
     <string name="title_advanced_uri">De gegevens fan it selektearre kontakt wurde brûkt foar vCard-bylagen</string>
     <string name="title_advanced_e2e_encryption">Opsjes foar end-to-end-fersifering</string>
@@ -905,6 +926,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_identity_name">Jo namme</string>
     <string name="title_identity_email">Jo e-mailadres</string>
     <string name="title_identity_tenant_hint">Dit fjild moat yn de measte gefallen leech wêze</string>
+    <string name="title_identity_receive_first_hint">It is selden nedich om dizze opsje yn te skeakeljen, boppedat sil it gegevensferbrûk tanimme!</string>
     <string name="title_identity_color_hint">Identiteitskleuren hawwe foarrang boppe map- en accountkleuren</string>
     <string name="title_advanced_sender">Bewurkjen ôfstjoerderadres tastean</string>
     <string name="title_advanced_sender_name">Brûk namme wannear ôfstjoerderadres oanpast is</string>
@@ -962,7 +984,9 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_password">Wachtwurd</string>
     <string name="title_password_storage">Hoe wurde wachtwurden bewarre?</string>
     <string name="title_case_sensitive">Brûkersnammen en wachtwurden binne meastal haadlettergefoelich</string>
+    <string name="title_login_before_send">Foar ferstjoeren ûntfange</string>
     <string name="title_client_certificate">Clientsertifikaat</string>
+    <string name="title_no_key_selected">Gjin kaai selektearre of gjin kaaien beskikber</string>
     <string name="title_realm">Domein</string>
     <string name="title_use_ip">Brûk lokaal IP-adres yn stee fan hostnamme</string>
     <string name="title_ehlo">Oanpaste HELO/EHLO-identifikaasje</string>
@@ -1064,6 +1088,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_expunge_remark">Dit sil alle berjochten dy’t markearre binne om fuort te smiten permanint fuortsmite</string>
     <string name="title_empty_trash">Jiskefet leegje</string>
     <string name="title_empty_spam">Net-winske leegje</string>
+    <string name="title_edit_color">Kleur bewurkje</string>
     <string name="title_edit_properties">Eigenskippen bewurkje</string>
     <string name="title_edit_rules">Rigel bewurkje</string>
     <string name="title_execute_rules">Rigels útfiere</string>
@@ -1092,8 +1117,10 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_delete_operation_move">Bewurkingen ferpleatse</string>
     <string name="title_delete_operation_flag">Bewurkingen labelje</string>
     <string name="title_delete_operation_delete">Bewurkingen fuortsmite</string>
+    <string name="title_delete_operation_send">Ferstjoeroperaasjes</string>
     <string name="title_delete_operation_deleted">%1$d bewurkingen fuortsmiten</string>
-    <string name="title_delete_contacts">Sichtbere lokale kontakten fuortsmite?</string>
+    <string name="title_delete_contacts">Alle lokale kontakten wiskje?</string>
+    <string name="title_delete_contacts_remark">Alle toande en net toande kontakten wurde fuortsmiten, sels as se socht wure!</string>
     <string name="title_no_operations">Gjin iepensteande bewurkingen</string>
     <string name="title_check_operations">Kontrolearje op bewurkingen</string>
     <string name="title_hint_operations">Fuortsmiten fan bewurkingen kin resultearje yn ferdwine berjochten en syngronisaasjeproblemen</string>
@@ -1168,7 +1195,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_subject_forward_alt">Fwd: %1$s</string>
     <string name="title_seen">As lêzen markearje</string>
     <string name="title_unseen">As net lêzen markearje</string>
-    <string name="title_seen_unseen" comment="title_seen_unseen&#10;Title for (swipe) action to toggle the read/unread status of a message&#10;Please try to keep it short, so it fits in a pop-up menu, like &quot;Mark un/read&quot;.">Markearje as lêzen/net-lêzen</string>
+    <string name="title_seen_unseen">Markearje as lêzen/net-lêzen</string>
     <string name="title_toggle_seen">Lêzen/Net-lêzen</string>
     <string name="title_hide">Ferstopje</string>
     <string name="title_unhide">Toane</string>
@@ -1193,6 +1220,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_create_rule">Regel meitsje&#8230;</string>
     <string name="title_full_screen">Folslein skerm</string>
     <string name="title_force_light">Ljocht tema forsearje</string>
+    <string name="title_rename">Omneame</string>
     <string name="title_share">Diele</string>
     <string name="title_event">Oan aginda tafoegje</string>
     <string name="title_pin">Fluchkeppeling tafoegje</string>
@@ -1318,7 +1346,9 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_ask_show_html">It orizjinele berjocht toane kin privacygefoelige ynformaasje lekke</string>
     <string name="title_ask_show_html_remark">It orizjinele berjocht toane op in donkere eftergrûn is net mooglik, omdat tsjustere teksten en ôfbyldingen ûnsichtber wurde kinne</string>
     <string name="title_ask_show_html_images">Altyd ôfbyldingen toane by it werjaan fan orizjinele berjochten</string>
+    <string name="title_ask_show_html_always">Orizjinele berjochten standert toane</string>
     <string name="title_ask_show_image">Ofbyldingen toane kin privacygefoelige ynformaasje lekke</string>
+    <string name="title_ask_show_images_always">Ofbyldingen standert toane</string>
     <string name="title_ask_show_image_hint">Ofbyldingen werkend as folchôfbyldingen, wurde net toand</string>
     <string name="title_ask_show_amp">AMP-fariant fan it berjocht toane?</string>
     <string name="title_ask_show_amp_hint">AMP-berjochten binne ûntwurpen om dynamysk te wêzen en om te kommunisearjen mei it ynternet en kinne dêrom per definysje brûkt wurde om jo te folgjen</string>
@@ -1335,8 +1365,10 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_third_party">Jo brûke in ferzje fan in tredde partij</string>
     <string name="title_expand_warning">It útwreidzjen fan dit berjocht sil %1$s downloade</string>
     <string name="title_download_message">Downloade&#8230;</string>
-    <string name="title_reformatted">        Dit is de opnij foarme berjochtewerjefte.        Jo kinne tikje op it &#x26F6;-piktogram om it orizjinele berjocht te besjen en dit berjocht te ferstopjen.
+    <string name="title_reformatted">        Dit is de feilige opnij foarme berjochtewerjefte.
+        Jo kinne op it &#x26F6;-piktogram tikke om it orizjinele berjocht te besjen en dit berjocht te ferstopjen.
         Berjochten opnij opmeitsje nimt wat tiid, ôfhinklik fan de grutte fan it berjocht en de snelheid fan jo apparaat.
+        Somtiden moat it orizjinele berjocht besjoen wurde om QR-koaden te sjen.
     </string>
     <string name="title_compose">Opstelle</string>
     <string name="title_submitter">Ferstjoerd troch:</string>
@@ -1347,6 +1379,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_reply_to">Antwurd oan:</string>
     <string name="title_cc">Cc:</string>
     <string name="title_bcc">Bcc:</string>
+    <string name="title_envelope_from">Slúfke fan:</string>
     <string name="title_recipients">%1$d ûntfangers</string>
     <string name="title_via_identity">Fia:</string>
     <string name="title_sent">Ferstjoerd:</string>
@@ -1438,6 +1471,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_create_template">Sjabloan oanmeitsje</string>
     <string name="title_select_default_identity">Standert adres selektearje</string>
     <string name="title_translate">Oersette</string>
+    <string name="title_summarize">Gearfetsje</string>
     <string name="title_translate_configure">Konfigurearje&#8230;</string>
     <string name="title_translate_key">Kaai ynfiere</string>
     <string name="title_translating">Oersette&#8230;</string>
@@ -1487,6 +1521,9 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_dsn_reminder">Hurde bounces bringe skea ta oan de reputaasje fan de orizjinele ôfstjoerder!</string>
     <string name="title_size_reminder">Berjocht (%1$s) grutter dan de serverlimyt (%2$s)</string>
     <string name="title_attachments_missing">Net alle bylagen binne download</string>
+    <string name="title_download_attachments">Bylagen downloade</string>
+    <string name="title_attachments_download">Downloade bylagen: %1$s</string>
+    <string name="title_attachments_no_download">Dit sil net langer toand wurde, noch sille bylagen automatysk download wurde</string>
     <string name="title_dialog_hint">Dit dialoochfinster kin opnij ynskeakele wurde fia it menu mei trije punten yn de boppeste aksjebalke</string>
     <string name="title_draft_deleted">Konsept fuotsmiten</string>
     <string name="title_draft_saved">Konsept bewarre</string>
@@ -1570,6 +1607,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_search_flag_notes">notysjes</string>
     <string name="title_search_flag_invite">útnûging</string>
     <string name="title_search_flag_size">grutte &gt; %1$s</string>
+    <string name="title_search_flag_touched">oanrekke</string>
     <string name="title_search_device">Sykje op apparaat</string>
     <string name="title_search_server">Sykje op server</string>
     <string name="title_search_server_wait">Wachtet op server</string>
@@ -1616,6 +1654,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_view_thread">Petear toane</string>
     <string name="title_force_sync">Syngronisaasje forsearje</string>
     <string name="title_force_send">Ferstjoeren forsearje</string>
+    <string name="title_pwned_remark">Dit kontrolearret it wachtwurd, sûnder it te ferstjoeren (mei help fan k-anonimisearring), en net it e-mailadres!</string>
     <string name="title_language_all">Alle</string>
     <string name="title_previous">Foarige</string>
     <string name="title_next">Folgjende</string>
@@ -1635,6 +1674,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_answer_favorite">Favoryt</string>
     <string name="title_answer_snippet">Tekstfragmint</string>
     <string name="title_answer_receipt">As lêsbefêstiging brûke</string>
+    <string name="title_answer_ai">As AI-ynfier brûke</string>
     <string name="title_answer_hide">Yn menu’s ferstopje</string>
     <string name="title_answer_text">Sjabloantekst</string>
     <string name="title_answer_placeholder">Plakhâlder</string>
@@ -1664,6 +1704,8 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_rule_delete">Permanint fuortsmite</string>
     <string name="title_rule_sound">Lûd ôfspylje</string>
     <string name="title_rule_silent">Stille melding</string>
+    <string name="title_rule_summarize">Gearfetsje</string>
+    <string name="title_rule_summarize_remark">It berjocht tegearre mei de konfigurearre AI-yntegraasje gearfetsje</string>
     <string name="title_rule_caption">Rigel bewurkje</string>
     <string name="title_rule_title">Regel jildt foar</string>
     <string name="title_rule_name">Namme</string>
@@ -1691,6 +1733,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_rule_younger">Berjochten jonger as (oeren)</string>
     <string name="title_rule_regex">Regex</string>
     <string name="title_rule_and">EN</string>
+    <string name="title_rule_not">NET</string>
     <string name="title_rule_action">Aksje</string>
     <string name="title_rule_action_remark">Dizze aksje sil tapast wurde op nije berjochten dy’t yn de map %1$s oankomme</string>
     <string name="title_rule_hours">Oeren</string>
@@ -1735,6 +1778,8 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_rule_tts_subject">Underwerp</string>
     <string name="title_rule_tts_content">Tekst</string>
     <string name="title_rule_select_sound">Lûd selektearje</string>
+    <string name="title_rule_select_sound_ringtone">Beltoan</string>
+    <string name="title_rule_select_sound_audio">Audiobestân</string>
     <string name="title_rule_use_as_alarm">As alarm brûke</string>
     <string name="title_rule_alarm_hint">Dit sil ‘net steure’-regels negearje</string>
     <string name="title_rule_alarm_duration">Maksimale alarmdoer (sekonden)</string>
@@ -1875,6 +1920,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_hint_dismiss">Jo kinne dit dialoochfienster slute om de melding fuort te smiten.</string>
     <string name="title_hint_support">As jo in fraach of in probleem hawwe, brûk dan it stipemenu om help te krijen</string>
     <string name="title_hint_message_actions">Fei links nei jiskefet; Fei rjochts nei argyf (as beskikber); De fei-aksjes kinne ynsteld wurde yn de accountynstellingen</string>
+    <string name="title_hint_outbox">Jo kinne nei links of rjochts feie om it ferstjoeren te annulearjen</string>
     <string name="title_hint_message_selection">Druk lang op in berjocht om meardere berjochten te selektearjen; Hâld en swipe omheech of omleech om mear berjochten te selektearjen</string>
     <string name="title_hint_message_junk">        In e-mailclient toant yn prinsipe berjochten op in e-mailserver.
         In e-mailserver is ferantwurdlik foar it filterjen fan net-winske, net in e-mailclient.
@@ -1939,6 +1985,8 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_ask_what">Freegje wat te dwaan</string>
     <string name="title_no_ask_again">Freegje dit net wer</string>
     <string name="title_no_ask_for_again">Freegje dit net wer foar %1$s</string>
+    <string name="title_no_show_again">Dit net opnij toane</string>
+    <string name="title_undo_privacy">Dit kin ûngedien makke wurde yn de ljepblêdside privacyynstellingen</string>
     <string name="title_no_body">Gjin berjochttekst fûn</string>
     <string name="title_large_body">Dit berjocht is hiel grut en dit kin problemen feroarsaakje!</string>
     <string name="title_no_charset">Net stipe kodearring: %1$s</string>
@@ -2023,6 +2071,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_widget_folder_unified">Kombinearre Postfek YN-mappen</string>
     <string name="title_widget_folder_notifying">Mappen mei nije berjochtmeldingen</string>
     <string name="title_widget_unseen">Allinnich net-lêzen berjochten</string>
+    <string name="title_widget_show_unseen">As net-lêzen toane</string>
     <string name="title_widget_flagged">Allinnich berjochten mei stjer</string>
     <string name="title_widget_font_size">Tekstgrutte</string>
     <string name="title_widget_padding">Opfolgrutte</string>
@@ -2051,6 +2100,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
     <string name="title_keyword_not_displayed">Net toand</string>
     <string name="title_keyword_not_delivered">Net ôflevere</string>
     <string name="title_keyword_complaint">Klacht</string>
+    <string name="title_keyword_phishing">Phishing</string>
     <plurals name="title_accessibility_messages">
         <item quantity="one">%1$d berjocht</item>
         <item quantity="other">%1$d berjochten</item>
@@ -2111,6 +2161,7 @@ https://en.wikipedia.org/wiki/ASCII</string>
         <item>Kombinearre mappen</item>
         <item>Primêr accountmappen</item>
         <item>Accounts</item>
+        <item>Primêre Postfek Yn</item>
     </string-array>
     <string-array name="downloadNames">
         <item>16 KB</item>

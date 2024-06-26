@@ -332,6 +332,14 @@ public class EmailService implements AutoCloseable {
         properties.put("mail." + protocol + ".ignorebodystructuresize", Boolean.toString(enabled));
     }
 
+    void setMailFrom(String address) {
+        properties.put("mail." + protocol + ".from", address);
+    }
+
+    void setSendPartial(boolean enabled) {
+        properties.put("mail." + protocol + ".sendpartial", Boolean.toString(enabled));
+    }
+
     void setUseIp(boolean enabled, String host) {
         this.useip = enabled;
         this.ehlo = host;
@@ -416,8 +424,6 @@ public class EmailService implements AutoCloseable {
             ServiceAuthenticator.IAuthenticated intf,
             String certificate, String fingerprint) throws MessagingException {
         properties.put("fairemail.server", host);
-
-        DnsHelper.clear(context);
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         boolean bind_socket = prefs.getBoolean("bind_socket", false);
@@ -512,7 +518,7 @@ public class EmailService implements AutoCloseable {
 
             if (auth == AUTH_TYPE_GMAIL || auth == AUTH_TYPE_OAUTH) {
                 try {
-                    EntityLog.log(context, EntityLog.Type.Debug,
+                    EntityLog.log(context, EntityLog.Type.Debug1,
                             ex + "\n" + android.util.Log.getStackTraceString(ex));
                     authenticator.refreshToken(true);
                     connect(dnssec, host, port, auth, user, factory);

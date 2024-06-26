@@ -19,6 +19,7 @@ package eu.faircode.email;
     Copyright 2018-2024 by Marcel Bokhorst (M66B)
 */
 
+import static eu.faircode.email.ServiceAuthenticator.AUTH_TYPE_GMAIL;
 import static eu.faircode.email.ServiceAuthenticator.AUTH_TYPE_OAUTH;
 import static eu.faircode.email.ServiceAuthenticator.AUTH_TYPE_PASSWORD;
 
@@ -141,9 +142,9 @@ public class AdapterIdentity extends RecyclerView.Adapter<AdapterIdentity.ViewHo
             ivSync.setContentDescription(context.getString(identity.synchronize ? R.string.title_legend_synchronize_on : R.string.title_legend_synchronize_off));
 
             ivOAuth.setVisibility(identity.auth_type == AUTH_TYPE_PASSWORD ? View.GONE : View.VISIBLE);
-            ivOAuth.setImageResource(identity.auth_type == AUTH_TYPE_OAUTH
-                    ? R.drawable.twotone_security_24
-                    : R.drawable.twotone_hub_24);
+            ivOAuth.setImageResource(
+                    identity.auth_type == AUTH_TYPE_GMAIL || identity.auth_type == AUTH_TYPE_OAUTH
+                            ? R.drawable.twotone_security_24 : R.drawable.twotone_hub_24);
             ivPrimary.setVisibility(identity.primary ? View.VISIBLE : View.GONE);
             ivGroup.setVisibility(identity.self ? View.GONE : View.VISIBLE);
             tvName.setText(identity.getDisplayName());
@@ -238,6 +239,9 @@ public class AdapterIdentity extends RecyclerView.Adapter<AdapterIdentity.ViewHo
             popupMenu.getMenu().add(Menu.NONE, R.string.title_primary, order++, R.string.title_primary)
                     .setCheckable(true).setChecked(identity.primary);
 
+            if (parentFragment instanceof FragmentIdentities)
+                popupMenu.getMenu().add(Menu.NONE, R.string.title_edit_color, order++, R.string.title_edit_color);
+
             if (identity.sign_key != null || identity.sign_key_alias != null)
                 popupMenu.getMenu().add(Menu.NONE, R.string.title_reset_sign_key, order++, R.string.title_reset_sign_key);
 
@@ -256,6 +260,9 @@ public class AdapterIdentity extends RecyclerView.Adapter<AdapterIdentity.ViewHo
                         return true;
                     } else if (itemId == R.string.title_primary) {
                         onActionPrimary(!item.isChecked());
+                        return true;
+                    } else if (itemId == R.string.title_edit_color) {
+                        onActionEditColor();
                         return true;
                     } else if (itemId == R.string.title_reset_sign_key) {
                         onActionClearSignKey();
@@ -338,6 +345,19 @@ public class AdapterIdentity extends RecyclerView.Adapter<AdapterIdentity.ViewHo
                             Log.unexpectedError(parentFragment.getParentFragmentManager(), ex);
                         }
                     }.execute(context, owner, args, "identity:primary");
+                }
+
+                private void onActionEditColor() {
+                    Bundle args = new Bundle();
+                    args.putLong("id", identity.id);
+                    args.putInt("color", identity.color == null ? Color.TRANSPARENT : identity.color);
+                    args.putString("title", context.getString(R.string.title_color));
+                    args.putBoolean("reset", true);
+
+                    FragmentDialogColor fragment = new FragmentDialogColor();
+                    fragment.setArguments(args);
+                    fragment.setTargetFragment(parentFragment, ActivitySetup.REQUEST_EDIT_IDENITY_COLOR);
+                    fragment.show(parentFragment.getParentFragmentManager(), "edit:color");
                 }
 
                 private void onActionClearSignKey() {

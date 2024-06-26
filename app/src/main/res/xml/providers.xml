@@ -627,7 +627,7 @@
     <provider
         name="T-Online.de"
         appPassword="true"
-        documentation="Für T-Online müssen Sie ein App-Passwort anstelle Ihres normalen Kontopassworts verwenden, &lt;a href=&quot;https://www.telekom.de/hilfe/festnetz-internet-tv/e-mail/e-mail-adresse-passwoerter-und-sicherheit/passwort-fuer-e-mail-programme-einrichten&quot;&gt;siehe hier&lt;/a&gt;."
+        documentation="Für T-Online müssen Sie ein App-Passwort anstelle Ihres normalen Kontopassworts verwenden, &lt;a href=&quot;https://www.telekom.de/hilfe/apps-dienste/e-mail/programme/passwort-definition&quot;&gt;siehe hier&lt;/a&gt;."
         domain="magenta\\.de,t-online\\.de"
         link="https://www.telekom.de/hilfe/festnetz-internet-tv/e-mail/e-mail-server-e-mail-protokolle-und-e-mail-einrichtung/imap/einrichtung-imap">
         <imap
@@ -742,7 +742,7 @@
     </provider>
     <provider
         name="freenet.de"
-        documentation="Haben Sie SMTP über die Systemsteuerung des E-Mail-Anbieters aktiviert?"
+        documentation="Haben Sie SMTP über die Systemsteuerung des E-Mail-Anbieters &lt;a href=&quot;https://kundenservice.freenet.de/artikel/1685&quot;&gt;aktiviert&lt;/a&gt;?"
         domain="freenet\\.de,fn\\.de,freenetmail\\.de,bossmail\\.de,justmail\\.de"
         link="https://kundenservice.freenet.de/artikel/1869">
         <imap
@@ -751,8 +751,8 @@
             starttls="false" />
         <smtp
             host="mx.freenet.de"
-            port="587"
-            starttls="true" />
+            port="465"
+            starttls="false" />
     </provider>
     <provider
         name="Zoho"
@@ -908,8 +908,8 @@
             starttls="false" />
         <smtp
             host="smtp.migadu.com"
-            port="587"
-            starttls="true" />
+            port="465"
+            starttls="false" />
     </provider>
     <provider
         name="XS4ALL"
@@ -998,7 +998,8 @@
     </provider>
     <provider
         name="DomainFactory"
-        link="https://www.df.eu/de/support/df-faq/e-mail/pop3-imap-postfaecher/mail-programme/">
+        link="https://www.df.eu/de/support/df-faq/e-mail/pop3-imap-postfaecher/mail-programme/"
+        useip="false">
         <imap
             host="sslin.df.eu"
             port="993"
@@ -1236,7 +1237,7 @@
     <provider
         name="Laposte.net"
         domain="laposte\\.net"
-        link="https://www.laposte.fr/votre-vie-digitale/conseils-pratiques/configuration-webmail-laposte.net">
+        link="https://aide.laposte.net/contents/comment-parametrer-un-logiciel-de-messagerie-pour-envoyer-et-recevoir-mes-courriers-electroniques">
         <imap
             host="imap.laposte.net"
             port="993"
@@ -1498,7 +1499,7 @@
     <provider
         name="TWC"
         appPassword="true"
-        domain=".*\\.rr\\.com"
+        domain=".*\\.rr\\.com,roadrunner\\.com"
         link="https://www.spectrum.net/support/internet/spectrum-email-server-settings/">
         <imap
             host="mail.twc.com"
@@ -2119,7 +2120,7 @@
     <provider
         name="Virgin Media"
         appPassword="true"
-        domain="ntlworld\\.com,blueyonder\\.co\\.uk,virgin\\.com"
+        domain="ntlworld\\.com,blueyonder\\.co\\.uk,virgin\\.com,virginmedia\\.com"
         link="https://www.virginmedia.com/help/broadband/manage-email-account">
         <imap
             host="imap.virginmedia.com"
@@ -2276,5 +2277,32 @@
             host="mail.mnet-online.de"
             port="587"
             starttls="true" />
+    </provider>
+    <provider
+        name="Namirial"
+        documentation="Potrebbe essere necessaria una password per l'applicazione, vedere &lt;a href='https://servicedesk.namirial.com/hc/it/articles/4406869586065-Come-si-configura-in-un-client-di-posta#h_01HBDFX24AVGQ4Z9K9DFAAD3VC'&gt;qui&lt;/a&gt;."
+        link="https://servicedesk.namirial.com/hc/it/articles/4406869586065-Come-si-configura-in-un-client-di-posta#h_01FJBS1SXG8J110SFVJ03ENQAB"
+        mx=".*sicurezzapostale\\.it">
+        <imap
+            host="imaps.sicurezzapostale.it"
+            port="993"
+            starttls="false" />
+        <smtp
+            host="smtps.sicurezzapostale.it"
+            port="465"
+            starttls="false" />
+    </provider>
+    <provider
+        name="prxy.com"
+        link="https://my.prxy.com/knowledgebase/52/Summary-of-Email-Settings.html"
+        mx=".*\\.mxof\\.com">
+        <imap
+            host="secure.prxy.com"
+            port="993"
+            starttls="false" />
+        <smtp
+            host="secure.prxy.com"
+            port="465"
+            starttls="false" />
     </provider>
 </providers>

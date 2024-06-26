@@ -43,6 +43,7 @@ public interface DaoOperation {
             " WHEN operation.name = '" + EntityOperation.DOWNLOAD + "' THEN 3" +
             " WHEN operation.name = '" + EntityOperation.EXISTS + "' THEN 3" +
             " WHEN operation.name = '" + EntityOperation.REPORT + "' THEN 3" +
+            " WHEN operation.name = '" + EntityOperation.SUBJECT + "' THEN 3" +
             " WHEN operation.name = '" + EntityOperation.COPY + "' THEN 4" +
             " WHEN operation.name = '" + EntityOperation.MOVE + "' THEN 5" +
             " WHEN operation.name = '" + EntityOperation.PURGE + "' THEN 6" +
@@ -77,6 +78,13 @@ public interface DaoOperation {
             " AND folder.account IS NOT NULL" + // not outbox
             " ORDER BY " + priority + ", id")
     LiveData<List<TupleOperationEx>> liveOperations(long account);
+
+    @Query("SELECT operation.id" +
+            ", message.uid, message.content" +
+            " FROM message" +
+            " LEFT JOIN operation ON operation.message = message.id AND operation.name = :name" +
+            " WHERE message.id = :message")
+    LiveData<TupleMessageOperation> liveOperations(long message, String name);
 
     @Transaction
     @Query("SELECT operation.*" +

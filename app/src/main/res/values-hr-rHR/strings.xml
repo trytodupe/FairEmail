@@ -100,7 +100,6 @@
     <string name="title_notification_sending">Poruka se šalje</string>
     <string name="title_notification_waiting">Čeka se prikladna veza</string>
     <string name="title_notification_idle">Nevažno</string>
-    <string name="title_notification_failed">\'%1$s\' nije uspjelo</string>
     <string name="title_notification_alert">Upozorenje poslužitelja: \'%1$s\'</string>
     <string name="title_notification_sending_left">Preostali pokušaji: %1$d</string>
     <string name="title_notification_sending_retry">Slanje će se ponovno pokušati nakon promjene internetske veze ili povlačenja prema dolje u odlaznoj pošti</string>
@@ -285,8 +284,6 @@
     <string name="title_setup_reset_full">Prikaži izvornu poruku</string>
     <string name="title_check_gmail_oauth">Vaš Gmail račun će nastaviti s radom nakon 30. svibnja 2022. godine</string>
     <string name="title_check_gmail_password">Neki od Vaših Gmail računa možda će prestati s radom nakon 30. svibnja 2022. godine</string>
-    <string name="title_check_outlook_oauth">Vaši Outlook računi nastavit će raditi nakon 1. listopada 2022. godine</string>
-    <string name="title_check_outlook_password">Neki od vaših Outlook računa mogu prestati raditi nakon 1. listopada 2022. godine</string>
     <string name="title_advanced_hint_title">Naprednije opcije</string>
     <string name="title_advanced_hint_message">        Prelazite na naprednije opcije.
         Sve opcije imaju uobičajeno korištene standardne vrijednosti, koje ne morate mijenjati osim ako nemate drugačije preferencije.
@@ -483,7 +480,6 @@
     <string name="title_advanced_actionbar">Prikaži traku s akcijama razgovora</string>
     <string name="title_advanced_actionbar_color">Koristi boju računa kao boju pozadine za akcijsku traku razgovora</string>
     <string name="title_advanced_category_header">Grupiraj po kategoriji računa</string>
-    <string name="title_advanced_navbar_colorize">Oboji Android navigacijsku traku</string>
     <string name="title_advanced_bundled_fonts">Koristi uključene fontove</string>
     <string name="title_advanced_parse_classes">Analiziraj stilske tablice</string>
     <string name="title_advanced_authentication">Prikaži upozorenja o autentikaciji</string>
@@ -665,7 +661,6 @@
     <string name="title_advanced_metered_warning">Onemogućivanjem ove opcije onemogućit ćete primanje i slanje poruka na mobilnim internetskim vezama</string>
     <string name="title_advanced_rlah_hint">Ne pretpostavljajući roaming unutar EU</string>
     <string name="title_advanced_usage_hint">Ovo će povećati potrošnju baterije, podataka i prostora za pohranu</string>
-    <string name="title_advanced_plain_hint">Omogućavanje ovoga ograničit će korištenje podataka, ali poruke će se prikazivati bez stilskog oblikovanja</string>
     <string name="title_advanced_tcp_keep_alive_hint">Omogućavanje ovoga može uzrokovati probleme s povezivanjem na nekim uređajima i može povećati potrošnju baterije</string>
     <string name="title_advanced_validate_hint">Ovo može rezultirati nesinkroniziranjem poruka, npr. kada koristite VPN, ali i u drugim situacijama</string>
     <string name="title_advanced_timeout_hint">Vremensko ograničenje čitanja / pisanja postavit će se u dvostruko vrijeme do prekida veze. Veće vrijednosti rezultirat će većom potrošnjom baterije.</string>
@@ -897,7 +892,7 @@
     <string name="title_delete_operation_flag">Operacije označavanja</string>
     <string name="title_delete_operation_delete">Operacije brisanja</string>
     <string name="title_delete_operation_deleted">%1$d operacije/a izbrisano</string>
-    <string name="title_delete_contacts">Izbriši vidljive lokalne kontakte?</string>
+    <string name="title_delete_contacts">Želite li izbrisati sve lokalne kontakte?</string>
     <string name="title_no_operations">Nema operacija na čekanju</string>
     <string name="title_check_operations">Provjera operacija</string>
     <string name="title_hint_operations">Brisanje operacija može rezultirati nestankom poruka i problemima sa sinkronizacijom</string>
@@ -1111,10 +1106,6 @@
     <string name="title_third_party">Koristite verziju neke treće strane</string>
     <string name="title_expand_warning">Proširivanjem ove poruke preuzet će se %1$s</string>
     <string name="title_download_message">Preuzima se &#8230;</string>
-    <string name="title_reformatted">        Ovo je preformatirani prikaz poruke.
-        Možete dodirnuti &#x26F6; ikonu za prikaz izvorne poruke i za skrivanje ove poruke.
-        Ponovno formatiranje poruka traje neko vrijeme, ovisno o veličini poruke i brzini uređaja.
-    </string>
     <string name="title_compose">Sastavi</string>
     <string name="title_submitter">Poslao:</string>
     <string name="title_delivered_to">Dostavljeno:</string>
@@ -1779,6 +1770,7 @@
         <item>Mape objedinjenog ulaznog spremnika</item>
         <item>Primarne mape računa</item>
         <item>Računi</item>
+        <item>Primary inbox</item>
     </string-array>
     <string-array name="downloadNames">
         <item>16 KB</item>

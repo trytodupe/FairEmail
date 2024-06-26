@@ -14,6 +14,7 @@
     <string name="app_cake_required">Minimum gerekli depolama alanı: %1$s</string>
     <string name="app_updated">Son güncelleme %1$s</string>
     <string name="app_download">Şuradan indirildi: %1$s</string>
+    <string name="app_motd">Android 14/15 beta sürümünde zaman zaman \'Uygulama yanıt vermiyor\' bildirimleri ortaya çıkıyor. Google bir düzeltme üzerinde çalışıyor. Lütfen bu Android sorunu için uygulamayı suçlamayın!    </string>
     <string name="channel_service">Monitör</string>
     <string name="channel_send">Gönder</string>
     <string name="channel_notification">e-posta</string>
@@ -114,7 +115,7 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_notification_sending">İletileri gönderiliyor</string>
     <string name="title_notification_waiting">Uygun bağlantı bekleniyor</string>
     <string name="title_notification_idle">Dışarıda</string>
-    <string name="title_notification_failed">\'%1$s\' başarısız oldu</string>
+    <string name="title_notification_failed">Hesap \'%1$s\' başarısız oldu</string>
     <string name="title_notification_alert">Sunucu uyarısı \'%1$s\'</string>
     <string name="title_notification_sending_left">%1$d deneme kaldı</string>
     <string name="title_notification_sending_retry">Gönderme, internet bağlantısı değişikliklerinde veya giden kutusu aşağı çekildiğinde yeniden denenecek</string>
@@ -194,6 +195,7 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_setup_gmail_password">Cihazdaki bir hesap yerine şifreli bir hesabı yetkilendirmek istiyorum</string>
     <string name="title_setup_office_auth">\'AUTHENTICATE failed\' hatası, sistem yöneticinizin IMAP/SMTP protokollerini engellemesinden kaynaklanıyor olabilir</string>
     <string name="title_setup_office_auth_5_7_3">Lütfen \'Diğer sağlayıcı\' hızlı kurulum sihirbazını deneyin.</string>
+    <string name="title_setup_office_auth_5_7_139">Lütfen \'Outlook/Hotmail/Live\' hızlı kurulum sihirbazını deneyin.</string>
     <string name="title_setup_oauth_rationale">%1$s hesabınıza erişim için yetkilendirin</string>
     <string name="title_setup_oauth_update">Mevcut bir hesabı yeniden yetkilendir (aksi takdirde yeni bir hesap oluştur)</string>
     <string name="title_setup_oauth_updated">Hesap yetkilendirme güncellendi</string>
@@ -237,6 +239,7 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_setup_doze_stopped">Senkronizasyon durdu mu?</string>
     <string name="title_setup_doze_device">Bu muhtemelen bu cihaz için gereklidir</string>
     <string name="title_setup_alarm_12">Uygulama düzgün çalışmayacak</string>
+    <string name="title_setup_fg_15">Uygulama otomatik olarak başlatılamıyor</string>
     <string name="title_setup_inexact">Alarmlar &amp; hatırlatıcılar devre dışı bırakıldı</string>
     <string name="title_setup_background">Arka plan kısıtlamaları etkinleştirildi</string>
     <string name="title_setup_data">Veri koruyucu etkin</string>
@@ -323,8 +326,6 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_setup_reset_full">Orijinal mesajları göster</string>
     <string name="title_check_gmail_oauth">Gmail hesaplarınız 30 Mayıs 2022\'den sonra çalışmaya devam edecek</string>
     <string name="title_check_gmail_password">Bazı Gmail hesaplarınız 30 Mayıs 2022\'den sonra çalışmayı durdurabilir</string>
-    <string name="title_check_outlook_oauth">Outlook hesaplarınız 1 Ekim 2022\'den sonra çalışmaya devam edecek</string>
-    <string name="title_check_outlook_password">Bazı Outlook hesaplarınız 1 Ekim 2022\'den sonra çalışmayı durdurabilir</string>
     <string name="title_advanced_hint_title">Daha gelişmiş seçenekler</string>
     <string name="title_advanced_hint_message">        Daha gelişmiş seçeneklere gidiyorsunuz.        Tüm seçenekler, farklı bir tercihiniz olmadığı sürece değiştirmenizin gerekmediği yaygın kullanılan varsayılan değerlere sahiptir.
     </string>
@@ -390,6 +391,7 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_advanced_send_nav_color">Alttaki eylem çubuğu için kimlik rengini kullanın</string>
     <string name="title_advanced_send_reminders">Hatırlatıcıları göster</string>
     <string name="title_advanced_send_delayed">Mesaj göndermede gecikme</string>
+    <string name="title_advanced_send_top">Gönder düğmesini en üstte göster</string>
     <string name="title_advanced_attach_new">Paylaşılan adresler ve dosyalar için yeni bir taslak mesaj oluştur</string>
     <string name="title_advanced_answer_caption">Cevap düğmesi ayarları</string>
     <string name="title_advanced_answer_default">Cevap düğmesine kısa basıldığında:</string>
@@ -424,6 +426,9 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_advanced_reply_move_inbox">Ayrıca gelen kutusundaki mesajlar için</string>
     <string name="title_advanced_send_retry_max">Maksimum gönderme denemesi</string>
     <string name="title_advanced_send_retry_hint">Bağlantı değişikliklerinde gönderme yeniden denenecektir</string>
+    <string name="title_advanced_send_partial">Gönderirken geçersiz adresleri yoksay</string>
+    <string name="title_advanced_send_partial_hint">Bazı adresler geçersizse, diğer adreslere yine de bir mesaj gönderilecektir</string>
+    <string name="title_advanced_sent_partially">Mesaj tüm alıcılara gönderilmedi</string>
     <string name="title_advanced_auto_link">Otomatik olarak bağlantı oluşturun</string>
     <string name="title_advanced_plain_only">Öntanımlı olarak yalnızca düz metin gönder</string>
     <string name="title_advanced_plain_only_reply">Yalnızca düz metin mesajına yanıt verirken otomatik olarak yalnızca düz metin</string>
@@ -474,7 +479,6 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_advanced_two_col">İki sütun kullan</string>
     <string name="title_advanced_min_screen_size">Ekranı bölmek için minimum ekran boyutu</string>
     <string name="title_advanced_close_pane">Bir konuşmayı kapatırken satırı veya sütunu daralt</string>
-    <string name="title_advanced_open_pane">İki satır veya iki sütunla başla</string>
     <string name="title_advanced_column_width">Mesaj sütun genişliği / satır yüksekliği: %1$s %%</string>
     <string name="title_advanced_hide_toolbar">Mesajları kaydırırken üstteki araç çubuğunu gizle</string>
     <string name="title_advanced_nav_options">Gezinme menüsü seçeneklerini göster</string>
@@ -577,7 +581,6 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_advanced_actionbar_swap">Çöp ve arşiv düğmesini değiştir</string>
     <string name="title_advanced_actionbar_color">Hesap rengini konuşma eylem çubuğu için arka plan rengi olarak kullan</string>
     <string name="title_advanced_category_header">Hesap kategorisine göre grupla</string>
-    <string name="title_advanced_navbar_colorize">Android gezinme çubuğunu renklendirin</string>
     <string name="title_advanced_list_count">Eylem çubuğunda mesaj veya sohbet sayısını göster</string>
     <string name="title_advanced_bundled_fonts">Birlikte verilen yazı tiplerini kullan</string>
     <string name="title_advanced_narrow_fonts">Dar yazı tipleri kullan</string>
@@ -632,6 +635,7 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_advanced_swipe_reply">Genişletilmiş mesajları yanıtlamak için sağa kaydırın</string>
     <string name="title_advanced_move_thread_all">Seçili konuşmaları taşırken, tüm mesajları taşı</string>
     <string name="title_advanced_move_thread_sent">Bir görüşmeyi taşırken, gönderilen mesajları da taşıyın</string>
+    <string name="title_advanced_swipe_trash_all">Bir konuşmayı çöp kutusuna kaydırırken, tüm mesajları çöpe atın</string>
     <string name="title_advanced_default_snooze">Varsayılan erteleme/gecikme süresi</string>
     <string name="title_advanced_default_folder">Varsayılan klasörü seçin</string>
     <string name="title_advanced_notifications">Bildirimleri yönet</string>
@@ -749,6 +753,7 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_advanced_haptic_feedback">Önemli eylemler hakkında dokunsal geri bildirim</string>
     <string name="title_advanced_language">Dil</string>
     <string name="title_advanced_language_system">Sistem</string>
+    <string name="title_advanced_integrations_hint">Aşağıdaki bulut hizmetleri uygulamanın bir parçası değildir. Herhangi bir ödeme, uygulama geliştiricisine değil, doğrudan bulut hizmetine gidecektir.</string>
     <string name="title_advanced_lt">Dil Aracı entegrasyonu</string>
     <string name="title_advanced_lt_sentence">Her cümleyi kontrol et</string>
     <string name="title_advanced_lt_auto">Yeni bir satırdan sonra paragrafı kontrol et</string>
@@ -763,6 +768,13 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_advanced_openai_model">Model</string>
     <string name="title_advanced_openai_temperature">Sıcaklık: %1$s</string>
     <string name="title_advanced_openai_moderation">İçerik denetimi</string>
+    <string name="title_advanced_gemini">Gemini entegrasyonu</string>
+    <string name="title_advanced_multi_modal">Multimodal</string>
+    <string name="title_advanced_summarize_prompt">Özetleme istemi</string>
+    <string name="title_advanced_answer_prompt">Cevap istemi</string>
+    <string name="title_advanced_system_instructions">Sistem talimatları</string>
+    <string name="title_advanced_default_prompt">Varsayılan istem</string>
+    <string name="title_advanced_entered_text">Girilen metin</string>
     <string name="title_advanced_sdcard">SD kart kullanmak istiyorum</string>
     <string name="title_advanced_watchdog">Düzenli aralıklarla FairEmail hala etkin mi diye kontrol et</string>
     <string name="title_advanced_updates">GitHub güncellemelerini kontrol et</string>
@@ -775,6 +787,7 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_advanced_cleanup_attachments">Eski iletilerin eklerini sil</string>
     <string name="title_advanced_cleanup">Temizle</string>
     <string name="title_advanced_last_cleanup">Son temizleme: %1$s</string>
+    <string name="title_advanced_google_backup">Android\'in veri yedeklemesini kullanın</string>
     <string name="title_advanced_app">Uygulama ayarları</string>
     <string name="title_advanced_more">Daha fazla seçenek</string>
     <string name="title_advanced_main_log">Ana günlük kaydı</string>
@@ -820,7 +833,7 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_advanced_metered_warning">Bu seçeneğin devre dışı bırakılması mobil internet bağlantısında ileti almayı ve göndermeyi devre dışı bırakacaktır</string>
     <string name="title_advanced_rlah_hint">AB içinde dolaşımda olmadığını varsayma</string>
     <string name="title_advanced_usage_hint">Bu pil, veri ve depolama alanı kullanımını artıracaktır</string>
-    <string name="title_advanced_plain_hint">Bunu etkinleştirmek veri kullanımını sınırlayacaktır, ancak mesajlar stil olmadan gösterilecektir</string>
+    <string name="title_advanced_plain_hint">Bunu etkinleştirmek veri kullanımını sınırlandıracaktır, ancak mesajlar stil ve resim olmadan gösterilecektir</string>
     <string name="title_advanced_plain_remark">Düz metin kısmı her zaman mesajın tamamını içermez!</string>
     <string name="title_advanced_tcp_keep_alive_hint">Bunu etkinleştirmek bazı cihazlarda bağlantı sorunlarına neden olabilir ve pil kullanımını artırabilir</string>
     <string name="title_advanced_validate_hint">Bu, örneğin bir VPN kullanırken değil, diğer durumlarda da mesajların senkronize edilmemesine neden olabilir</string>
@@ -839,6 +852,9 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_advanced_threading_hint">Birbirlerine bağlı grup iletileri</string>
     <string name="title_advanced_indentation_hint">Yalnızca kart stili için</string>
     <string name="title_advanced_highlight_hint">Temanın vurgu rengi vurgulamak için kullanılacak</string>
+    <string name="title_advanced_free">Bu bulut hizmetini kullanmak ücretsizdir</string>
+    <string name="title_advanced_free_tier">Bu bulut hizmetinin ücretsiz bir katmanı vardır</string>
+    <string name="title_advanced_paid_service">Bu bulut hizmeti ödeme gerektirir</string>
     <string name="title_advanced_privacy_risk">Bir gizlilik riski olabilir</string>
     <string name="title_advanced_name_email_hint">Adlar yalnızca uygun olduğunda gösterilecektir</string>
     <string name="title_advanced_preview_hint">Yalnızca ileti metni indirildiğinde kullanılabilir</string>
@@ -860,6 +876,7 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_advanced_autoclose_hint">Tüm iletiler arşivlendiğinde veya çöpe gittiğinde bu iletişim kutusunu otomatik olarak kapat</string>
     <string name="title_advanced_sender_hint">Çoğu sağlayıcı değiştirilmiş gönderici adreslerine izin vermiyor</string>
     <string name="title_advanced_bcc_hint">Adres gösterilmeyecek, ancak gönderime eklenecek</string>
+    <string name="title_advanced_envelope_from_hint">Bu adres SMTP MAIL FROM için kullanılacaktır</string>
     <string name="title_advanced_internal_hint">Başka bir alana gönderirken bir uyarı olacak</string>
     <string name="title_advanced_uri">Seçilen kişinin ayrıntıları vCard ekleri için kullanılacaktır</string>
     <string name="title_advanced_e2e_encryption">Uçtan uca şifreleme seçenekleri</string>
@@ -905,6 +922,7 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_identity_name">Adınız</string>
     <string name="title_identity_email">E-posta adresiniz</string>
     <string name="title_identity_tenant_hint">Bu alan çoğu durumda boş olmalıdır</string>
+    <string name="title_identity_receive_first_hint">Bu seçeneği açmak nadiren gereklidir, ayrıca veri kullanımı artacaktır!</string>
     <string name="title_identity_color_hint">Kimlik renkleri, klasör ve hesap renklerinden önceliklidir</string>
     <string name="title_advanced_sender">Gönderici adresini düzenlemeye izin ver</string>
     <string name="title_advanced_sender_name">Gönderen adresi düzenlendiğinde adı kullan</string>
@@ -962,7 +980,9 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_password">Parola</string>
     <string name="title_password_storage">Şifreler nasıl saklanır?</string>
     <string name="title_case_sensitive">Kullanıcı adları ve parolalar büyük-küçük harfe duyarlıdır</string>
+    <string name="title_login_before_send">Göndermeden önce al</string>
     <string name="title_client_certificate">İstemci sertifikası</string>
+    <string name="title_no_key_selected">Hiçbir tuş seçilmedi veya mevcut tuş yok</string>
     <string name="title_realm">Bölge</string>
     <string name="title_use_ip">Ana bilgisayar adı yerine yerel IP adresini kullan</string>
     <string name="title_ehlo">Özel HELO/EHLO kimliği</string>
@@ -971,9 +991,12 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_primary_identity">Birincil (varsayılan kimlik)</string>
     <string name="title_self_identity">Yanıtlarken e-posta adresinizi kaldırın</string>
     <string name="title_leave_on_server">Mesajları sunucuda bırak</string>
+    <string name="title_leave_on_server_hint" comment="title_leave_on_server_hint&#10;Remark text for the POP3 option &quot;Leave messages on the server&quot;">Sunucudan mesajları indirdikten sonra, mesajlar sunucuda kalır</string>
     <string name="title_client_delete">İndirdikten sonra mesajları aktif olarak sil</string>
     <string name="title_leave_deleted">Silinen mesajları sunucuda bırak</string>
+    <string name="title_leave_deleted_hint" comment="title_leave_deleted_hint&#10;Remark text for the POP3 option &quot;Leave deleted messages on the server&quot;">Mesajları cihazdan sildikten sonra, mesajlar sunucuda kalacaktır</string>
     <string name="title_leave_on_device">Mesajları cihazda bırak</string>
+    <string name="title_leave_on_device_hint" comment="title_leave_on_device_hint&#10;Remark text for the POP3 option &quot;Leave messages on the device&quot;">Mesajlar sunucudan silindiğinde, mesajlar cihazda kalır</string>
     <string name="title_max_messages">İndirilecek mesajların maksimum sayısı (hepsi için boş)</string>
     <string name="title_max_messages_keep">Bu, cihazda tutulacak maksimum mesaj sayısıdır</string>
     <string name="title_max_messages_remark">        Sondaki mesajları indirmek için pozitif bir sayı girin (en yaygın)
@@ -1064,6 +1087,7 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_expunge_remark">Bu, silinmek üzere işaretlenen tüm mesajları kalıcı olarak siler</string>
     <string name="title_empty_trash">Çöp kutusunu temizle</string>
     <string name="title_empty_spam">Spam kutusunu temizle</string>
+    <string name="title_edit_color">Renk düzenleme</string>
     <string name="title_edit_properties">Özellikleri düzenle</string>
     <string name="title_edit_rules">Kuralları düzenle</string>
     <string name="title_execute_rules">Kuralları gerçekleştir</string>
@@ -1092,8 +1116,10 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_delete_operation_move">Taşıma işlemleri</string>
     <string name="title_delete_operation_flag">İşaretleme işlemleri</string>
     <string name="title_delete_operation_delete">Silme işlemleri</string>
+    <string name="title_delete_operation_send">İşlemleri gönder</string>
     <string name="title_delete_operation_deleted">%1$d işlem silindi</string>
-    <string name="title_delete_contacts">Görünür yerel rehber silinsin mi?</string>
+    <string name="title_delete_contacts">Tüm yerel rehber silinsin mi?</string>
+    <string name="title_delete_contacts_remark">Gösterilen ve gösterilmeyen tüm kişiler, aranmış olsalar bile silinecektir!</string>
     <string name="title_no_operations">Bekleyen işlem yok</string>
     <string name="title_check_operations">İşlemleri kontrol ediyor</string>
     <string name="title_hint_operations">İşlemleri silmek mesajların kaybolmasına ve senkronizasyon sorunlarına neden olabilir</string>
@@ -1167,7 +1193,7 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_subject_forward_alt">İlet: %1$s</string>
     <string name="title_seen">Okundu olarak işaretle</string>
     <string name="title_unseen">Okunmadı olarak işaretle</string>
-    <string name="title_seen_unseen" comment="title_seen_unseen&#10;Title for (swipe) action to toggle the read/unread status of a message&#10;Please try to keep it short, so it fits in a pop-up menu, like &quot;Mark un/read&quot;.">Okundu/okunmadı olarak işaretle</string>
+    <string name="title_seen_unseen">Okundu/okunmadı olarak işaretle</string>
     <string name="title_toggle_seen">Okumayı aç/kapat</string>
     <string name="title_hide">Gizle</string>
     <string name="title_unhide">Göster</string>
@@ -1192,6 +1218,7 @@ Gönderen etki alanını engellemek, profesyonel bir özellik olan filtre kurall
     <string name="title_create_rule">Kural oluştur &#8230;</string>
     <string name="title_full_screen">Tam ekran</string>
     <string name="title_force_light">Aydınlık temasını zorla</string>
+    <string name="title_rename">Yeniden Adlandır</string>
     <string name="title_share">Paylaş</string>
     <string name="title_event">Takvime ekle</string>
     <string name="title_pin">Kısayol ekle</string>
@@ -1316,7 +1343,9 @@ Bu işlem başarısız olabileceği için eski mesaj çöp kutusuna taşınacak.
     <string name="title_ask_show_html">Özgün iletiyi göstermek gizliliğe duyarlı bilgilerin sızmasına neden olabilir</string>
     <string name="title_ask_show_html_remark">Orijinal mesajı koyu arka planda görüntülemek mümkün değildir çünkü görünmez koyu metinlere ve resimlere neden olabilir</string>
     <string name="title_ask_show_html_images">Orijinal mesajları görüntülerken her zaman resimleri göster</string>
+    <string name="title_ask_show_html_always">Orijinal mesajları varsayılan olarak göster</string>
     <string name="title_ask_show_image">Resimlerin gösterilmesi gizliliğe duyarlı bilgilerin sızmasına neden olabilir</string>
+    <string name="title_ask_show_images_always">Resimleri varsayılan olarak göster</string>
     <string name="title_ask_show_image_hint">İzleme resimleri olarak tanınan resimler gösterilmeyecektir</string>
     <string name="title_ask_show_amp">Mesajın AMP varyantı gösterilsin mi?</string>
     <string name="title_ask_show_amp_hint">AMP mesajları dinamik olacak ve internet ile etkileşime girecek şekilde tasarlanmıştır ve bu nedenle tanım gereği sizi izlemek için kullanılabilir</string>
@@ -1333,10 +1362,10 @@ Bu işlem başarısız olabileceği için eski mesaj çöp kutusuna taşınacak.
     <string name="title_third_party">Üçüncü parti bir sürüm kullanıyorsunuz</string>
     <string name="title_expand_warning">Bu mesajı genişletmek %1$s indirecektir</string>
     <string name="title_download_message">İndiriliyor &#8230;</string>
-    <string name="title_reformatted">        Bu, yeniden biçimlendirilmiş ileti görünümüdür.
-        Orijinal mesajı görüntülemek ve bu mesajı gizlemek için &#x26F6; simgesine dokunun
-        Mesajların yeniden biçimlendirilmesi, mesajın boyutuna ve cihazınızın hızına bağlı olarak biraz zaman alabilir.
-    </string>
+    <string name="title_reformatted">Bu, yeniden biçimlendirilmiş güvenli mesaj görünümüdür.
+        Daha az güvenli orijinal mesajı görüntülemek ve bu mesajı gizlemek için &#x26F6; simgesine dokunabilirsiniz.
+        Mesajların yeniden biçimlendirilmesi, mesajın boyutuna ve cihazınızın hızına bağlı olarak biraz zaman alır.
+        Bazen QR kodlarını görmek için orijinal mesajın görüntülenmesi gerekir.    </string>
     <string name="title_compose">Eposta Oluştur</string>
     <string name="title_submitter">Gönderen:</string>
     <string name="title_signed_by">Tarafından imzalandı:</string>
@@ -1346,6 +1375,7 @@ Bu işlem başarısız olabileceği için eski mesaj çöp kutusuna taşınacak.
     <string name="title_reply_to">Yanıt adresi:</string>
     <string name="title_cc">CC:</string>
     <string name="title_bcc">BCC:</string>
+    <string name="title_envelope_from">Zarf geldi:</string>
     <string name="title_recipients">%1$d alıcı</string>
     <string name="title_via_identity">Şu yol ile:</string>
     <string name="title_sent">Gönderildi:</string>
@@ -1437,6 +1467,7 @@ Bu işlem başarısız olabileceği için eski mesaj çöp kutusuna taşınacak.
     <string name="title_create_template">Şablon oluştur</string>
     <string name="title_select_default_identity">Varsayılan adresi seçin</string>
     <string name="title_translate">Tercüme et</string>
+    <string name="title_summarize">Özetle</string>
     <string name="title_translate_configure">Yapılandır&#8230;</string>
     <string name="title_translate_key">Anahtarı gir</string>
     <string name="title_translating">Tercüme ediliyor&#8230;</string>
@@ -1486,6 +1517,9 @@ Bu işlem başarısız olabileceği için eski mesaj çöp kutusuna taşınacak.
     <string name="title_dsn_reminder">Sert zıplama, orijinal gönderenin e-posta itibarına zarar verir!</string>
     <string name="title_size_reminder">İleti (%1$s) sunucu sınırından (%2$s) yüksek</string>
     <string name="title_attachments_missing">Tüm ekler indirilmedi</string>
+    <string name="title_download_attachments">Ekleri indirin</string>
+    <string name="title_attachments_download">İndirilen ekler: %1$s</string>
+    <string name="title_attachments_no_download">Bu artık gösterilmeyecek ve ekler otomatik olarak indirilmeyecek</string>
     <string name="title_dialog_hint">Bu iletişim kutusu, üst işlem çubuğundaki üç nokta menüsü üzerinden tekrar etkinleştirilebilir</string>
     <string name="title_draft_deleted">Taslak silindi</string>
     <string name="title_draft_saved">Taslak kaydedildi</string>
@@ -1568,6 +1602,7 @@ Bu işlem başarısız olabileceği için eski mesaj çöp kutusuna taşınacak.
     <string name="title_search_flag_notes">notlar</string>
     <string name="title_search_flag_invite">davetiye</string>
     <string name="title_search_flag_size">boyut &gt; %1$s</string>
+    <string name="title_search_flag_touched">dokunuldu</string>
     <string name="title_search_device">Cihazda ara</string>
     <string name="title_search_server">Sunucuda ara</string>
     <string name="title_search_server_wait">Sunucu için bekleniyor</string>
@@ -1614,6 +1649,7 @@ Bu işlem başarısız olabileceği için eski mesaj çöp kutusuna taşınacak.
     <string name="title_view_thread">Konuşmayı göster</string>
     <string name="title_force_sync">Senkronizasyona zorla</string>
     <string name="title_force_send">Göndermeye zorla</string>
+    <string name="title_pwned_remark">Bu, e-posta adresini değil, şifreyi göndermeden (k-anonimleştirme kullanarak) kontrol edecektir!</string>
     <string name="title_language_all">Tümü</string>
     <string name="title_previous">Önceki</string>
     <string name="title_next">Sonraki</string>
@@ -1634,6 +1670,7 @@ Bu işlem başarısız olabileceği için eski mesaj çöp kutusuna taşınacak.
     <string name="title_answer_favorite">Favori</string>
     <string name="title_answer_snippet">Kısaca</string>
     <string name="title_answer_receipt">Okuma makbuzu olarak kullan</string>
+    <string name="title_answer_ai">Yapay zeka istemi olarak kullanın</string>
     <string name="title_answer_hide">Menülerden gizle</string>
     <string name="title_answer_text">Kalıp metni</string>
     <string name="title_answer_placeholder">Yer tutucu</string>
@@ -1663,6 +1700,8 @@ Bu işlem başarısız olabileceği için eski mesaj çöp kutusuna taşınacak.
     <string name="title_rule_delete">Kalıcı olarak sil</string>
     <string name="title_rule_sound">Ses Çal</string>
     <string name="title_rule_silent">Sessiz bildirimler</string>
+    <string name="title_rule_summarize">Özetle</string>
+    <string name="title_rule_summarize_remark">Yapılandırılmış yapay zeka entegrasyonu ile mesajı özetleyin</string>
     <string name="title_rule_caption">Kuralı düzenle</string>
     <string name="title_rule_title">Kural geçerlidir</string>
     <string name="title_rule_name">Ad</string>
@@ -1690,6 +1729,7 @@ Bu işlem başarısız olabileceği için eski mesaj çöp kutusuna taşınacak.
     <string name="title_rule_younger">Şundan daha eski mesajlar: (saatler)</string>
     <string name="title_rule_regex">Düzenli ifade</string>
     <string name="title_rule_and">VE</string>
+    <string name="title_rule_not">DEĞİL</string>
     <string name="title_rule_action">Eylem</string>
     <string name="title_rule_action_remark">Bu işlem %1$s klasörüne gelen yeni iletilere uygulanacaktır</string>
     <string name="title_rule_hours">Saatler</string>
@@ -1734,6 +1774,8 @@ Bu işlem başarısız olabileceği için eski mesaj çöp kutusuna taşınacak.
     <string name="title_rule_tts_subject">Konu</string>
     <string name="title_rule_tts_content">Metin</string>
     <string name="title_rule_select_sound">Ses seç</string>
+    <string name="title_rule_select_sound_ringtone">Zil sesi</string>
+    <string name="title_rule_select_sound_audio">Ses dosyası</string>
     <string name="title_rule_use_as_alarm">Alarm olarak kullan</string>
     <string name="title_rule_alarm_hint">Bu, \"rahatsız etmeyin\" kurallarını yok sayar</string>
     <string name="title_rule_alarm_duration">Maksimum alarm süresi (saniye)</string>
@@ -1874,6 +1916,7 @@ Bu işlem başarısız olabileceği için eski mesaj çöp kutusuna taşınacak.
     <string name="title_hint_dismiss">Bildirimi kaldırmak için bu iletişim kutusunu kapatabilirsiniz.</string>
     <string name="title_hint_support">Bir soru ya da bir probleminiz varsa, lütfen yardım almak için destek menüsünü kullanın</string>
     <string name="title_hint_message_actions">Çöp için sola kaydırın; Arşiv için sağa kaydırın (mevcut ise); Kaydırma eylemleri hesap ayarlarından yapılandırılabilir</string>
+    <string name="title_hint_outbox">Gönderimi iptal etmek için sola veya sağa kaydırabilirsiniz</string>
     <string name="title_hint_message_selection">Birden fazla ileti seçmeye başlamak için bir mesaja uzun basın; basılı tutarak ve yukarı veya aşağı kaydırın ve iletileri seçin</string>
     <string name="title_hint_message_junk">        Bir e-posta istemcisi temel olarak mesajları bir e-posta sunucusunda görüntüler.
         İstenmeyen e-postaları filtrelemekten bir e-posta istemcisi değil, bir e-posta sunucusu sorumludur.
@@ -1938,6 +1981,8 @@ Bu işlem başarısız olabileceği için eski mesaj çöp kutusuna taşınacak.
     <string name="title_ask_what">Ne yapılacağını sor</string>
     <string name="title_no_ask_again">Bunu bir daha sorma</string>
     <string name="title_no_ask_for_again">%1$s için bunu bir daha sorma</string>
+    <string name="title_no_show_again">Bunu bir daha gösterme</string>
+    <string name="title_undo_privacy">Bu, gizlilik ayarları sekmesi sayfasından geri alınabilir</string>
     <string name="title_no_body">Hiçbir ileti metni bulunamadı</string>
     <string name="title_large_body">Bu mesaj çok büyüktür ve sorunlara neden olabilir!</string>
     <string name="title_no_charset">Desteklenmeyen kodlama: %1$s</string>
@@ -2022,6 +2067,7 @@ Bu işlem başarısız olabileceği için eski mesaj çöp kutusuna taşınacak.
     <string name="title_widget_folder_unified">Birleşik gelen kutusu klasörleri</string>
     <string name="title_widget_folder_notifying">Yeni mesaj bildirimleri içeren klasörler</string>
     <string name="title_widget_unseen">Sadece okunmamış iletiler</string>
+    <string name="title_widget_show_unseen">Okunmamış olarak göster</string>
     <string name="title_widget_flagged">Sadece yıldızlı iletiler</string>
     <string name="title_widget_font_size">Metin boyutu</string>
     <string name="title_widget_padding">Boşluk boyutu</string>
@@ -2050,6 +2096,7 @@ Bu işlem başarısız olabileceği için eski mesaj çöp kutusuna taşınacak.
     <string name="title_keyword_not_displayed">Görüntülenmiyor</string>
     <string name="title_keyword_not_delivered">Teslim edilmedi</string>
     <string name="title_keyword_complaint">Şikâyet</string>
+    <string name="title_keyword_phishing">Kimlik Avı</string>
     <plurals name="title_accessibility_messages">
         <item quantity="one">%1$d mesaj</item>
         <item quantity="other">%1$d mesaj</item>
@@ -2110,6 +2157,7 @@ Bu işlem başarısız olabileceği için eski mesaj çöp kutusuna taşınacak.
         <item>Birleşik klasörler</item>
         <item>Varsayılan hesap klasörleri</item>
         <item>Hesaplar</item>
+        <item>Birincil gelen kutusu</item>
     </string-array>
     <string-array name="downloadNames">
         <item>16 KB</item>

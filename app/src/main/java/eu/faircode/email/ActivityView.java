@@ -155,6 +155,7 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
     private AdapterNavMenu adapterNavMenu;
     private AdapterNavMenu adapterNavMenuExtra;
 
+    private boolean initialized = false;
     private boolean exit = false;
     private boolean searching = false;
     private int lastBackStackCount = 0;
@@ -217,8 +218,10 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
         iff.addAction(ACTION_NEW_MESSAGE);
         lbm.registerReceiver(creceiver, iff);
 
-        if (savedInstanceState != null)
+        if (savedInstanceState != null) {
+            initialized = savedInstanceState.getBoolean("fair:initialized");
             searching = savedInstanceState.getBoolean("fair:searching");
+        }
 
         colorDrawerScrim = Helper.resolveColor(this, R.attr.colorDrawerScrim);
 
@@ -246,7 +249,6 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
                 " landscape cols=" + landscape + " min=" + landscape_min_size);
         boolean duo = Helper.isSurfaceDuo();
         boolean close_pane = prefs.getBoolean("close_pane", !duo);
-        boolean open_pane = (!close_pane && prefs.getBoolean("open_pane", false));
         boolean nav_categories = prefs.getBoolean("nav_categories", false);
 
         // 1=small, 2=normal, 3=large, 4=xlarge
@@ -266,8 +268,6 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
         setContentView(view);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setCustomView(R.layout.action_bar);
-        getSupportActionBar().setDisplayShowCustomEnabled(true);
 
         content_separator = findViewById(R.id.content_separator);
         content_pane = findViewById(R.id.content_pane);
@@ -710,8 +710,8 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
         // Initialize
 
         if (content_pane != null) {
-            content_separator.setVisibility(duo || open_pane ? View.INVISIBLE : View.GONE);
-            content_pane.setVisibility(duo || open_pane ? View.INVISIBLE : View.GONE);
+            content_separator.setVisibility(close_pane ? View.GONE : View.INVISIBLE);
+            content_pane.setVisibility(close_pane ? View.GONE : View.INVISIBLE);
         }
 
         FragmentManager fm = getSupportFragmentManager();
@@ -744,12 +744,15 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
             boolean unified = (intent != null && "unified".equals(intent.getAction()));
             if (!search && !(standalone && !unified))
                 init();
+            else
+                initialized = true;
         }
 
         if (savedInstanceState != null)
             drawerToggle.setDrawerIndicatorEnabled(savedInstanceState.getBoolean("fair:toggle"));
 
-        checkFirst();
+        if (!"inbox".equals(startup))
+            checkFirst();
         checkBanner();
         checkCrash();
 
@@ -779,6 +782,42 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
     private void init() {
         Bundle args = new Bundle();
 
+        if ("inbox".equals(startup)) {
+            new SimpleTask<EntityFolder>() {
+                @Override
+                protected void onPreExecute(Bundle args) {
+                    initialized = false;
+                }
+
+                @Override
+                protected EntityFolder onExecute(Context context, Bundle args) throws Throwable {
+                    DB db = DB.getInstance(context);
+                    return db.folder().getFolderPrimary(EntityFolder.INBOX);
+                }
+
+                @Override
+                protected void onExecuted(Bundle args, EntityFolder inbox) {
+                    FragmentBase fragment = new FragmentMessages();
+                    if (inbox != null) {
+                        args.putString("type", inbox.type);
+                        args.putLong("account", inbox.account);
+                        args.putLong("folder", inbox.id);
+                    }
+                    fragment.setArguments(args);
+                    setFragment(fragment);
+                    checkIntent();
+                    checkFirst();
+                    initialized = true;
+                }
+
+                @Override
+                protected void onException(Bundle args, Throwable ex) {
+                    Log.unexpectedError(getSupportFragmentManager(), ex);
+                }
+            }.execute(this, new Bundle(), "primary");
+            return;
+        }
+
         FragmentBase fragment;
         switch (startup) {
             case "accounts":
@@ -798,7 +837,10 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
         }
 
         fragment.setArguments(args);
+        setFragment(fragment);
+    }
 
+    private void setFragment(Fragment fragment) {
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fm.beginTransaction();
         for (Fragment existing : fm.getFragments())
@@ -811,6 +853,7 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
     protected void onSaveInstanceState(Bundle outState) {
         outState.putParcelable("fair:intent", getIntent());
         outState.putBoolean("fair:toggle", drawerToggle == null || drawerToggle.isDrawerIndicatorEnabled());
+        outState.putBoolean("fair:initialized", initialized);
         outState.putBoolean("fair:searching", searching);
         super.onSaveInstanceState(outState);
     }
@@ -1127,7 +1170,8 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
 
         checkUpdate(false);
         checkAnnouncements(false);
-        checkIntent();
+        if (initialized || !"inbox".equals(startup))
+            checkIntent();
     }
 
     @Override
@@ -1346,8 +1390,6 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
         if (count == 0)
             finish();
         else {
-            showActionBar(true);
-
             if (count < lastBackStackCount) {
                 Intent intent = getIntent();
                 intent.setAction(null);
@@ -1413,8 +1455,8 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
 
         final View content = drawerLayout.getChildAt(0);
 
-        final Snackbar snackbar = Snackbar.make(content, title, Snackbar.LENGTH_INDEFINITE)
-                .setGestureInsetBottomIgnored(true);
+        final Snackbar snackbar = Helper.setSnackbarOptions(
+                Snackbar.make(content, title, Snackbar.LENGTH_INDEFINITE));
         Helper.setSnackbarLines(snackbar, 7);
 
         lastSnackbar = snackbar;
@@ -1470,7 +1512,7 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean first = prefs.getBoolean("first", true);
-        boolean show_changelog = prefs.getBoolean("show_changelog", !BuildConfig.PLAY_STORE_RELEASE);
+        boolean show_changelog = prefs.getBoolean("show_changelog", true);
 
         if (first)
             new FragmentDialogFirst().show(getSupportFragmentManager(), "first");
@@ -1484,16 +1526,17 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
                 return;
 
             String last = prefs.getString("changelog", null);
-            if (!Objects.equals(version, last) || BuildConfig.DEBUG) {
+            if (last != null && !last.equals(version)) {
+                prefs.edit().putString("changelog", version).apply();
+
                 Bundle args = new Bundle();
                 args.putString("name", "CHANGELOG.md");
+                args.putString("option", "show_changelog");
                 FragmentDialogMarkdown fragment = new FragmentDialogMarkdown();
                 fragment.setArguments(args);
                 fragment.show(getSupportFragmentManager(), "changelog");
             }
         }
-
-        prefs.edit().putString("changelog", version).apply();
     }
 
     private void checkBanner() {

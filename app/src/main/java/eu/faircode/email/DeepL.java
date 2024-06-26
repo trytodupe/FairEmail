@@ -65,7 +65,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -79,9 +78,7 @@ public class DeepL {
 
     static final String PRIVACY_URI = "https://www.deepl.com/privacy/";
 
-    // curl https://api-free.deepl.com/v2/languages \
-    //	-d auth_key=... \
-    //	-d type=target
+    // curl https://api-free.deepl.com/v2/languages -d auth_key=... -d type=target
 
     public static boolean isAvailable(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -117,7 +114,9 @@ public class DeepL {
                 int frequency = prefs.getInt("translated_" + target, 0);
 
                 String flag;
-                if ("CS".equals(target))
+                if ("AR".equals(target))
+                    flag = "SA";
+                else if ("CS".equals(target))
                     flag = "CZ";
                 else if ("DA".equals(target))
                     flag = "DK";
@@ -238,16 +237,7 @@ public class DeepL {
         if (html)
             request += "&tag_handling=html";
 
-        ensureLanguages(context);
-        for (int i = 0; i < jlanguages.length(); i++) {
-            JSONObject jlanguage = jlanguages.getJSONObject(i);
-            if (Objects.equals(target, jlanguage.getString("language"))) {
-                boolean supports_formality = jlanguage.optBoolean("supports_formality");
-                if (supports_formality)
-                    request += "&formality=" + (formality ? "more" : "less");
-                break;
-            }
-        }
+        request += "&formality=" + (formality ? "prefer_more" : "prefer_less");
 
         URL url = new URL(getBaseUri(key) + "translate");
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();

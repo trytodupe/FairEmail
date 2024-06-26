@@ -46,6 +46,7 @@ import androidx.core.os.LocaleListCompat;
 import androidx.emoji2.text.DefaultEmojiCompatConfig;
 import androidx.emoji2.text.EmojiCompat;
 import androidx.emoji2.text.FontRequestEmojiCompatConfig;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
@@ -254,6 +255,11 @@ public class ApplicationEx extends Application
 
         DB.setupViewInvalidation(this);
 
+        // https://issuetracker.google.com/issues/341313071
+        // https://developer.android.com/guide/navigation/custom-back/support-animations#fragments
+        // https://developer.android.com/guide/navigation/custom-back/predictive-back-gesture#opt-predictive
+        FragmentManager.enablePredictiveBack(false);
+
         if (Helper.hasWebView(this))
             CookieManager.getInstance().setAcceptCookie(false);
 
@@ -406,19 +412,14 @@ public class ApplicationEx extends Application
                 case "watchdog":
                     ServiceSynchronize.scheduleWatchdog(this);
                     break;
-                case "secure": // privacy
-                case "load_emoji": // privacy
-                case "shortcuts": // misc
-                case "language": // misc
-                case "wal": // misc
-                    // Should be excluded for import
-                    restart(this, key);
-                    break;
                 case "debug":
                 case "log_level":
                     Log.setLevel(this);
                     FairEmailLoggingProvider.setLevel(this);
                     break;
+                default:
+                    if (FragmentOptionsBackup.RESTART_OPTIONS.contains(key))
+                        restart(this, key);
             }
         } catch (Throwable ex) {
             Log.e(ex);
@@ -481,8 +482,6 @@ public class ApplicationEx extends Application
 
         if (version < BuildConfig.VERSION_CODE)
             editor.remove("crash_report_count");
-        if (version < BuildConfig.VERSION_CODE && !BuildConfig.DEBUG)
-            editor.remove("third_party_notified");
 
         if (!Log.isTestRelease())
             editor.remove("test1").remove("test2").remove("test3").remove("test4").remove("test5");
@@ -854,6 +853,44 @@ public class ApplicationEx extends Application
         } else if (version < 2162) {
             if (!BuildConfig.DEBUG)
                 editor.putBoolean("tabular_unread_bg", false);
+        } else if (version < 2168) {
+            if (Helper.isGoogle())
+                editor.putBoolean("mod", true);
+        } else if (version < 2170) {
+            editor.putBoolean("mod", false);
+        }
+
+        if (version < 2180) {
+            if (Helper.isAndroid15())
+                editor.putInt("last_sdk", 0);
+        }
+
+        if (version < 2187) {
+            if (!prefs.contains("delete_unseen"))
+                editor.putBoolean("delete_unseen", false);
+            if (Helper.isPixelBeta())
+                editor.putBoolean("motd", true);
+        }
+
+        if (version < 2191) {
+            if ("a".equals(BuildConfig.REVISION))
+                editor.remove("show_changelog");
+        }
+
+        if (version < 2196) {
+            if (!prefs.contains("forward_new"))
+                editor.putBoolean("forward_new", true);
+        }
+
+        if (version < 2206) {
+            if (prefs.getInt("viewport_height", 0) == 16000 &&
+                    (Helper.isGoogle() || Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU))
+                editor.remove("viewport_height");
+        }
+
+        if (version < 2208) {
+            if (!BuildConfig.DEBUG)
+                ContactInfo.clearCache(context); // SVG scale
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !BuildConfig.DEBUG)
@@ -862,6 +899,11 @@ public class ApplicationEx extends Application
         if (version < BuildConfig.VERSION_CODE)
             editor.putInt("previous_version", version);
         editor.putInt("version", BuildConfig.VERSION_CODE);
+
+        int last_sdk = prefs.getInt("last_sdk", Build.VERSION.SDK_INT);
+        if (Helper.isAndroid15() && last_sdk <= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            editor.remove("setup_reminder");
+        editor.putInt("last_sdk", Build.VERSION.SDK_INT);
 
         editor.apply();
     }

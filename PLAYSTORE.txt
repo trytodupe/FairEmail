@@ -64,7 +64,7 @@ This app starts a foreground service with a low-priority status bar notification
 * No special permissions required
 * No advertisements
 * No analytics and no tracking (error reporting via Bugsnag is opt-in)
-* No Google backup
+* Optional Android backup
 * No Firebase Cloud Messaging
 * FairEmail is an original work, not a fork or a clone
 
@@ -78,7 +78,7 @@ This app starts a foreground service with a low-priority status bar notification
 
 All pro features are convenience or advanced features.
 
-* Account/identity/folder colors
+* Account/identity/folder colors/avatars
 * Colored stars
 * Notification settings (sounds) per account/folder/sender (requires Android 8 Oreo)
 * Configurable notification actions

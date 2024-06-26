@@ -51,6 +51,7 @@ import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
@@ -113,6 +114,7 @@ public class FragmentOptionsSend extends FragmentBase implements SharedPreferenc
     private SwitchCompat swSignatureForward;
     private Button btnEditSignature;
 
+    private SwitchCompat swSendAtTop;
     private SwitchCompat swAttachNew;
     private SwitchCompat swAutoLink;
     private SwitchCompat swPlainOnly;
@@ -128,8 +130,9 @@ public class FragmentOptionsSend extends FragmentBase implements SharedPreferenc
     private SwitchCompat swReplyMove;
     private SwitchCompat swReplyMoveInbox;
     private EditText etSendRetryMax;
+    private SwitchCompat swSendPartial;
 
-    private final static List<String> RESET_OPTIONS = Collections.unmodifiableList(Arrays.asList(
+    final static List<String> RESET_OPTIONS = Collections.unmodifiableList(Arrays.asList(
             "keyboard", "keyboard_no_fullscreen",
             "suggest_names", "suggest_sent", "suggested_received", "suggest_frequently", "suggest_account", "auto_identity",
             "purge_contact_age", "purge_contact_freq",
@@ -143,12 +146,12 @@ public class FragmentOptionsSend extends FragmentBase implements SharedPreferenc
             "separate_reply", "extended_reply", "write_below", "quote_reply", "quote_limit",
             "resize_reply", "resize_paste",
             "signature_location", "signature_new", "signature_reply", "signature_reply_once", "signature_forward",
-            "attach_new", "auto_link", "plain_only", "plain_only_reply",
+            "send_at_top", "attach_new", "auto_link", "plain_only", "plain_only_reply",
             "format_flowed", "usenet_signature", "remove_signatures",
             "receipt_default", "receipt_type", "receipt_legacy",
             "forward_new",
             "lookup_mx", "reply_move", "reply_move_inbox",
-            "send_retry_max"
+            "send_retry_max", "send_partial"
     ));
 
     @Override
@@ -207,6 +210,7 @@ public class FragmentOptionsSend extends FragmentBase implements SharedPreferenc
         swSignatureForward = view.findViewById(R.id.swSignatureForward);
         btnEditSignature = view.findViewById(R.id.btnEditSignature);
 
+        swSendAtTop = view.findViewById(R.id.swSendAtTop);
         swAttachNew = view.findViewById(R.id.swAttachNew);
         swAutoLink = view.findViewById(R.id.swAutoLink);
         swPlainOnly = view.findViewById(R.id.swPlainOnly);
@@ -222,6 +226,7 @@ public class FragmentOptionsSend extends FragmentBase implements SharedPreferenc
         swReplyMove = view.findViewById(R.id.swReplyMove);
         swReplyMoveInbox = view.findViewById(R.id.swReplyMoveInbox);
         etSendRetryMax = view.findViewById(R.id.etSendRetryMax);
+        swSendPartial = view.findViewById(R.id.swSendPartial);
 
         List<StyleHelper.FontDescriptor> fonts = StyleHelper.getFonts(getContext(), false);
 
@@ -463,14 +468,40 @@ public class FragmentOptionsSend extends FragmentBase implements SharedPreferenc
         btnSound.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String sound = prefs.getString("sound_sent", null);
-                Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
-                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION);
-                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, getString(R.string.title_advanced_sound));
-                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
-                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true);
-                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, sound == null ? null : Uri.parse(sound));
-                startActivityForResult(Helper.getChooser(getContext(), intent), ActivitySetup.REQUEST_SOUND_OUTBOUND);
+                PopupMenuLifecycle popupMenu = new PopupMenuLifecycle(getContext(), getViewLifecycleOwner(), v);
+
+                popupMenu.getMenu().add(Menu.NONE, R.string.title_rule_select_sound_ringtone, 1, R.string.title_rule_select_sound_ringtone);
+                popupMenu.getMenu().add(Menu.NONE, R.string.title_rule_select_sound_audio, 2, R.string.title_rule_select_sound_audio);
+
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        int itemId = item.getItemId();
+                        if (itemId == R.string.title_rule_select_sound_ringtone) {
+                            String sound = prefs.getString("sound_sent", null);
+                            Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+                            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION);
+                            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, getString(R.string.title_advanced_sound));
+                            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
+                            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true);
+                            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, sound == null ? null : Uri.parse(sound));
+                            startActivityForResult(Helper.getChooser(getContext(), intent), ActivitySetup.REQUEST_RINGTONE_OUTBOUND);
+                            return true;
+                        } else if (itemId == R.string.title_rule_select_sound_audio) {
+                            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                            intent.addCategory(Intent.CATEGORY_OPENABLE);
+                            intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            intent.setType("audio/*");
+                            Helper.openAdvanced(getContext(), intent);
+                            startActivityForResult(Helper.getChooser(getContext(), intent), ActivitySetup.REQUEST_AUDIO_OUTBOUND);
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+
+                popupMenu.show();
             }
         });
 
@@ -659,6 +690,13 @@ public class FragmentOptionsSend extends FragmentBase implements SharedPreferenc
             }
         });
 
+        swSendAtTop.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+                prefs.edit().putBoolean("send_at_top", checked).apply();
+            }
+        });
+
         swAttachNew.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
@@ -786,9 +824,14 @@ public class FragmentOptionsSend extends FragmentBase implements SharedPreferenc
             }
         });
 
-        // Initialize
-        FragmentDialogTheme.setBackground(getContext(), view, false);
+        swSendPartial.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+                prefs.edit().putBoolean("send_partial", checked).apply();
+            }
+        });
 
+        // Initialize
         String re1 = getString(R.string.title_subject_reply, "");
         String re2 = getString(R.string.title_subject_reply_alt, "");
         ((RadioButton) view.findViewById(R.id.rbRe1)).setText(re1);
@@ -945,6 +988,7 @@ public class FragmentOptionsSend extends FragmentBase implements SharedPreferenc
             swSignatureReplyOnce.setEnabled(swSignatureReply.isChecked());
             swSignatureForward.setChecked(prefs.getBoolean("signature_forward", true));
 
+            swSendAtTop.setChecked(prefs.getBoolean("send_at_top", false));
             swAttachNew.setChecked(prefs.getBoolean("attach_new", true));
             swAutoLink.setChecked(prefs.getBoolean("auto_link", false));
             swPlainOnly.setChecked(prefs.getBoolean("plain_only", false));
@@ -959,7 +1003,7 @@ public class FragmentOptionsSend extends FragmentBase implements SharedPreferenc
 
             swReceiptLegacy.setChecked(prefs.getBoolean("receipt_legacy", false));
 
-            swForwardNew.setChecked(prefs.getBoolean("forward_new", true));
+            swForwardNew.setChecked(prefs.getBoolean("forward_new", false));
             swLookupMx.setChecked(prefs.getBoolean("lookup_mx", false));
             swReplyMove.setChecked(prefs.getBoolean("reply_move", false));
             swReplyMoveInbox.setChecked(prefs.getBoolean("reply_move_inbox", true));
@@ -968,6 +1012,8 @@ public class FragmentOptionsSend extends FragmentBase implements SharedPreferenc
             int send_retry_max = prefs.getInt("send_retry_max", 0);
             etSendRetryMax.setText(send_retry_max > 0 ? Integer.toString(send_retry_max) : null);
             etSendRetryMax.setHint(Integer.toString(ServiceSend.RETRY_MAX_DEFAULT));
+
+            swSendPartial.setChecked(prefs.getBoolean("send_partial", false));
         } catch (Throwable ex) {
             Log.e(ex);
         }
@@ -979,9 +1025,13 @@ public class FragmentOptionsSend extends FragmentBase implements SharedPreferenc
 
         try {
             switch (requestCode) {
-                case ActivitySetup.REQUEST_SOUND_OUTBOUND:
+                case ActivitySetup.REQUEST_RINGTONE_OUTBOUND:
                     if (resultCode == RESULT_OK && data != null)
                         onSelectSound(data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI));
+                    break;
+                case ActivitySetup.REQUEST_AUDIO_OUTBOUND:
+                    if (resultCode == RESULT_OK && data != null)
+                        onSelectSound(data.getData());
                     break;
             }
         } catch (Throwable ex) {

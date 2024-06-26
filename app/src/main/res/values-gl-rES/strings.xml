@@ -104,7 +104,6 @@
     <string name="title_notification_sending">Enviando mensaxes</string>
     <string name="title_notification_waiting">Agardando por unha conexión axeitada</string>
     <string name="title_notification_idle">Inactivo</string>
-    <string name="title_notification_failed">\'%1$s\' fallou</string>
     <string name="title_notification_alert">Alerta do servidor: \'%1$s\'</string>
     <string name="title_notification_sending_left">Intentos restantes: %1$d</string>
     <string name="title_notification_sending_retry">O envío intentarase de novo cando mude a conexión de internet ou cando se tire cara abaixo da caixa de saída</string>
@@ -293,8 +292,6 @@
     <string name="title_setup_reset_full">Ver mensaxes orixinais</string>
     <string name="title_check_gmail_oauth">As súas contas de Gmail seguirán a funcionar despois do 30 de maio de 2022</string>
     <string name="title_check_gmail_password">Algunhas das súas contas de Gmail poderían deixar de funcionar despois do 30 de maio de 2022</string>
-    <string name="title_check_outlook_oauth">As súas contas de Outlook seguirán a funcionar despois do 1 de outubro de 2022</string>
-    <string name="title_check_outlook_password">Algunhas das súas contas de Outlook poderían deixar de funcionar despois do 1 de outubro de 2022</string>
     <string name="title_advanced_hint_title">Máis opcións avanzadas</string>
     <string name="title_advanced_hint_message">        Vostede está navegando cara as opcións máis avanzadas.        Todas as opcións teñen valores comúns, que non precisan ser cambiadas de non ser que  vostede teña una preferencia diferente.
     </string>
@@ -494,7 +491,6 @@
     <string name="title_advanced_actionbar">Mostrar a barra de accións de conversa</string>
     <string name="title_advanced_actionbar_color">Usar a cor da conta coma a cor de fondo para a barra de acción de conversa</string>
     <string name="title_advanced_category_header">Agrupar por categoría de conta</string>
-    <string name="title_advanced_navbar_colorize">Dar cor á barra de navegación de Android</string>
     <string name="title_advanced_list_count">Mostrar o número de mensaxes ou conversas na barra de accións superior</string>
     <string name="title_advanced_bundled_fonts">Usar as fontes internas</string>
     <string name="title_advanced_parse_classes">Interpretar as follas de estilo</string>
@@ -686,7 +682,6 @@
     <string name="title_advanced_metered_warning">Ao desactivar esta opción non se recibirán nen enviarán mensaxes nas conexións móbeis de internet</string>
     <string name="title_advanced_rlah_hint">Asúmese que non hai roaming na U.E.</string>
     <string name="title_advanced_usage_hint">Isto incrementará o uso da batería, dos datos e do espazo de almacenamiento</string>
-    <string name="title_advanced_plain_hint">Habilitar isto limitará o uso de datos, pero as mensaxes sairán sen o formatado</string>
     <string name="title_advanced_validate_hint">Isto podería facer que non se sincronicen as mensaxes, por exemplo cando se use unha VPN, e tamén noutras situacións</string>
     <string name="title_advanced_timeout_hint">Axustarase o tempo límite de lectura/escritura ao dobre do tempo límite de conexión. Valores máis altos resultarán nun maior uso da batería.</string>
     <string name="title_advanced_cert_strict_hint">Desactivar isto suavizará a comprobación dos certificados dos servidores</string>
@@ -910,6 +905,7 @@
     <string name="title_delete_operation_flag">Marcar operacións</string>
     <string name="title_delete_operation_delete">Eliminar operacións</string>
     <string name="title_delete_operation_deleted">%1$d operacións borradas</string>
+    <string name="title_delete_contacts">Eliminar todos os contactos locais?</string>
     <string name="title_no_operations">Sen operacións pendentes</string>
     <string name="title_hint_operations">Borrar operacións pode resultar en mensaxes desaparecidas e problemas de sincronización</string>
     <string name="title_op_title_headers">Descargando cabeceiras</string>
@@ -1113,9 +1109,6 @@
     <string name="title_third_party">A súa versión é de terceiros</string>
     <string name="title_expand_warning">Expandir esta mensaxe descargará %1$s</string>
     <string name="title_download_message">Descargando &#8230;</string>
-    <string name="title_reformatted">        Isto é a vista de mensaxe procesada.        Pode tocar a icona &#x26F6; para ver a mensaxe orixinal e agochar esta notificación.
-        Procesar as mensaxes leva tempo, dependendo do seu tamaño e da velocidade do seu dispositivo.
-    </string>
     <string name="title_compose">Redactar</string>
     <string name="title_submitter">Enviada por:</string>
     <string name="title_delivered_to">Enviada a:</string>
@@ -1801,6 +1794,7 @@
         <item>Cartafoles unificados</item>
         <item>Cartafoles primarios das contas</item>
         <item>Contas</item>
+        <item>Primary inbox</item>
     </string-array>
     <string-array name="downloadNames">
         <item>16 KB</item>

@@ -111,6 +111,8 @@ public class ContactInfo {
     private static final long CACHE_FAVICON_DURATION = 2 * 7 * 24 * 60 * 60 * 1000L; // milliseconds
     private static final float MIN_FAVICON_LUMINANCE = 0.2f;
 
+    static final int AVATAR_SIZE = FAVICON_ICON_SIZE;
+
     // https://realfavicongenerator.net/faq
     private static final String[] FIXED_FAVICONS = new String[]{
             "apple-touch-icon.png", // 57x57
@@ -268,6 +270,7 @@ public class ContactInfo {
         if (cacheOnly)
             return null;
 
+        boolean cached = false;
         ContactInfo info = new ContactInfo();
         info.email = address.getAddress();
 
@@ -394,6 +397,7 @@ public class ContactInfo {
                                 info.type = (data.length > 0 ? data[0] : "unknown");
                                 info.verified = (data.length > 1 && "verified".equals(data[1]));
                             }
+                            cached = true;
                         }
                     } else {
                         final int scaleToPixels = Helper.dp2pixels(context, FAVICON_ICON_SIZE);
@@ -563,6 +567,7 @@ public class ContactInfo {
                 files[0].setLastModified(new Date().getTime());
                 info.bitmap = BitmapFactory.decodeFile(files[0].getAbsolutePath());
                 info.type = Helper.getExtension(files[0].getName());
+                cached = true;
             } else {
                 int dp = Helper.dp2pixels(context, GENERATED_ICON_SIZE);
                 if (identicons) {
@@ -601,6 +606,21 @@ public class ContactInfo {
             } catch (Throwable ex) {
                 Log.e(ex);
             }
+
+        if (info.bitmap != null) {
+            int abc = info.bitmap.getAllocationByteCount();
+            if (!cached && (abc > 1024 * 1024 || BuildConfig.DEBUG)) {
+                String msg = "Avatar type=" + info.type +
+                        " domain=" + UriHelper.getEmailDomain(info.email) +
+                        " size=" + Helper.humanReadableByteCount(abc) +
+                        "/" + Helper.humanReadableByteCount(info.bitmap.getByteCount()) +
+                        " " + info.bitmap.getWidth() + "x" + info.bitmap.getHeight() + " " + info.bitmap.getConfig() +
+                        " play=" + BuildConfig.PLAY_STORE_RELEASE;
+                if (!BuildConfig.DEBUG)
+                    Log.e(msg);
+                EntityLog.log(context, EntityLog.Type.Debug4, msg);
+            }
+        }
 
         synchronized (emailContactInfo) {
             emailContactInfo.put(key, info);

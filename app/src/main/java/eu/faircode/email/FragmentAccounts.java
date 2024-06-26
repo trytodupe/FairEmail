@@ -33,6 +33,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -271,7 +272,7 @@ public class FragmentAccounts extends FragmentBase {
                         getContext(),
                         getViewLifecycleOwner(),
                         getParentFragmentManager(),
-                        fabCompose, -1L);
+                        fabCompose, -1L, -1L);
             }
         });
 
@@ -290,8 +291,6 @@ public class FragmentAccounts extends FragmentBase {
         animator = Helper.getFabAnimator(fab, getViewLifecycleOwner());
 
         // Initialize
-        FragmentDialogTheme.setBackground(getContext(), view, false);
-
         if (settings) {
             fab.show();
             fabCompose.hide();
@@ -368,6 +367,7 @@ public class FragmentAccounts extends FragmentBase {
         menu.findItem(R.id.menu_show_folders).setVisible(!settings);
         menu.findItem(R.id.menu_theme).setVisible(!settings);
         menu.findItem(R.id.menu_force_sync).setVisible(!settings);
+        menu.findItem(R.id.menu_pwned).setVisible(settings && !TextUtils.isEmpty(BuildConfig.PWNED_ENDPOINT));
 
         super.onPrepareOptionsMenu(menu);
     }
@@ -398,6 +398,9 @@ public class FragmentAccounts extends FragmentBase {
             return true;
         } else if (itemId == R.id.menu_force_sync) {
             onMenuForceSync();
+            return true;
+        } else if (itemId == R.id.menu_pwned) {
+            onMenuPwned();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -475,12 +478,20 @@ public class FragmentAccounts extends FragmentBase {
         ToastEx.makeText(getContext(), R.string.title_executing, Toast.LENGTH_LONG).show();
     }
 
+    private void onMenuPwned() {
+        new FragmentDialogPwned().show(getParentFragmentManager(), "pawned");
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         try {
             switch (requestCode) {
+                case ActivitySetup.REQUEST_EDIT_ACCOUNT_COLOR:
+                    if (resultCode == RESULT_OK && data != null)
+                        onEditAccountColor(data.getBundleExtra("args"));
+                    break;
                 case ActivitySetup.REQUEST_DELETE_ACCOUNT:
                     if (resultCode == RESULT_OK && data != null)
                         onDeleteAccount(data.getBundleExtra("args"));
@@ -497,6 +508,33 @@ public class FragmentAccounts extends FragmentBase {
             btnGrant.setVisibility(View.GONE);
             ServiceSynchronize.reload(getContext(), null, false, "Permissions regranted");
         }
+    }
+
+    private void onEditAccountColor(Bundle args) {
+        if (!ActivityBilling.isPro(getContext())) {
+            startActivity(new Intent(getContext(), ActivityBilling.class));
+            return;
+        }
+
+        new SimpleTask<Void>() {
+            @Override
+            protected Void onExecute(Context context, Bundle args) {
+                long id = args.getLong("id");
+                Integer color = args.getInt("color");
+
+                if (color == Color.TRANSPARENT)
+                    color = null;
+
+                DB db = DB.getInstance(context);
+                db.account().setAccountColor(id, color);
+                return null;
+            }
+
+            @Override
+            protected void onException(Bundle args, Throwable ex) {
+                Log.unexpectedError(getParentFragmentManager(), ex);
+            }
+        }.execute(this, args, "edit:color");
     }
 
     private void onDeleteAccount(Bundle args) {
@@ -631,8 +669,8 @@ public class FragmentAccounts extends FragmentBase {
             @Override
             protected void onException(Bundle args, Throwable ex) {
                 if (ex instanceof IllegalStateException) {
-                    Snackbar snackbar = Snackbar.make(view, new ThrowableWrapper(ex).getSafeMessage(), Snackbar.LENGTH_LONG)
-                            .setGestureInsetBottomIgnored(true);
+                    Snackbar snackbar = Helper.setSnackbarOptions(
+                            Snackbar.make(view, new ThrowableWrapper(ex).getSafeMessage(), Snackbar.LENGTH_LONG));
                     snackbar.setAction(R.string.title_fix, new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -643,8 +681,9 @@ public class FragmentAccounts extends FragmentBase {
                     });
                     snackbar.show();
                 } else if (ex instanceof IllegalArgumentException)
-                    Snackbar.make(view, new ThrowableWrapper(ex).getSafeMessage(), Snackbar.LENGTH_LONG)
-                            .setGestureInsetBottomIgnored(true).show();
+                    Helper.setSnackbarOptions(
+                                    Snackbar.make(view, new ThrowableWrapper(ex).getSafeMessage(), Snackbar.LENGTH_LONG))
+                            .show();
                 else
                     Log.unexpectedError(getParentFragmentManager(), ex);
             }

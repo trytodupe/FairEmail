@@ -284,14 +284,20 @@ class ImageHelper {
             SVG.setInternalEntitiesEnabled(false);
 
             SVG svg = SVG.getFromInputStream(is);
-            float w = svg.getDocumentWidth();
-            float h = svg.getDocumentHeight();
-            if (w < 0 || h < 0) {
-                w = scaleToPixels;
-                h = scaleToPixels;
+            float dw = svg.getDocumentWidth();
+            float dh = svg.getDocumentHeight();
+            if (dw <= 0 || dh <= 0) {
+                dw = scaleToPixels;
+                dh = scaleToPixels;
             }
 
-            Bitmap bm = Bitmap.createBitmap((int) w, (int) h, Bitmap.Config.ARGB_8888);
+            int w = scaleToPixels;
+            int h = Math.round(scaleToPixels * dh / dw);
+
+            svg.setDocumentWidth("100%");
+            svg.setDocumentHeight("100%");
+
+            Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
             bm.eraseColor(fillColor);
             Canvas canvas = new Canvas(bm);
             svg.renderToCanvas(canvas);
@@ -613,6 +619,24 @@ class ImageHelper {
             return null;
 
         return source.substring(colon + 1, semi);
+    }
+
+    static String getDataUri(File file, String type) throws IOException {
+        try (InputStream is = new FileInputStream(file)) {
+            return getDataUri(is, type);
+        }
+    }
+
+    static String getDataUri(InputStream is, String type) throws IOException {
+        byte[] bytes = Helper.readBytes(is);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("data:");
+        sb.append(type);
+        sb.append(";base64,");
+        sb.append(Base64.encodeToString(bytes, Base64.NO_WRAP));
+
+        return sb.toString();
     }
 
     static ByteArrayInputStream getDataUriStream(String source) {

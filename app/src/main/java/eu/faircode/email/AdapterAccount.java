@@ -29,9 +29,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -70,6 +72,8 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListUpdateCallback;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -85,6 +89,7 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
     private LifecycleOwner owner;
     private LayoutInflater inflater;
 
+    private boolean pro;
     private int dp24;
     private int colorStripeWidth;
     private int colorWarning;
@@ -94,6 +99,7 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
     private boolean show_unexposed;
     private boolean debug;
 
+    private boolean hasAvatars = false;
     private List<TupleAccountFolder> all = new ArrayList<>();
     private List<TupleAccountFolder> items = new ArrayList<>();
 
@@ -103,6 +109,7 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         private View view;
         private View vwColor;
+        private ImageView ivAvatar;
         private ImageView ivOAuth;
         private ImageView ivPrimary;
         private ImageView ivNotify;
@@ -135,6 +142,7 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
 
             view = itemView.findViewById(R.id.clItem);
             vwColor = itemView.findViewById(R.id.vwColor);
+            ivAvatar = itemView.findViewById(R.id.ivAvatar);
             ivSync = itemView.findViewById(R.id.ivSync);
             ibInbox = itemView.findViewById(R.id.ibInbox);
             ivOAuth = itemView.findViewById(R.id.ivOAuth);
@@ -209,6 +217,48 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
                 view.setAlpha(account.synchronize ? 1.0f : Helper.LOW_LIGHT);
                 vwColor.setBackgroundColor(account.color == null ? Color.TRANSPARENT : account.color);
                 vwColor.setVisibility(ActivityBilling.isPro(context) ? View.VISIBLE : View.INVISIBLE);
+
+                if (account.avatar == null || !pro)
+                    ivAvatar.setVisibility(hasAvatars ? View.INVISIBLE : View.GONE);
+                else {
+                    Bundle args = new Bundle();
+                    args.putString("avatar", account.avatar);
+
+                    new SimpleTask<Bitmap>() {
+                        @Override
+                        protected Bitmap onExecute(Context context, Bundle args) throws Throwable {
+                            String avatar = args.getString("avatar");
+                            Uri uri = Uri.parse(avatar);
+                            Bitmap bm;
+                            int scaleToPixels = Helper.dp2pixels(context, ContactInfo.AVATAR_SIZE);
+                            try (InputStream is = context.getContentResolver().openInputStream(uri)) {
+                                if (is == null)
+                                    throw new FileNotFoundException(uri.toString());
+                                bm = ImageHelper.getScaledBitmap(is, avatar, null, scaleToPixels);
+                                if (bm == null)
+                                    throw new FileNotFoundException(avatar);
+                            }
+
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                            boolean circular = prefs.getBoolean("circular", true);
+                            bm = ImageHelper.makeCircular(bm, circular ? null : Helper.dp2pixels(context, 3));
+
+                            return bm;
+                        }
+
+                        @Override
+                        protected void onExecuted(Bundle args, Bitmap bitmap) {
+                            ivAvatar.setImageBitmap(bitmap);
+                            ivAvatar.setVisibility(View.VISIBLE);
+                        }
+
+                        @Override
+                        protected void onException(Bundle args, Throwable ex) {
+                            Log.w(ex);
+                            ivAvatar.setVisibility(hasAvatars ? View.INVISIBLE : View.GONE);
+                        }
+                    }.execute(context, owner, args, "account:avatar");
+                }
 
                 ivSync.setImageResource(account.synchronize ? R.drawable.twotone_sync_24 : R.drawable.twotone_sync_disabled_24);
                 ivSync.setContentDescription(context.getString(account.synchronize ? R.string.title_legend_synchronize_on : R.string.title_legend_synchronize_off));
@@ -339,6 +389,8 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
                 view.setAlpha(account.synchronize ? 1.0f : Helper.LOW_LIGHT);
                 vwColor.setBackgroundColor(account.folderColor == null ? Color.TRANSPARENT : account.folderColor);
                 vwColor.setVisibility(ActivityBilling.isPro(context) ? View.VISIBLE : View.INVISIBLE);
+
+                ivAvatar.setVisibility(View.GONE);
 
                 ivSync.setVisibility(View.GONE);
 
@@ -492,8 +544,11 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
                 popupMenu.getMenu().add(Menu.NONE, R.string.title_account_ondemand, order++, R.string.title_account_ondemand)
                         .setCheckable(true).setChecked(account.ondemand);
             }
-            popupMenu.getMenu().add(Menu.NONE, R.string.title_primary, order++, R.string.title_primary)
-                    .setCheckable(true).setChecked(account.primary);
+            if (account.synchronize)
+                popupMenu.getMenu().add(Menu.NONE, R.string.title_primary, order++, R.string.title_primary)
+                        .setCheckable(true).setChecked(account.primary);
+            if (parentFragment instanceof FragmentAccounts)
+                popupMenu.getMenu().add(Menu.NONE, R.string.title_edit_color, order++, R.string.title_edit_color);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 String channelId = EntityAccount.getNotificationChannelId(account.id);
@@ -518,6 +573,9 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
                 popupMenu.getMenu().add(Menu.NONE, R.string.title_log, order++, R.string.title_log);
             }
 
+            if (!settings)
+                popupMenu.getMenu().add(Menu.NONE, R.string.menu_setup, order++, R.string.menu_setup);
+
             if (debug || BuildConfig.DEBUG) {
                 popupMenu.getMenu().add(Menu.NONE, R.string.title_reset, order++, R.string.title_reset);
                 popupMenu.getMenu().add(Menu.NONE, R.string.title_setup_oauth_authorize, order++, R.string.title_setup_oauth_authorize);
@@ -535,6 +593,9 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
                         return true;
                     } else if (itemId == R.string.title_primary) {
                         onActionPrimary(!item.isChecked());
+                        return true;
+                    } else if (itemId == R.string.title_edit_color) {
+                        onActionEditColor();
                         return true;
                     } else if (itemId == R.string.title_create_channel) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
@@ -559,6 +620,9 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
                         return true;
                     } else if (itemId == R.string.title_log) {
                         onActionLog();
+                        return true;
+                    } else if (itemId == R.string.menu_setup) {
+                        onActionSettings();
                         return true;
                     } else if (itemId == R.string.title_reset) {
                         onActionReset();
@@ -589,6 +653,7 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
                                     db.account().setAccountWarning(id, null);
                                     db.account().setAccountError(id, null);
                                     db.account().setAccountConnected(id, null);
+                                    db.account().setAccountPrimary(id, false);
                                 }
 
                                 db.account().setAccountSynchronize(id, sync);
@@ -674,6 +739,19 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
                             Log.unexpectedError(parentFragment.getParentFragmentManager(), ex);
                         }
                     }.execute(context, owner, args, "account:primary");
+                }
+
+                private void onActionEditColor() {
+                    Bundle args = new Bundle();
+                    args.putLong("id", account.id);
+                    args.putInt("color", account.color == null ? Color.TRANSPARENT : account.color);
+                    args.putString("title", context.getString(R.string.title_color));
+                    args.putBoolean("reset", true);
+
+                    FragmentDialogColor fragment = new FragmentDialogColor();
+                    fragment.setArguments(args);
+                    fragment.setTargetFragment(parentFragment, ActivitySetup.REQUEST_EDIT_ACCOUNT_COLOR);
+                    fragment.show(parentFragment.getParentFragmentManager(), "edit:color");
                 }
 
                 @TargetApi(Build.VERSION_CODES.O)
@@ -795,6 +873,14 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
                     fragmentTransaction.commit();
                 }
 
+                private void onActionSettings() {
+                    context.startActivity(new Intent(context, ActivitySetup.class)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            .putExtra("target", "accounts")
+                            .putExtra("id", account.id)
+                            .putExtra("protocol", account.protocol));
+                }
+
                 private void onActionReset() {
                     Bundle args = new Bundle();
                     args.putLong("id", account.id);
@@ -877,6 +963,7 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
         this.owner = parentFragment.getViewLifecycleOwner();
         this.inflater = LayoutInflater.from(context);
 
+        this.pro = ActivityBilling.isPro(context);
         this.dp24 = Helper.dp2pixels(context, 24);
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -924,6 +1011,14 @@ public class AdapterAccount extends RecyclerView.Adapter<AdapterAccount.ViewHold
             TupleAccountFolder.sort(filtered, true, context);
 
         DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffCallback(items, filtered), false);
+
+        hasAvatars = false;
+        if (pro)
+            for (TupleAccountFolder account : accounts)
+                if (account.avatar != null) {
+                    hasAvatars = true;
+                    break;
+                }
 
         items = filtered;
 

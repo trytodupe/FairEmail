@@ -56,6 +56,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -101,20 +102,6 @@ public class FragmentBase extends Fragment {
             return null;
     }
 
-    protected boolean isActionBarShown() {
-        FragmentActivity activity = getActivity();
-        if (activity instanceof ActivityBase)
-            return ((ActivityBase) activity).isActionBarShown();
-        else
-            return false;
-    }
-
-    protected void showActionBar(boolean show) {
-        FragmentActivity activity = getActivity();
-        if (activity instanceof ActivityBase)
-            ((ActivityBase) activity).showActionBar(show);
-    }
-
     protected void setCount(String count) {
         this.count = count;
         updateSubtitle();
@@ -147,10 +134,12 @@ public class FragmentBase extends Fragment {
         if (actionbar == null)
             return;
 
-        if ((actionbar.getDisplayOptions() & DISPLAY_SHOW_CUSTOM) == 0)
+        Toolbar toolbar = activity.findViewById(R.id.toolbar);
+
+        if ((actionbar.getDisplayOptions() & DISPLAY_SHOW_CUSTOM) == 0 && toolbar == null)
             return;
 
-        final View custom = actionbar.getCustomView();
+        View custom = (toolbar == null ? actionbar.getCustomView() : toolbar);
         if (custom == null)
             return;
 
@@ -289,7 +278,72 @@ public class FragmentBase extends Fragment {
         if (savedInstanceState == null) {
             Bundle args = getArguments();
             if (args == null && !isStateSaved())
-                setArguments(new Bundle());
+                try {
+                    setArguments(new Bundle());
+                } catch (Throwable ex) {
+                    Log.e(ex);
+                    /*
+                        java.lang.IllegalStateException: Fragment already added and state has been saved
+                                at androidx.fragment.app.Fragment.setArguments(SourceFile:2)
+                                at eu.faircode.email.FragmentBase.onCreate(SourceFile:4)
+                                at androidx.fragment.app.Fragment.performCreate(SourceFile:7)
+                                at androidx.fragment.app.FragmentStateManager.create(SourceFile:5)
+                                at androidx.fragment.app.FragmentStateManager.moveToExpectedState(SourceFile:21)
+                                at androidx.fragment.app.FragmentManager.executeOpsTogether(SourceFile:34)
+                                at androidx.fragment.app.FragmentManager.removeRedundantOperationsAndExecute(SourceFile:10)
+                                at androidx.fragment.app.FragmentManager.execSingleAction(SourceFile:5)
+                                at androidx.fragment.app.BackStackRecord.commitNowAllowingStateLoss(SourceFile:2)
+                                at androidx.fragment.app.FragmentStatePagerAdapter.finishUpdate(SourceFile:4)
+                                at androidx.viewpager.widget.ViewPager.populate(SourceFile:51)
+                                at androidx.viewpager.widget.ViewPager.populate(SourceFile:1)
+                                at androidx.viewpager.widget.ViewPager.onMeasure(SourceFile:25)
+                                at android.view.View.measure(View.java:26114)
+                                at androidx.constraintlayout.widget.ConstraintLayout$Measurer.measure(SourceFile:62)
+                                at androidx.constraintlayout.core.widgets.analyzer.BasicMeasure.measure(SourceFile:15)
+                                at androidx.constraintlayout.core.widgets.analyzer.BasicMeasure.measureChildren(SourceFile:18)
+                                at androidx.constraintlayout.core.widgets.analyzer.BasicMeasure.solverMeasure(SourceFile:31)
+                                at androidx.constraintlayout.core.widgets.ConstraintWidgetContainer.measure(SourceFile:3)
+                                at androidx.constraintlayout.widget.ConstraintLayout.resolveSystem(SourceFile:16)
+                                at androidx.constraintlayout.widget.ConstraintLayout.onMeasure(SourceFile:15)
+                                at android.view.View.measure(View.java:26114)
+                                at android.view.ViewGroup.measureChildWithMargins(ViewGroup.java:7118)
+                                at android.widget.FrameLayout.onMeasure(FrameLayout.java:194)
+                                at android.view.View.measure(View.java:26114)
+                                at androidx.drawerlayout.widget.DrawerLayout.onMeasure(SourceFile:43)
+                                at android.view.View.measure(View.java:26114)
+                                at android.view.ViewGroup.measureChildWithMargins(ViewGroup.java:7118)
+                                at android.widget.FrameLayout.onMeasure(FrameLayout.java:194)
+                                at androidx.appcompat.widget.ContentFrameLayout.onMeasure(SourceFile:21)
+                                at android.view.View.measure(View.java:26114)
+                                at android.view.ViewGroup.measureChildWithMargins(ViewGroup.java:7118)
+                                at androidx.appcompat.widget.ActionBarOverlayLayout.onMeasure(SourceFile:44)
+                                at android.view.View.measure(View.java:26114)
+                                at android.view.ViewGroup.measureChildWithMargins(ViewGroup.java:7118)
+                                at android.widget.FrameLayout.onMeasure(FrameLayout.java:194)
+                                at android.view.View.measure(View.java:26114)
+                                at android.view.ViewGroup.measureChildWithMargins(ViewGroup.java:7118)
+                                at android.widget.LinearLayout.measureChildBeforeLayout(LinearLayout.java:1552)
+                                at android.widget.LinearLayout.measureVertical(LinearLayout.java:842)
+                                at android.widget.LinearLayout.onMeasure(LinearLayout.java:721)
+                                at android.view.View.measure(View.java:26114)
+                                at android.view.ViewGroup.measureChildWithMargins(ViewGroup.java:7118)
+                                at com.android.internal.policy.DecorView.measureChildWithMargins(DecorView.java:3446)
+                                at android.widget.FrameLayout.onMeasure(FrameLayout.java:194)
+                                at com.android.internal.policy.DecorView.onMeasure(DecorView.java:968)
+                                at android.view.View.measure(View.java:26114)
+                                at android.view.ViewRootImpl.performMeasure(ViewRootImpl.java:3985)
+                                at android.view.ViewRootImpl.measureHierarchy(ViewRootImpl.java:2679)
+                                at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:3052)
+                                at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:2391)
+                                at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:9325)
+                                at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1186)
+                                at android.view.Choreographer.doCallbacks(Choreographer.java:986)
+                                at android.view.Choreographer.doFrame(Choreographer.java:912)
+                                at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:1171)
+                                at android.os.Handler.handleCallback(Handler.java:938)
+                                at android.os.Handler.dispatchMessage(Handler.java:99)
+                     */
+                }
         } else {
             title = savedInstanceState.getCharSequence("fair:title");
             subtitle = savedInstanceState.getCharSequence("fair:subtitle");
@@ -465,15 +519,16 @@ public class FragmentBase extends Fragment {
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         if (activity != null && !isPane()) {
             ActionBar actionbar = activity.getSupportActionBar();
-            if (actionbar != null)
-                if ((actionbar.getDisplayOptions() & DISPLAY_SHOW_CUSTOM) == 0) {
+            if (actionbar != null) {
+                Toolbar toolbar = activity.findViewById(R.id.toolbar);
+                if ((actionbar.getDisplayOptions() & DISPLAY_SHOW_CUSTOM) == 0 && toolbar == null) {
                     actionbar.setTitle(title == null ? getString(R.string.app_name) : title);
                     actionbar.setSubtitle(subtitle);
                 } else {
                     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
                     boolean list_count = prefs.getBoolean("list_count", false);
 
-                    View custom = actionbar.getCustomView();
+                    View custom = (toolbar == null ? actionbar.getCustomView() : toolbar);
                     TextView tvCount = custom.findViewById(R.id.count);
                     TextView tvTitle = custom.findViewById(R.id.title);
                     TextView tvSubtitle = custom.findViewById(R.id.subtitle);
@@ -487,6 +542,7 @@ public class FragmentBase extends Fragment {
                     if (tvSubtitle != null)
                         tvSubtitle.setText(subtitle);
                 }
+            }
         }
     }
 

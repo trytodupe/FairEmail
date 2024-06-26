@@ -55,7 +55,14 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
+import android.opengl.EGL14;
+import android.opengl.EGLConfig;
+import android.opengl.EGLContext;
+import android.opengl.EGLDisplay;
+import android.opengl.EGLSurface;
+import android.opengl.GLES20;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -81,7 +88,6 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.method.PasswordTransformationMethod;
 import android.text.method.TransformationMethod;
-import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.util.TypedValue;
 import android.view.ActionMode;
@@ -93,7 +99,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.view.Window;
 import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.MimeTypeMap;
@@ -117,9 +122,11 @@ import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
 import androidx.core.view.SoftwareKeyboardControllerCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -183,6 +190,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
+import javax.mail.internet.ContentType;
+import javax.mail.internet.ParseException;
+
 public class Helper {
     private static Integer targetSdk = null;
     private static Boolean hasWebView = null;
@@ -200,6 +210,7 @@ public class Helper {
     static final int PIN_FAILURE_DELAY = 3; // seconds
     static final long PIN_FAILURE_DELAY_MAX = 20 * 60 * 1000L; // milliseconds
     static final float BNV_LUMINANCE_THRESHOLD = 0.7f;
+    static final float MIN_SNACKBAR_LUMINANCE = 0.3f;
 
     static final String PLAY_PACKAGE_NAME = "com.android.vending";
 
@@ -224,6 +235,7 @@ public class Helper {
     static final String DONTKILL_URI = "https://dontkillmyapp.com/";
     static final String URI_SUPPORT_RESET_OPEN = "https://support.google.com/pixelphone/answer/6271667";
     static final String URI_SUPPORT_CONTACT_GROUP = "https://support.google.com/contacts/answer/30970";
+    static final String GOOGLE_PRIVACY_URI = "https://policies.google.com/privacy";
 
     // https://developer.android.com/distribute/marketing-tools/linking-to-google-play#PerformingSearch
     private static final String PLAY_STORE_SEARCH = "https://play.google.com/store/search";
@@ -236,7 +248,7 @@ public class Helper {
     static final String REGEX_UUID = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 
     static final Pattern EMAIL_ADDRESS = Pattern.compile(
-            "[\\S&&[^\"@]]{1,256}" +
+            "[\\S&&[^\"@<>()]]{1,256}" +
                     "\\@" +
                     "[\\p{L}0-9][\\p{L}0-9\\-\\_]{0,64}" +
                     "(" +
@@ -572,6 +584,7 @@ public class Helper {
             } else
                 return false;
         } catch (Throwable ex) {
+            Log.w(ex);
             /*
                 Caused by: java.lang.RuntimeException: Package manager has died
                     at android.app.ApplicationPackageManager.hasSystemFeature(ApplicationPackageManager.java:414)
@@ -897,40 +910,108 @@ public class Helper {
                         SdkExtensions.getExtensionVersion(Build.VERSION_CODES.R) >= 2));
     }
 
-    // View
-
-    static void setStatusBarColor(Activity activity, Integer color) {
-        if (!BuildConfig.DEBUG)
-            return;
-        if (activity == null)
-            return;
-        Window window = activity.getWindow();
-        if (window == null)
-            return;
-
-        if (color == null) {
-            //window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            window.setStatusBarColor(Helper.resolveColor(window.getContext(), androidx.appcompat.R.attr.colorPrimaryDark));
-        } else {
-            //window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            //window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(color);
+    static Boolean isOnForeground() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN)
+            return null;
+        try {
+            ActivityManager.RunningAppProcessInfo appProcessInfo = new ActivityManager.RunningAppProcessInfo();
+            ActivityManager.getMyMemoryState(appProcessInfo);
+            return (appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND ||
+                    appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE);
+        } catch (Throwable ex) {
+            Log.w(ex);
+            return null;
         }
     }
 
-    static Integer actionBarHeight = null;
+    // View
 
-    static int getActionBarHeight(Context context) {
-        if (actionBarHeight == null) {
-            TypedValue tv = new TypedValue();
-            if (context.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
-                DisplayMetrics dm = context.getResources().getDisplayMetrics();
-                actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, dm);
-            } else
-                actionBarHeight = Helper.dp2pixels(context, 56);
+    static int getMaxTextureSize() {
+        try {
+            EGLDisplay display = EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
+            if (display == EGL14.EGL_NO_DISPLAY) {
+                Log.e("eglGetDisplay failed");
+                return -1;
+            }
+
+            try {
+                int[] version = new int[2];
+                boolean result = EGL14.eglInitialize(display, version, 0, version, 1);
+                if (!result) {
+                    Log.e("eglInitialize failed");
+                    return -1;
+                }
+
+                int[] attr = {
+                        EGL14.EGL_COLOR_BUFFER_TYPE, EGL14.EGL_RGB_BUFFER,
+                        EGL14.EGL_LEVEL, 0,
+                        EGL14.EGL_RENDERABLE_TYPE, EGL14.EGL_OPENGL_ES2_BIT,
+                        EGL14.EGL_SURFACE_TYPE, EGL14.EGL_PBUFFER_BIT,
+                        EGL14.EGL_NONE
+                };
+                EGLConfig[] configs = new EGLConfig[1];
+                int[] count = new int[1];
+                result = EGL14.eglChooseConfig(display, attr, 0,
+                        configs, 0, 1, count, 0);
+                if (!result || count[0] == 0) {
+                    Log.e("eglChooseConfig failed");
+                    return -1;
+                }
+
+                int[] surfAttr = {
+                        EGL14.EGL_WIDTH, 64,
+                        EGL14.EGL_HEIGHT, 64,
+                        EGL14.EGL_NONE
+                };
+                EGLSurface surface = EGL14.eglCreatePbufferSurface(display, configs[0], surfAttr, 0);
+                if (surface == EGL14.EGL_NO_SURFACE) {
+                    Log.e("eglCreatePbufferSurface failed");
+                    return -1;
+                }
+
+                try {
+                    int[] ctxAttrib = {
+                            EGL14.EGL_CONTEXT_CLIENT_VERSION, 2,
+                            EGL14.EGL_NONE
+                    };
+                    EGLContext ctx = EGL14.eglCreateContext(display, configs[0], EGL14.EGL_NO_CONTEXT, ctxAttrib, 0);
+                    if (ctx == EGL14.EGL_NO_CONTEXT) {
+                        Log.e("eglCreateContext failed");
+                        return -1;
+                    }
+
+                    try {
+                        result = EGL14.eglMakeCurrent(display, surface, surface, ctx);
+                        if (!result) {
+                            Log.e("eglMakeCurrent failed");
+                            return -1;
+                        }
+
+                        try {
+                            int[] maxSize = new int[1];
+                            GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, maxSize, 0);
+                            return maxSize[0];
+                        } finally {
+                            EGL14.eglMakeCurrent(display, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_CONTEXT);
+                        }
+                    } finally {
+                        EGL14.eglDestroyContext(display, ctx);
+                    }
+                } finally {
+                    EGL14.eglDestroySurface(display, surface);
+                }
+            } finally {
+                EGL14.eglTerminate(display);
+            }
+        } catch (Throwable ex) {
+            Log.e(ex);
         }
 
-        return actionBarHeight;
+        return -1;
+    }
+
+    static int getActionBarHeight(Context context) {
+        return Helper.dp2pixels(context, 56);
     }
 
     static int getBottomNavigationHeight(Context context) {
@@ -939,6 +1020,18 @@ public class Helper {
             return Helper.dp2pixels(context, 56);
         else
             return context.getResources().getDimensionPixelSize(resid);
+    }
+
+    static @NonNull List<View> getViewsWithTag(@NonNull View view, @NonNull String tag) {
+        List<View> result = new ArrayList<>();
+        if (view != null && tag.equals(view.getTag()))
+            result.add(view);
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i <= group.getChildCount(); i++)
+                result.addAll(getViewsWithTag(group.getChildAt(i), tag));
+        }
+        return result;
     }
 
     static ObjectAnimator getFabAnimator(View fab, LifecycleOwner owner) {
@@ -1015,6 +1108,11 @@ public class Helper {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndTypeAndNormalize(uri, type);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean share_task = prefs.getBoolean("share_task", false);
+        if (share_task)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         if (launchAdjacent(context, true))
             intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1161,15 +1259,13 @@ public class Helper {
                 reportNoViewer(context, uri, ex);
             }
         } else {
-            boolean navbar_colorize = prefs.getBoolean("navbar_colorize", false);
             int colorPrimary = resolveColor(context, androidx.appcompat.R.attr.colorPrimary);
             int colorPrimaryDark = resolveColor(context, androidx.appcompat.R.attr.colorPrimaryDark);
 
             CustomTabColorSchemeParams.Builder schemes = new CustomTabColorSchemeParams.Builder()
                     .setToolbarColor(colorPrimary)
-                    .setSecondaryToolbarColor(colorPrimaryDark);
-            if (navbar_colorize)
-                schemes.setNavigationBarColor(colorPrimaryDark);
+                    .setSecondaryToolbarColor(colorPrimaryDark)
+                    .setNavigationBarColor(colorPrimaryDark);
 
             // https://developer.chrome.com/multidevice/android/customtabs
             CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder()
@@ -1517,6 +1613,12 @@ public class Helper {
         return "Google".equalsIgnoreCase(Build.MANUFACTURER);
     }
 
+    static boolean isPixelBeta() {
+        return (isGoogle() &&
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+                Build.PRODUCT != null && Build.PRODUCT.endsWith("_beta"));
+    }
+
     static boolean isSamsung() {
         return "Samsung".equalsIgnoreCase(Build.MANUFACTURER);
     }
@@ -1671,6 +1773,10 @@ public class Helper {
 
     static boolean isAndroid12() {
         return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S);
+    }
+
+    static boolean isAndroid15() {
+        return (Build.VERSION.SDK_INT > Build.VERSION_CODES.UPSIDE_DOWN_CAKE);
     }
 
     static String getMIUIVersion() {
@@ -2057,6 +2163,17 @@ public class Helper {
         view.setLayoutParams(lparam);
     }
 
+    static Snackbar setSnackbarOptions(Snackbar snackbar) {
+        snackbar.setGestureInsetBottomIgnored(true);
+        int colorAccent = Helper.resolveColor(snackbar.getContext(), android.R.attr.colorAccent);
+        double lum = ColorUtils.calculateLuminance(colorAccent);
+        if (lum < MIN_SNACKBAR_LUMINANCE) {
+            colorAccent = ColorUtils.blendARGB(colorAccent, Color.WHITE, MIN_SNACKBAR_LUMINANCE);
+            snackbar.setActionTextColor(colorAccent);
+        }
+        return snackbar;
+    }
+
     static void setSnackbarLines(Snackbar snackbar, int lines) {
         View sv = snackbar.getView();
         if (sv == null)
@@ -2082,21 +2199,23 @@ public class Helper {
     }
 
     static void showKeyboard(final View view) {
-        try {
-            Log.i("showKeyboard view=" + view);
-            new SoftwareKeyboardControllerCompat(view).show();
-        } catch (Throwable ex) {
-            Log.e(ex);
-        }
+        view.post(new RunnableEx("showKeyboard") {
+            @Override
+            protected void delegate() {
+                Log.i("showKeyboard view=" + view);
+                new SoftwareKeyboardControllerCompat(view).show();
+            }
+        });
     }
 
     static void hideKeyboard(final View view) {
-        try {
-            Log.i("hideKeyboard view=" + view);
-            new SoftwareKeyboardControllerCompat(view).hide();
-        } catch (Throwable ex) {
-            Log.e(ex);
-        }
+        view.post(new RunnableEx("hideKeyboard") {
+            @Override
+            protected void delegate() {
+                Log.i("hideKeyboard view=" + view);
+                new SoftwareKeyboardControllerCompat(view).hide();
+            }
+        });
     }
 
     static boolean isKeyboardVisible(final View view) {
@@ -2766,6 +2885,67 @@ public class Helper {
                 return "ovpn";
 
         return extension;
+    }
+
+    @NonNull
+    static UriInfo getInfo(Uri uri, Context context) {
+        UriInfo result = new UriInfo();
+
+        // https://stackoverflow.com/questions/76094229/android-13-photo-video-picker-file-name-from-the-uri-is-garbage
+        DocumentFile dfile = null;
+        try {
+            dfile = DocumentFile.fromSingleUri(context, uri);
+            if (dfile != null) {
+                result.name = dfile.getName();
+                result.type = dfile.getType();
+                result.size = dfile.length();
+                EntityLog.log(context, "UriInfo dfile " + result + " uri=" + uri);
+            }
+        } catch (Throwable ex) {
+            Log.e(ex);
+        }
+
+        // Check name
+        if (TextUtils.isEmpty(result.name))
+            result.name = uri.getLastPathSegment();
+
+        // Check type
+        if (!TextUtils.isEmpty(result.type))
+            try {
+                new ContentType(result.type);
+            } catch (ParseException ex) {
+                Log.w(new Throwable(result.type, ex));
+                result.type = null;
+            }
+
+        if (TextUtils.isEmpty(result.type) ||
+                "*/*".equals(result.type) ||
+                "application/*".equals(result.type) ||
+                "application/octet-stream".equals(result.type))
+            result.type = Helper.guessMimeType(result.name);
+
+        if (result.size != null && result.size <= 0)
+            result.size = null;
+
+        EntityLog.log(context, "UriInfo result " + result + " uri=" + uri);
+
+        return result;
+    }
+
+    static class UriInfo {
+        String name;
+        String type;
+        Long size;
+
+        boolean isImage() {
+            return ImageHelper.isImage(type);
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "name=" + name + " type=" + type + " size=" + size;
+        }
     }
 
     static void writeText(File file, String content) throws IOException {
@@ -3474,18 +3654,20 @@ public class Helper {
                     @Override
                     public void run() {
                         if (owner.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-                            if (selected == null)
+                            if (selected == null) {
                                 intf.onNothingSelected();
-                            else
+                                ToastEx.makeText(activity, R.string.title_no_key_selected, Toast.LENGTH_LONG).show();
+                            } else
                                 intf.onSelected(selected);
                         } else {
                             owner.getLifecycle().addObserver(new LifecycleObserver() {
                                 @OnLifecycleEvent(Lifecycle.Event.ON_START)
                                 public void onStart() {
                                     owner.getLifecycle().removeObserver(this);
-                                    if (selected == null)
+                                    if (selected == null) {
                                         intf.onNothingSelected();
-                                    else
+                                        ToastEx.makeText(activity, R.string.title_no_key_selected, Toast.LENGTH_LONG).show();
+                                    } else
                                         intf.onSelected(selected);
                                 }
 

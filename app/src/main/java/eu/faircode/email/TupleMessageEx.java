@@ -22,7 +22,6 @@ package eu.faircode.email;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.text.TextUtils;
 
 import androidx.preference.PreferenceManager;
 import androidx.room.Ignore;
@@ -124,17 +123,6 @@ public class TupleMessageEx extends EntityMessage {
 
         this.keyword_colors = color.toArray(new Integer[0]);
         this.keyword_titles = titles.toArray(new String[0]);
-    }
-
-    String getRemark() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(MessageHelper.formatAddresses(from));
-        if (!TextUtils.isEmpty(subject)) {
-            if (sb.length() > 0)
-                sb.append('\n');
-            sb.append(subject);
-        }
-        return sb.toString();
     }
 
     @Override

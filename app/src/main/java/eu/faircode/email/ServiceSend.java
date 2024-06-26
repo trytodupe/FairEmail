@@ -67,6 +67,7 @@ import java.util.concurrent.ExecutorService;
 
 import javax.mail.Address;
 import javax.mail.AuthenticationFailedException;
+import javax.mail.Folder;
 import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.SendFailedException;
@@ -106,7 +107,16 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
     public void onCreate() {
         EntityLog.log(this, "Service send create");
         super.onCreate();
-        startForeground(NotificationHelper.NOTIFICATION_SEND, getNotificationService(false));
+        try {
+            startForeground(NotificationHelper.NOTIFICATION_SEND, getNotificationService(false));
+            EntityLog.log(this, EntityLog.Type.Debug2,
+                    "onCreate class=" + this.getClass().getName());
+        } catch (Throwable ex) {
+            if (Helper.isPlayStoreInstall())
+                Log.i(ex);
+            else
+                Log.e(ex);
+        }
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         retry_max = prefs.getInt("send_retry_max", RETRY_MAX_DEFAULT);
@@ -180,8 +190,9 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
             }
         });
 
-        lastActive = ConnectionHelper.getActiveNetwork(this);
-        lastSuitable = ConnectionHelper.getNetworkState(this).isSuitable();
+        ConnectionHelper.NetworkState state = ConnectionHelper.getNetworkState(this);
+        lastActive = state.getActive();
+        lastSuitable = state.isSuitable();
         if (lastSuitable)
             owner.start();
 
@@ -199,6 +210,16 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
                 ContextCompat.RECEIVER_NOT_EXPORTED);
 
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onTimeout(int startId) {
+        String msg = "onTimeout" +
+                " class=" + this.getClass().getName() +
+                " ignoring=" + Helper.isIgnoringOptimizations(this);
+        Log.e(new Throwable(msg));
+        EntityLog.log(this, EntityLog.Type.Debug3, msg);
+        stopSelf();
     }
 
     @Override
@@ -235,7 +256,16 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        startForeground(NotificationHelper.NOTIFICATION_SEND, getNotificationService(false));
+        try {
+            startForeground(NotificationHelper.NOTIFICATION_SEND, getNotificationService(false));
+            EntityLog.log(this, EntityLog.Type.Debug2,
+                    "onStartCommand class=" + this.getClass().getName());
+        } catch (Throwable ex) {
+            if (Helper.isPlayStoreInstall())
+                Log.i(ex);
+            else
+                Log.e(ex);
+        }
 
         Log.i("Send intent=" + intent);
         Log.logExtras(intent);
@@ -294,7 +324,7 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
                 .setSmallIcon(R.drawable.baseline_warning_white_24)
                 .setContentTitle(getString(R.string.title_notification_sending_failed, recipient))
                 .setContentIntent(getPendingIntent(this))
-                .setAutoCancel(tries_left != 0)
+                .setAutoCancel(true)
                 .setShowWhen(true)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setOnlyAlertOnce(false)
@@ -573,7 +603,7 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
             // Requeue non executing operations
             for (long id : db.message().getMessageByFolder(outbox.id)) {
                 EntityMessage message = db.message().getMessage(id);
-                if (message == null)
+                if (message == null || message.warning != null)
                     continue;
 
                 EntityOperation op = db.operation().getOperation(message.id, EntityOperation.SEND);
@@ -623,6 +653,7 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
             nm.notify(NotificationHelper.NOTIFICATION_SEND, getNotificationService(true));
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean send_partial = prefs.getBoolean("send_partial", false);
         boolean reply_move = prefs.getBoolean("reply_move", false);
         boolean reply_move_inbox = prefs.getBoolean("reply_move_inbox", true);
         boolean protocol = prefs.getBoolean("protocol", false);
@@ -701,7 +732,7 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
             if (plain != null && (plain & 1) != 0)
                 body = body.replace("<div x-plain=\"true\">", "<div>");
 
-            String text = HtmlHelper.getFullText(body);
+            String text = HtmlHelper.getFullText(body, true);
             String language = HtmlHelper.getLanguage(this, message.subject, text);
             String preview = HtmlHelper.getPreview(text);
 
@@ -761,15 +792,33 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
         }
 
         // Create transport
-        long start, end;
+        long start = 0;
+        long end = 0;
         Long max_size = null;
+        SMTPSendFailedException partial = null;
         if (ident.auth_type == AUTH_TYPE_GRAPH) {
             start = new Date().getTime();
             MicrosoftGraph.send(ServiceSend.this, ident, imessage);
             end = new Date().getTime();
         } else {
+            if (account != null)
+                try (EmailService iaccount = new EmailService(this, account, EmailService.PURPOSE_USE, debug)) {
+                    iaccount.connect(account);
+                    Folder ifolder = iaccount.getStore().getFolder("INBOX");
+                    ifolder.open(Folder.READ_ONLY);
+                    try {
+                        ifolder.getMessages();
+                    } finally {
+                        ifolder.close();
+                    }
+                }
+
             EmailService iservice = new EmailService(this, ident, EmailService.PURPOSE_USE, debug);
             try {
+                if (ident.envelopeFrom != null)
+                    iservice.setMailFrom(ident.envelopeFrom);
+                if (send_partial)
+                    iservice.setSendPartial(true);
                 iservice.setUseIp(ident.use_ip, ident.ehlo);
                 if (!message.isSigned() && !message.isEncrypted())
                     iservice.set8BitMime(ident.octetmime);
@@ -820,6 +869,12 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
                             recipients.add(a);
                 }
 
+                if (BuildConfig.DEBUG && false) {
+                    InternetAddress invalid = new InternetAddress();
+                    invalid.setAddress("invalid");
+                    recipients.add(invalid);
+                }
+
                 if (protocol && BuildConfig.DEBUG) {
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     imessage.writeTo(bos);
@@ -855,15 +910,27 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
                 // Send message
                 EntityLog.log(this, "Sending " + via);
                 start = new Date().getTime();
-                iservice.getTransport().sendMessage(imessage, rcptto);
-                end = new Date().getTime();
+                try {
+                    iservice.getTransport().sendMessage(imessage, rcptto);
+                } finally {
+                    end = new Date().getTime();
+                }
                 EntityLog.log(this, "Sent " + via + " elapse=" + (end - start) + " ms");
             } catch (MessagingException ex) {
+
                 iservice.dump(ident.email);
                 Log.e(ex);
 
                 if (ex instanceof SMTPSendFailedException) {
                     SMTPSendFailedException sem = (SMTPSendFailedException) ex;
+                    if (send_partial &&
+                            sem.getInvalidAddresses() != null &&
+                            sem.getValidSentAddresses() != null &&
+                            sem.getValidUnsentAddresses() != null &&
+                            sem.getValidSentAddresses().length > 0 &&
+                            sem.getInvalidAddresses().length + sem.getValidUnsentAddresses().length > 0) {
+                        partial = sem;
+                    }
                     ex = new SMTPSendFailedException(
                             sem.getCommand(),
                             sem.getReturnCode(),
@@ -874,12 +941,13 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
                             sem.getInvalidAddresses());
                 }
 
-                if (sid != null)
+                if (sid != null && partial == null)
                     db.message().deleteMessage(sid);
 
                 db.identity().setIdentityError(ident.id, Log.formatThrowable(ex));
 
-                throw ex;
+                if (partial == null)
+                    throw ex;
             } catch (Throwable ex) {
                 iservice.dump(ident.email);
                 throw ex;
@@ -898,7 +966,20 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
             db.beginTransaction();
 
             // Delete from outbox
-            db.message().deleteMessage(message.id);
+            if (partial == null)
+                db.message().deleteMessage(message.id);
+            else {
+                Throwable ex = new Throwable(getString(R.string.title_advanced_sent_partially), partial);
+                db.message().setMessageWarning(message.id, Log.formatThrowable(ex));
+                if (NotificationHelper.areNotificationsEnabled(nm)) {
+                    NotificationCompat.Builder builder = getNotificationError(
+                            MessageHelper.formatAddressesShort(message.to),
+                            ex, 0);
+                    nm.notify("partial:" + message.id,
+                            NotificationHelper.NOTIFICATION_TAGGED,
+                            builder.build());
+                }
+            }
 
             // Show in sent folder
             if (sid != null) {
@@ -906,6 +987,20 @@ public class ServiceSend extends ServiceBase implements SharedPreferences.OnShar
                         EntityMessage.SMIME_SIGNENCRYPT.equals(message.ui_encrypt))
                     db.attachment().deleteAttachments(sid,
                             new int[]{EntityAttachment.PGP_MESSAGE, EntityAttachment.SMIME_MESSAGE});
+
+                if (partial != null) {
+                    List<Address> unsent = new ArrayList<>();
+                    if (partial.getInvalidAddresses() != null)
+                        unsent.addAll(Arrays.asList(partial.getInvalidAddresses()));
+                    if (partial.getValidUnsentAddresses() != null)
+                        unsent.addAll(Arrays.asList(partial.getValidUnsentAddresses()));
+                    db.message().setMessageTo(sid,
+                            DB.Converters.encodeAddresses(MessageHelper.removeAddresses(message.to, unsent)));
+                    db.message().setMessageCc(sid,
+                            DB.Converters.encodeAddresses(MessageHelper.removeAddresses(message.cc, unsent)));
+                    db.message().setMessageBcc(sid,
+                            DB.Converters.encodeAddresses(MessageHelper.removeAddresses(message.bcc, unsent)));
+                }
 
                 db.message().setMessageReceived(sid, start);
                 db.message().setMessageSent(sid, end);

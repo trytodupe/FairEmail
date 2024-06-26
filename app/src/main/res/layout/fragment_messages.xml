@@ -205,6 +205,39 @@
                 app:layout_constraintTop_toBottomOf="@id/tvHintSwipe" />
 
             <TextView
+                android:id="@+id/tvHintOutbox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:minHeight="36dp"
+                android:padding="6dp"
+                android:text="@string/title_hint_outbox"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                app:layout_constraintEnd_toStartOf="@+id/ibHintSwipe"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/vSeparatorHintSwipe" />
+
+            <ImageButton
+                android:id="@+id/ibHintOutbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/title_legend_close_hint"
+                android:padding="9dp"
+                app:layout_constraintBottom_toBottomOf="@id/tvHintOutbox"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tvHintOutbox"
+                app:srcCompat="@drawable/twotone_close_24" />
+
+            <View
+                android:id="@+id/vSeparatorHintOutbox"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?attr/colorSeparator"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvHintOutbox" />
+
+            <TextView
                 android:id="@+id/tvHintSelect"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -215,7 +248,7 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
                 app:layout_constraintEnd_toStartOf="@+id/ibHintSelect"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/vSeparatorHintSwipe" />
+                app:layout_constraintTop_toBottomOf="@id/vSeparatorHintOutbox" />
 
             <ImageButton
                 android:id="@+id/ibHintSelect"
@@ -270,6 +303,39 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tvHintJunk" />
 
+            <TextView
+                android:id="@+id/tvMotd"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:minHeight="36dp"
+                android:padding="6dp"
+                android:text="Message of the day"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                app:layout_constraintEnd_toStartOf="@+id/ibMotd"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/vSeparatorHintJunk" />
+
+            <ImageButton
+                android:id="@+id/ibMotd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/title_legend_close_hint"
+                android:padding="9dp"
+                app:layout_constraintBottom_toBottomOf="@id/tvMotd"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tvMotd"
+                app:srcCompat="@drawable/twotone_close_24" />
+
+            <View
+                android:id="@+id/vSeparatorMod"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?attr/colorSeparator"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvMotd" />
+
             <include
                 android:id="@+id/inGroup"
                 layout="@layout/item_group"
@@ -277,7 +343,7 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/vSeparatorHintJunk" />
+                app:layout_constraintTop_toBottomOf="@id/vSeparatorMod" />
 
             <eu.faircode.email.ViewTextDelayed
                 android:id="@+id/tvNoEmail"
@@ -433,6 +499,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/title_accessibility_filter_out_seen"
                 android:padding="12dp"
+                android:tag="inset"
                 app:layout_constraintBottom_toTopOf="@+id/etSearch"
                 app:layout_constraintEnd_toStartOf="@id/ibUnflagged"
                 app:layout_constraintHorizontal_chainStyle="packed"
@@ -448,6 +515,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/title_accessibility_filter_out_unflagged"
                 android:padding="12dp"
+                android:tag="inset"
                 app:layout_constraintBottom_toTopOf="@+id/etSearch"
                 app:layout_constraintEnd_toStartOf="@+id/ibSnoozed"
                 app:layout_constraintStart_toEndOf="@id/ibSeen"
@@ -462,6 +530,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/title_accessibility_filter_out_snoozed"
                 android:padding="12dp"
+                android:tag="inset"
                 app:layout_constraintBottom_toTopOf="@+id/etSearch"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/ibUnflagged"
@@ -497,6 +566,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="36dp"
                 android:background="?attr/colorPrimary"
+                android:tag="inset"
                 app:itemIconTint="@color/action_foreground"
                 app:itemTextColor="@color/action_foreground"
                 app:labelVisibilityMode="unlabeled"
@@ -548,6 +618,12 @@
                 app:constraint_referenced_ids="tvHintSwipe,ibHintSwipe,vSeparatorHintSwipe" />
 
             <androidx.constraintlayout.widget.Group
+                android:id="@+id/grpHintOutbox"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:constraint_referenced_ids="tvHintOutbox,ibHintOutbox,vSeparatorHintOutbox" />
+
+            <androidx.constraintlayout.widget.Group
                 android:id="@+id/grpHintSelect"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -558,6 +634,12 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 app:constraint_referenced_ids="tvHintJunk,ibHintJunk,vSeparatorHintJunk" />
+
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/grpMotd"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:constraint_referenced_ids="tvMotd,ibMotd,vSeparatorMod" />
 
             <androidx.constraintlayout.widget.Group
                 android:id="@+id/grpReady"
@@ -596,7 +678,7 @@
         android:paddingVertical="3dp"
         android:text="3"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
-        android:textColor="@color/action_foreground"
+        android:textColor="?attr/colorInfoForeground"
         app:layout_anchor="@id/fabMore"
         app:layout_anchorGravity="center_horizontal|bottom" />
 
@@ -631,6 +713,20 @@
                 app:tint="@color/action_foreground" />
 
             <ImageButton
+                android:id="@+id/ibSummarize"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/title_summarize"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:tooltipText="@string/title_summarize"
+                app:layout_constraintEnd_toStartOf="@id/ibAnswer"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/twotone_smart_toy_24"
+                app:tint="@color/action_foreground" />
+
+            <ImageButton
                 android:id="@+id/ibBatchSeen"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
@@ -639,7 +735,7 @@
                 android:padding="6dp"
                 android:scaleType="fitCenter"
                 android:tooltipText="@string/title_seen"
-                app:layout_constraintEnd_toStartOf="@id/ibAnswer"
+                app:layout_constraintEnd_toStartOf="@id/ibSummarize"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/twotone_drafts_24"
                 app:tint="@color/action_foreground" />
@@ -765,17 +861,17 @@
                 app:tint="@color/action_foreground" />
 
             <ImageButton
-                android:id="@+id/ibInbox"
+                android:id="@+id/ibMove"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/title_folder_inbox"
+                android:contentDescription="@string/title_move_to"
                 android:padding="6dp"
                 android:scaleType="fitCenter"
-                android:tooltipText="@string/title_folder_inbox"
+                android:tooltipText="@string/title_move_to"
                 app:layout_constraintEnd_toStartOf="@id/ibHighImportance"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/twotone_inbox_24"
+                app:srcCompat="@drawable/twotone_drive_file_move_24"
                 app:tint="@color/action_foreground" />
 
             <ImageButton
@@ -787,23 +883,9 @@
                 android:padding="6dp"
                 android:scaleType="fitCenter"
                 android:tooltipText="@string/title_archive"
-                app:layout_constraintEnd_toStartOf="@id/ibInbox"
+                app:layout_constraintEnd_toStartOf="@id/ibMove"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/twotone_archive_24"
-                app:tint="@color/action_foreground" />
-
-            <ImageButton
-                android:id="@+id/ibJunk"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/title_folder_junk"
-                android:padding="6dp"
-                android:scaleType="fitCenter"
-                android:tooltipText="@string/title_folder_junk"
-                app:layout_constraintEnd_toStartOf="@id/ibArchive"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/twotone_report_24"
                 app:tint="@color/action_foreground" />
 
             <ImageButton
@@ -815,7 +897,7 @@
                 android:padding="6dp"
                 android:scaleType="fitCenter"
                 android:tooltipText="@string/title_trash"
-                app:layout_constraintEnd_toStartOf="@id/ibJunk"
+                app:layout_constraintEnd_toStartOf="@id/ibArchive"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/twotone_delete_24"
                 app:tint="@color/action_foreground" />
@@ -835,17 +917,31 @@
                 app:tint="@color/action_foreground" />
 
             <ImageButton
-                android:id="@+id/ibMove"
+                android:id="@+id/ibJunk"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/title_move_to"
+                android:contentDescription="@string/title_folder_junk"
                 android:padding="6dp"
                 android:scaleType="fitCenter"
-                android:tooltipText="@string/title_move_to"
+                android:tooltipText="@string/title_folder_junk"
                 app:layout_constraintEnd_toStartOf="@id/ibDelete"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/twotone_drive_file_move_24"
+                app:srcCompat="@drawable/twotone_report_24"
+                app:tint="@color/action_foreground" />
+
+            <ImageButton
+                android:id="@+id/ibInbox"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/title_folder_inbox"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:tooltipText="@string/title_folder_inbox"
+                app:layout_constraintEnd_toStartOf="@id/ibJunk"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/twotone_inbox_24"
                 app:tint="@color/action_foreground" />
 
             <ImageButton
@@ -857,7 +953,7 @@
                 android:padding="3dp"
                 android:paddingVertical="6dp"
                 android:tooltipText="@string/title_setup"
-                app:layout_constraintEnd_toStartOf="@id/ibMove"
+                app:layout_constraintEnd_toStartOf="@id/ibInbox"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/twotone_settings_24"
                 app:tint="@color/action_foreground" />
@@ -895,6 +991,7 @@
         android:layout_gravity="center_horizontal|bottom"
         android:layout_marginBottom="45dp"
         android:contentDescription="@string/title_setup_error"
+        android:tag="inset"
         android:tooltipText="@string/title_setup_error"
         app:backgroundTint="?attr/colorWarning"
         app:srcCompat="@drawable/twotone_warning_24"

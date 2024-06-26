@@ -535,16 +535,36 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
+        <CheckBox
+            android:id="@+id/cbLoginBeforeSend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/title_login_before_send"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardServer" />
+
+        <TextView
+            android:id="@+id/tvLoginBeforeSendHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="@string/title_identity_receive_first_hint"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textStyle="italic"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cbLoginBeforeSend" />
+
         <Button
             android:id="@+id/btnCertificate"
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="12dp"
             android:tag="disable"
             android:text="@string/title_client_certificate"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/cardServer" />
+            app:layout_constraintTop_toBottomOf="@id/tvLoginBeforeSendHint" />
 
         <TextView
             android:id="@+id/tvCertificate"
@@ -834,6 +854,38 @@
             app:layout_constraintTop_toBottomOf="@id/etBcc" />
 
         <TextView
+            android:id="@+id/tvEnvelopeFrom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/title_envelope_from"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvBccHint" />
+
+        <eu.faircode.email.EditTextPlain
+            android:id="@+id/etEnvelopeFrom"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/title_optional"
+            android:importantForAutofill="no"
+            android:inputType="textEmailAddress"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvEnvelopeFrom" />
+
+        <TextView
+            android:id="@+id/tvEnvelopeFromHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/title_advanced_envelope_from_hint"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textStyle="italic"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/etEnvelopeFrom" />
+
+        <TextView
             android:id="@+id/tvInternal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -841,7 +893,7 @@
             android:text="@string/title_identity_internal"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvBccHint" />
+            app:layout_constraintTop_toBottomOf="@id/tvEnvelopeFromHint" />
 
         <eu.faircode.email.EditTextPlain
             android:id="@+id/etInternal"
@@ -1154,12 +1206,14 @@
                 tvProvider,spProvider,
                 tvDomain,tvDomainHint,etDomain,btnAutoConfig,
                 cardServer,
+                cbLoginBeforeSend,tvLoginBeforeSendHint,
                 btnCertificate,tvCertificate,
                 tvRealm,etRealm,
                 cbUseIp,tvUseIpHint,tvEhlo,etEhlo,ibEhlo,
                 cbSynchronize,cbPrimary,cbSelf,tvSelfHint,
                 cbSenderExtra,cbSenderExtraName,cbReplyExtraName,tvSenderExtra,etSenderExtra,ibSenderExtra,tvSenderExtraHint,
                 tvReplyTo,etReplyTo,tvCc,etCc,tvCcHint,tvBcc,etBcc,tvBccHint,
+                tvEnvelopeFrom,etEnvelopeFrom,tvEnvelopeFromHint,
                 tvInternal,etInternal,tvInternalHint,
                 btnUri,tvUriHint,tvUriInfo,tvUriPro,
                 tvE2Encryption,cbSignDefault,cbEncryptDefault,

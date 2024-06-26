@@ -20,8 +20,6 @@ package eu.faircode.email;
 */
 
 import android.Manifest;
-import android.animation.Animator;
-import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -40,6 +38,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
@@ -48,11 +47,19 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.ColorUtils;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsAnimationCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -62,6 +69,8 @@ import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.OnLifecycleEvent;
 import androidx.preference.PreferenceManager;
+
+import com.google.android.material.appbar.AppBarLayout;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -77,10 +86,11 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
     private int themeId;
     private Context originalContext;
     private boolean visible;
+    private boolean hasWindowFocus;
     private boolean contacts;
     private List<IKeyPressedListener> keyPressedListeners = new ArrayList<>();
 
-    private static final long ACTIONBAR_ANIMATION_DURATION = 250L;
+    private static final double LUMINANCE_THRESHOLD = 0.7f;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -93,6 +103,178 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
     }
 
     @Override
+    public void setContentView(View view) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean hide_toolbar = prefs.getBoolean("hide_toolbar", !BuildConfig.PLAY_STORE_RELEASE);
+        boolean edge_to_edge = prefs.getBoolean("edge_to_edge", false);
+
+        int colorPrimary = Helper.resolveColor(this, androidx.appcompat.R.attr.colorPrimary);
+        double lum = ColorUtils.calculateLuminance(colorPrimary);
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        ViewGroup holder = (ViewGroup) inflater.inflate(lum > LUMINANCE_THRESHOLD
+                        ? R.layout.toolbar_holder_light
+                        : R.layout.toolbar_holder_dark,
+                null);
+        if (BuildConfig.DEBUG)
+            holder.setBackgroundColor(Color.RED);
+
+        AppBarLayout appbar = holder.findViewById(R.id.appbar);
+        Toolbar toolbar = holder.findViewById(R.id.toolbar);
+        View placeholder = holder.findViewById(R.id.placeholder);
+
+        ViewGroup.LayoutParams lp = toolbar.getLayoutParams();
+        lp.height = Helper.getActionBarHeight(this);
+        toolbar.setLayoutParams(lp);
+
+        toolbar.setPopupTheme(getThemeId());
+        if (hide_toolbar && this instanceof ActivityView) {
+            AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
+            params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL |
+                    AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
+            toolbar.setLayoutParams(params);
+
+            getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+                @Override
+                public void onBackStackChanged() {
+                    try {
+                        appbar.setExpanded(true);
+                    } catch (Throwable ex) {
+                        Log.e(ex);
+                    }
+                }
+            });
+        }
+
+        setSupportActionBar(toolbar);
+
+        holder.removeView(placeholder);
+        holder.addView(view, placeholder.getLayoutParams());
+
+        int abh = Helper.getActionBarHeight(this);
+        appbar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int offset) {
+                try {
+                    view.setTranslationY(abh + offset);
+                    ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+                    if (mlp.bottomMargin != abh + offset) {
+                        mlp.bottomMargin = abh + offset;
+                        view.setLayoutParams(mlp);
+                    }
+                } catch (Throwable ex) {
+                    Log.e(ex);
+                }
+            }
+        });
+
+        FragmentDialogTheme.setBackground(this, holder, this instanceof ActivityCompose);
+
+        ViewCompat.setOnApplyWindowInsetsListener(holder, (v, windowInsets) -> {
+            try {
+                Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+                boolean changed = false;
+                ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                if (mlp.leftMargin != insets.left) {
+                    changed = true;
+                    mlp.leftMargin = insets.left;
+                }
+                if (mlp.topMargin != insets.top) {
+                    changed = true;
+                    mlp.topMargin = insets.top;
+                }
+                if (mlp.rightMargin != insets.right) {
+                    changed = true;
+                    mlp.rightMargin = insets.right;
+                }
+                if (!edge_to_edge)
+                    if (mlp.bottomMargin != insets.bottom) {
+                        changed = true;
+                        mlp.bottomMargin = insets.bottom;
+                    }
+                if (changed)
+                    v.setLayoutParams(mlp);
+
+                int b = v.getPaddingBottom();
+                if (hasWindowFocus) {
+                    int bottom = windowInsets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
+                    int pad = Math.max(0, bottom - insets.bottom);
+                    if (b != pad)
+                        v.setPaddingRelative(0, 0, 0, pad);
+                } else {
+                    if (b != 0)
+                        v.setPaddingRelative(0, 0, 0, 0);
+                }
+
+                if (edge_to_edge)
+                    for (View child : Helper.getViewsWithTag(v, "inset")) {
+                        mlp = (ViewGroup.MarginLayoutParams) child.getLayoutParams();
+                        mlp.bottomMargin = insets.bottom;
+                        child.setLayoutParams(mlp);
+                    }
+
+            } catch (Throwable ex) {
+                Log.e(ex);
+            }
+
+            return WindowInsetsCompat.CONSUMED;
+        });
+
+        if (false)
+            ViewCompat.setWindowInsetsAnimationCallback(
+                    holder,
+                    new WindowInsetsAnimationCompat.Callback(WindowInsetsAnimationCompat.Callback.DISPATCH_MODE_STOP) {
+                        @NonNull
+                        @Override
+                        public WindowInsetsCompat onProgress(
+                                @NonNull WindowInsetsCompat windowInsets,
+                                @NonNull List<WindowInsetsAnimationCompat> runningAnimations) {
+                            try {
+                                // https://developer.android.com/develop/ui/views/layout/sw-keyboard
+                                for (WindowInsetsAnimationCompat animation : runningAnimations)
+                                    if ((animation.getTypeMask() & WindowInsetsCompat.Type.ime()) != 0) {
+                                        Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                                        int bottom = windowInsets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
+                                        int pad = bottom - insets.bottom;
+                                        holder.setPaddingRelative(0, 0, 0, pad < 0 ? 0 : pad);
+                                        break;
+                                    }
+                            } catch (Throwable ex) {
+                                Log.e(ex);
+                            }
+
+                            return windowInsets;
+                        }
+                    });
+
+        super.setContentView(holder);
+
+        int colorPrimaryDark = Helper.resolveColor(this, androidx.appcompat.R.attr.colorPrimaryDark);
+        view.post(new RunnableEx("setBackgroundColor") {
+            @Override
+            public void delegate() {
+                getWindow().getDecorView().setBackgroundColor(colorPrimaryDark);
+            }
+        });
+    }
+
+    @Override
+    public void setContentView(int layoutResID) {
+        View view = LayoutInflater.from(this).inflate(layoutResID, null);
+        setContentView(view);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        hasWindowFocus = hasFocus;
+        Window window = getWindow();
+        View view = (window == null ? null : window.getDecorView());
+        if (view != null)
+            view.requestApplyInsets();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         EntityLog.log(this, "Activity create " + this.getClass().getName() +
                 " version=" + BuildConfig.VERSION_NAME + BuildConfig.REVISION +
@@ -102,6 +284,7 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
             EntityLog.log(this, intent +
                     " extras=" + TextUtils.join(", ", Log.getExtras(intent.getExtras())));
 
+        Window window = getWindow();
         getSupportFragmentManager().registerFragmentLifecycleCallbacks(lifecycleCallbacks, true);
 
         this.contacts = hasPermission(Manifest.permission.READ_CONTACTS);
@@ -110,21 +293,23 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
 
         boolean secure = prefs.getBoolean("secure", false);
         if (secure)
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+            window.addFlags(WindowManager.LayoutParams.FLAG_SECURE);
 
         if (!this.getClass().equals(ActivityMain.class)) {
             themeId = FragmentDialogTheme.getTheme(this);
             setTheme(themeId);
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                boolean dark = Helper.isDarkTheme(this);
-                Window window = getWindow();
-                View view = window.getDecorView();
-                int flags = view.getSystemUiVisibility();
-                if (dark)
-                    flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-                view.setSystemUiVisibility(flags);
-            }
+            EdgeToEdge.enable(this);
+
+            int colorPrimary = Helper.resolveColor(this, androidx.appcompat.R.attr.colorPrimary);
+            double lum = ColorUtils.calculateLuminance(colorPrimary);
+
+            WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(window, window.getDecorView());
+            controller.setAppearanceLightStatusBars(lum > LUMINANCE_THRESHOLD);
+            controller.setAppearanceLightNavigationBars(lum > LUMINANCE_THRESHOLD);
+            window.setNavigationBarColor(Color.TRANSPARENT);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                window.setNavigationBarContrastEnforced(false);
         }
 
         String requestKey = getRequestKey();
@@ -153,8 +338,6 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
 
         prefs.registerOnSharedPreferenceChangeListener(this);
 
-        int colorPrimaryDark = Helper.resolveColor(this, androidx.appcompat.R.attr.colorPrimaryDark);
-
         try {
             Drawable d = getDrawable(R.drawable.baseline_mail_24);
             Bitmap bm = Bitmap.createBitmap(
@@ -167,28 +350,19 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
             d.draw(canvas);
 
             boolean task_description = prefs.getBoolean("task_description", true);
-            int colorPrimary;
-            if (task_description) {
-                colorPrimary = colorPrimaryDark;
-                if (colorPrimary != 0 && Color.alpha(colorPrimary) != 255) {
-                    Log.w("Task color primary=" + Integer.toHexString(colorPrimary));
-                    colorPrimary = ColorUtils.setAlphaComponent(colorPrimary, 255);
-                }
-            } else
-                colorPrimary = getColor(R.color.lightBluePrimary);
+            int colorPrimary = (task_description
+                    ? Helper.resolveColor(this, androidx.appcompat.R.attr.colorPrimaryDark)
+                    : getColor(R.color.lightBluePrimary));
+            if (colorPrimary != 0 && Color.alpha(colorPrimary) != 255) {
+                Log.w("Task color primary=" + Integer.toHexString(colorPrimary));
+                colorPrimary = ColorUtils.setAlphaComponent(colorPrimary, 255);
+            }
 
             ActivityManager.TaskDescription td = new ActivityManager.TaskDescription(
                     null, bm, colorPrimary);
             setTaskDescription(td);
         } catch (Throwable ex) {
             Log.e(ex);
-        }
-
-        boolean navbar_colorize = prefs.getBoolean("navbar_colorize", false);
-        if (navbar_colorize) {
-            Window window = getWindow();
-            if (window != null)
-                window.setNavigationBarColor(colorPrimaryDark);
         }
 
         FragmentManager fm = getSupportFragmentManager();
@@ -900,80 +1074,6 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
         return super.shouldUpRecreateTask(targetIntent);
     }
 
-    public boolean abShowing = true;
-    public ValueAnimator abAnimator = null;
-
-    public boolean isActionBarShown() {
-        return abShowing;
-    }
-
-    public void showActionBar(boolean show) {
-        ViewGroup abv = findViewById(androidx.appcompat.R.id.action_bar);
-        if (abv == null)
-            return;
-
-        if (abShowing == show)
-            return;
-        abShowing = show;
-
-        int height = Helper.getActionBarHeight(this);
-        int current = abv.getLayoutParams().height;
-        int target = (show ? height : 0);
-        Log.i("ActionBar height=" + current + "..." + target);
-
-
-        if (abAnimator != null)
-            abAnimator.cancel();
-
-        abAnimator = ValueAnimator.ofInt(current, target);
-
-        abAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator anim) {
-                try {
-                    Integer v = (Integer) anim.getAnimatedValue();
-                    Log.i("ActionBar height=" + v);
-                    ViewGroup.LayoutParams lparam = abv.getLayoutParams();
-                    if (lparam.height == v)
-                        Log.i("ActionBar ---");
-                    else {
-                        lparam.height = v;
-                        abv.requestLayout();
-                    }
-                } catch (Throwable ex) {
-                    Log.e(ex);
-                }
-            }
-        });
-
-        abAnimator.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(@NonNull Animator animation) {
-                Log.i("ActionBar start");
-            }
-
-            @Override
-            public void onAnimationEnd(@NonNull Animator animation) {
-                Log.i("ActionBar end");
-                abAnimator = null;
-            }
-
-            @Override
-            public void onAnimationCancel(@NonNull Animator animation) {
-                Log.i("ActionBar cancel");
-                abAnimator = null;
-            }
-
-            @Override
-            public void onAnimationRepeat(@NonNull Animator animation) {
-                Log.i("ActionBar repeat");
-            }
-        });
-
-        abAnimator.setDuration(ACTIONBAR_ANIMATION_DURATION * Math.abs(current - target) / height);
-        abAnimator.start();
-    }
-
     Handler getMainHandler() {
         return ApplicationEx.getMainHandler();
     }
@@ -1019,6 +1119,16 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
         @Override
         public void onFragmentResumed(@NonNull FragmentManager fm, @NonNull Fragment f) {
             log(fm, f, "onFragmentResumed");
+
+            // WindowInsetsAnimationCompat / COMPAT_ANIMATION_DURATION = 160 ms
+            View v = f.getView();
+            if (v != null && Helper.isKeyboardVisible(v))
+                v.postDelayed(new RunnableEx("resumed") {
+                    @Override
+                    protected void delegate() {
+                        v.requestApplyInsets();
+                    }
+                }, 250);
         }
 
         @Override

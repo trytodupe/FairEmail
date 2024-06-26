@@ -25,6 +25,7 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.media.RingtoneManager;
@@ -64,6 +65,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Group;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.Lifecycle;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -93,25 +95,30 @@ public class FragmentRule extends FragmentBase {
     private EditText etAge;
     private CheckBox cbStop;
 
+    private CheckBox cbSenderNot;
     private EditText etSender;
     private CheckBox cbSender;
     private ImageButton ibSender;
     private CheckBox cbKnownSender;
 
+    private CheckBox cbRecipientNot;
     private EditText etRecipient;
     private CheckBox cbRecipient;
     private ImageButton ibRecipient;
 
+    private CheckBox cbSubjectNot;
     private EditText etSubject;
     private CheckBox cbSubject;
 
     private CheckBox cbAttachments;
     private EditText etMimeType;
 
+    private CheckBox cbHeaderNot;
     private EditText etHeader;
     private ImageButton ibHeader;
     private CheckBox cbHeader;
 
+    private CheckBox cbBodyNot;
     private EditText etBody;
     private CheckBox cbBody;
     private CheckBox cbSkipQuotes;
@@ -127,6 +134,8 @@ public class FragmentRule extends FragmentBase {
     private TextView tvScheduleHourEnd;
     private CheckBox cbEveryDay;
     private EditText etYounger;
+
+    private EditText etExpression;
 
     private Spinner spAction;
     private TextView tvActionRemark;
@@ -179,6 +188,7 @@ public class FragmentRule extends FragmentBase {
     private ContentLoadingProgressBar pbWait;
 
     private Group grpReady;
+    private Group grpExpression;
     private Group grpAge;
     private Group grpSnooze;
     private Group grpFlag;
@@ -194,6 +204,7 @@ public class FragmentRule extends FragmentBase {
     private Group grpLocalOnly;
     private Group grpNotes;
     private Group grpUrl;
+    private Group grpSummarize;
 
     private ArrayAdapter<String> adapterGroup;
     private ArrayAdapter<String> adapterDay;
@@ -219,11 +230,12 @@ public class FragmentRule extends FragmentBase {
     private static final int REQUEST_TO = 7;
     private final static int REQUEST_TTS_CHECK = 8;
     private final static int REQUEST_TTS_DATA = 9;
-    private final static int REQUEST_SOUND = 10;
-    private final static int REQUEST_DATE_AFTER = 11;
-    private final static int REQUEST_DATE_BEFORE = 12;
-    private final static int REQUEST_FOLDER = 13;
-    private final static int REQUEST_COLOR_NOTES = 14;
+    private final static int REQUEST_RINGTONE = 10;
+    private final static int REQUEST_AUDIO = 11;
+    private final static int REQUEST_DATE_AFTER = 12;
+    private final static int REQUEST_DATE_BEFORE = 13;
+    private final static int REQUEST_FOLDER = 14;
+    private final static int REQUEST_COLOR_NOTES = 15;
 
     private static final List<String> HEADER_CONDITIONS = Collections.unmodifiableList(Arrays.asList(
             "$$seen$",
@@ -288,25 +300,30 @@ public class FragmentRule extends FragmentBase {
         etAge = view.findViewById(R.id.etAge);
         cbStop = view.findViewById(R.id.cbStop);
 
+        cbSenderNot = view.findViewById(R.id.cbSenderNot);
         etSender = view.findViewById(R.id.etSender);
         cbSender = view.findViewById(R.id.cbSender);
         ibSender = view.findViewById(R.id.ibSender);
         cbKnownSender = view.findViewById(R.id.cbKnownSender);
 
+        cbRecipientNot = view.findViewById(R.id.cbRecipientNot);
         etRecipient = view.findViewById(R.id.etRecipient);
         cbRecipient = view.findViewById(R.id.cbRecipient);
         ibRecipient = view.findViewById(R.id.ibRecipient);
 
+        cbSubjectNot = view.findViewById(R.id.cbSubjectNot);
         etSubject = view.findViewById(R.id.etSubject);
         cbSubject = view.findViewById(R.id.cbSubject);
 
         cbAttachments = view.findViewById(R.id.cbAttachments);
         etMimeType = view.findViewById(R.id.etMimeType);
 
+        cbHeaderNot = view.findViewById(R.id.cbHeaderNot);
         etHeader = view.findViewById(R.id.etHeader);
         ibHeader = view.findViewById(R.id.ibHeader);
         cbHeader = view.findViewById(R.id.cbHeader);
 
+        cbBodyNot = view.findViewById(R.id.cbBodyNot);
         etBody = view.findViewById(R.id.etBody);
         cbBody = view.findViewById(R.id.cbBody);
         cbSkipQuotes = view.findViewById(R.id.cbSkipQuotes);
@@ -322,6 +339,8 @@ public class FragmentRule extends FragmentBase {
         tvScheduleHourEnd = view.findViewById(R.id.tvScheduleHourEnd);
         cbEveryDay = view.findViewById(R.id.cbEveryDay);
         etYounger = view.findViewById(R.id.etYounger);
+
+        etExpression = view.findViewById(R.id.etExpression);
 
         spAction = view.findViewById(R.id.spAction);
         tvActionRemark = view.findViewById(R.id.tvActionRemark);
@@ -375,6 +394,7 @@ public class FragmentRule extends FragmentBase {
         pbWait = view.findViewById(R.id.pbWait);
 
         grpReady = view.findViewById(R.id.grpReady);
+        grpExpression = view.findViewById(R.id.grpExpression);
         grpAge = view.findViewById(R.id.grpAge);
         grpSnooze = view.findViewById(R.id.grpSnooze);
         grpFlag = view.findViewById(R.id.grpFlag);
@@ -390,6 +410,7 @@ public class FragmentRule extends FragmentBase {
         grpLocalOnly = view.findViewById(R.id.grpLocalOnly);
         grpNotes = view.findViewById(R.id.grpNotes);
         grpUrl = view.findViewById(R.id.grpUrl);
+        grpSummarize = view.findViewById(R.id.grpSummarize);
 
         adapterGroup = new ArrayAdapter<>(getContext(), R.layout.spinner_item1_dropdown, android.R.id.text1);
         etGroup.setThreshold(1);
@@ -652,6 +673,8 @@ public class FragmentRule extends FragmentBase {
             actions.add(new Action(EntityRule.TYPE_COPY, getString(R.string.title_rule_copy)));
         actions.add(new Action(EntityRule.TYPE_DELETE, getString(R.string.title_rule_delete)));
         actions.add(new Action(EntityRule.TYPE_ANSWER, getString(R.string.title_rule_answer)));
+        if (AI.isAvailable(getContext()))
+            actions.add(new Action(EntityRule.TYPE_SUMMARIZE, getString(R.string.title_rule_summarize)));
         actions.add(new Action(EntityRule.TYPE_TTS, getString(R.string.title_rule_tts)));
         actions.add(new Action(EntityRule.TYPE_SOUND, getString(R.string.title_rule_sound)));
         actions.add(new Action(EntityRule.TYPE_AUTOMATION, getString(R.string.title_rule_automation)));
@@ -708,8 +731,6 @@ public class FragmentRule extends FragmentBase {
         npDuration.setMinValue(0);
         npDuration.setMaxValue(999);
 
-        tvActionRemark.setVisibility(View.GONE);
-
         btnColor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -758,7 +779,6 @@ public class FragmentRule extends FragmentBase {
             }
         });
 
-        cbAttached.setEnabled(protocol == EntityAccount.TYPE_IMAP);
         cbResend.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
@@ -792,12 +812,38 @@ public class FragmentRule extends FragmentBase {
         btnSound.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
-                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALL);
-                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, getString(R.string.title_advanced_sound));
-                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true);
-                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, sound);
-                startActivityForResult(Helper.getChooser(getContext(), intent), REQUEST_SOUND);
+                PopupMenuLifecycle popupMenu = new PopupMenuLifecycle(getContext(), getViewLifecycleOwner(), v);
+
+                popupMenu.getMenu().add(Menu.NONE, R.string.title_rule_select_sound_ringtone, 1, R.string.title_rule_select_sound_ringtone);
+                popupMenu.getMenu().add(Menu.NONE, R.string.title_rule_select_sound_audio, 2, R.string.title_rule_select_sound_audio);
+
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        int itemId = item.getItemId();
+                        if (itemId == R.string.title_rule_select_sound_ringtone) {
+                            Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+                            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALL);
+                            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, getString(R.string.title_advanced_sound));
+                            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true);
+                            intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, sound);
+                            startActivityForResult(Helper.getChooser(getContext(), intent), REQUEST_RINGTONE);
+                            return true;
+                        } else if (itemId == R.string.title_rule_select_sound_audio) {
+                            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                            intent.addCategory(Intent.CATEGORY_OPENABLE);
+                            intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            intent.setType("audio/*");
+                            Helper.openAdvanced(getContext(), intent);
+                            startActivityForResult(Helper.getChooser(getContext(), intent), REQUEST_AUDIO);
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+
+                popupMenu.show();
             }
         });
 
@@ -847,6 +893,7 @@ public class FragmentRule extends FragmentBase {
         tvFolder.setText(null);
         bottom_navigation.setVisibility(View.GONE);
         grpReady.setVisibility(View.GONE);
+        grpExpression.setVisibility(View.GONE);
         grpAge.setVisibility(View.GONE);
         grpSnooze.setVisibility(View.GONE);
         grpFlag.setVisibility(View.GONE);
@@ -862,6 +909,7 @@ public class FragmentRule extends FragmentBase {
         grpLocalOnly.setVisibility(View.GONE);
         grpNotes.setVisibility(View.GONE);
         grpUrl.setVisibility(View.GONE);
+        grpSummarize.setVisibility(View.GONE);
 
         pbWait.setVisibility(View.VISIBLE);
 
@@ -916,7 +964,6 @@ public class FragmentRule extends FragmentBase {
 
                 tvActionRemark.setText(
                         getString(R.string.title_rule_action_remark, data.folder.getDisplayName(getContext())));
-                tvActionRemark.setVisibility(View.VISIBLE);
 
                 loadRule(savedInstanceState);
             }
@@ -1015,9 +1062,13 @@ public class FragmentRule extends FragmentBase {
                     break;
                 case REQUEST_TTS_DATA:
                     break;
-                case REQUEST_SOUND:
+                case REQUEST_RINGTONE:
                     if (resultCode == RESULT_OK && data != null)
                         onSelectSound(data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI));
+                    break;
+                case REQUEST_AUDIO:
+                    if (resultCode == RESULT_OK && data != null)
+                        onSelectSound(data.getData());
                     break;
                 case REQUEST_DATE_AFTER:
                     if (resultCode == RESULT_OK && data != null)
@@ -1068,6 +1119,14 @@ public class FragmentRule extends FragmentBase {
     }
 
     private void onSelectSound(Uri uri) {
+        try {
+            Log.i("Selected sound uri=" + uri);
+            getContext().getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (!Helper.isPersisted(getContext(), uri, true, false))
+                throw new IllegalStateException("No permission granted to access selected image " + uri);
+        } catch (Throwable ex) {
+            Log.w(ex);
+        }
         this.sound = uri;
     }
 
@@ -1235,6 +1294,7 @@ public class FragmentRule extends FragmentBase {
                         etAge.setText(jgeneral == null ? null : Integer.toString(jgeneral.optInt("age")));
                         cbStop.setChecked(rule != null && rule.stop);
 
+                        cbSenderNot.setChecked(jsender != null && jsender.optBoolean("not"));
                         etSender.setText(jsender == null ? args.getString("sender") : jsender.getString("value"));
                         cbSender.setChecked(jsender != null && jsender.getBoolean("regex"));
                         cbKnownSender.setChecked(jsender != null && jsender.optBoolean("known"));
@@ -1242,9 +1302,11 @@ public class FragmentRule extends FragmentBase {
                         ibSender.setEnabled(!cbKnownSender.isChecked());
                         cbSender.setEnabled(!cbKnownSender.isChecked());
 
+                        cbRecipientNot.setChecked(jrecipient != null && jrecipient.optBoolean("not"));
                         etRecipient.setText(jrecipient == null ? args.getString("recipient") : jrecipient.getString("value"));
                         cbRecipient.setChecked(jrecipient != null && jrecipient.getBoolean("regex"));
 
+                        cbSubjectNot.setChecked(jsubject != null && jsubject.optBoolean("not"));
                         etSubject.setText(jsubject == null ? args.getString("subject") : jsubject.getString("value"));
                         cbSubject.setChecked(jsubject != null && jsubject.getBoolean("regex"));
 
@@ -1252,9 +1314,11 @@ public class FragmentRule extends FragmentBase {
                         etMimeType.setText(jcondition.optString("mimetype"));
                         etMimeType.setEnabled(cbAttachments.isChecked());
 
+                        cbHeaderNot.setChecked(jheader != null && jheader.optBoolean("not"));
                         etHeader.setText(jheader == null ? null : jheader.getString("value"));
                         cbHeader.setChecked(jheader != null && jheader.getBoolean("regex"));
 
+                        cbBodyNot.setChecked(jbody != null && jbody.optBoolean("not"));
                         etBody.setText(jbody == null ? null : jbody.getString("value"));
                         cbBody.setChecked(jbody != null && jbody.getBoolean("regex"));
                         cbSkipQuotes.setChecked(jbody != null && jbody.optBoolean("skip_quotes"));
@@ -1274,6 +1338,8 @@ public class FragmentRule extends FragmentBase {
                         cbEveryDay.setChecked(jschedule != null && jschedule.optBoolean("all"));
                         etYounger.setText(jcondition.has("younger")
                                 ? Integer.toString(jcondition.optInt("younger")) : null);
+
+                        etExpression.setText(jcondition.optString("expression"));
 
                         spScheduleDayStart.setSelection(start / (24 * 60));
                         spScheduleDayEnd.setSelection(end / (24 * 60));
@@ -1408,6 +1474,9 @@ public class FragmentRule extends FragmentBase {
                             showActionParameters(action.type);
                     }
 
+                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+                    boolean experiments = prefs.getBoolean("experiments", false);
+                    grpExpression.setVisibility(experiments ? View.VISIBLE : View.GONE);
                 } catch (Throwable ex) {
                     Log.e(ex);
                 } finally {
@@ -1441,6 +1510,7 @@ public class FragmentRule extends FragmentBase {
         grpLocalOnly.setVisibility(type == EntityRule.TYPE_LOCAL_ONLY ? View.VISIBLE : View.GONE);
         grpNotes.setVisibility(type == EntityRule.TYPE_NOTES ? View.VISIBLE : View.GONE);
         grpUrl.setVisibility(type == EntityRule.TYPE_URL ? View.VISIBLE : View.GONE);
+        grpSummarize.setVisibility(type == EntityRule.TYPE_SUMMARIZE ? View.VISIBLE : View.GONE);
     }
 
     private void onActionDelete() {
@@ -1550,7 +1620,9 @@ public class FragmentRule extends FragmentBase {
                             jheader == null &&
                             jbody == null &&
                             jdate == null &&
-                            jschedule == null)
+                            jschedule == null &&
+                            !jcondition.has("younger") &&
+                            !jcondition.has("expression"))
                         throw new IllegalArgumentException(context.getString(R.string.title_rule_condition_missing));
 
                     if (TextUtils.isEmpty(order))
@@ -1596,8 +1668,9 @@ public class FragmentRule extends FragmentBase {
                 @Override
                 protected void onException(Bundle args, Throwable ex) {
                     if (ex instanceof IllegalArgumentException)
-                        Snackbar.make(view, new ThrowableWrapper(ex).getSafeMessage(), Snackbar.LENGTH_LONG)
-                                .setGestureInsetBottomIgnored(true).show();
+                        Helper.setSnackbarOptions(
+                                        Snackbar.make(view, new ThrowableWrapper(ex).getSafeMessage(), Snackbar.LENGTH_LONG))
+                                .show();
                     else
                         Log.unexpectedError(getParentFragmentManager(), ex);
                 }
@@ -1626,6 +1699,7 @@ public class FragmentRule extends FragmentBase {
         boolean known = cbKnownSender.isChecked();
         if (!TextUtils.isEmpty(sender) || known) {
             JSONObject jsender = new JSONObject();
+            jsender.put("not", cbSenderNot.isChecked());
             jsender.put("value", sender);
             jsender.put("regex", cbSender.isChecked());
             jsender.put("known", known);
@@ -1635,6 +1709,7 @@ public class FragmentRule extends FragmentBase {
         String recipient = etRecipient.getText().toString();
         if (!TextUtils.isEmpty(recipient)) {
             JSONObject jrecipient = new JSONObject();
+            jrecipient.put("not", cbRecipientNot.isChecked());
             jrecipient.put("value", recipient);
             jrecipient.put("regex", cbRecipient.isChecked());
             jcondition.put("recipient", jrecipient);
@@ -1643,6 +1718,7 @@ public class FragmentRule extends FragmentBase {
         String subject = etSubject.getText().toString();
         if (!TextUtils.isEmpty(subject)) {
             JSONObject jsubject = new JSONObject();
+            jsubject.put("not", cbSubjectNot.isChecked());
             jsubject.put("value", subject);
             jsubject.put("regex", cbSubject.isChecked());
             jcondition.put("subject", jsubject);
@@ -1654,6 +1730,7 @@ public class FragmentRule extends FragmentBase {
         String header = etHeader.getText().toString();
         if (!TextUtils.isEmpty(header)) {
             JSONObject jheader = new JSONObject();
+            jheader.put("not", cbHeaderNot.isChecked());
             jheader.put("value", header);
             jheader.put("regex", cbHeader.isChecked());
             jcondition.put("header", jheader);
@@ -1662,6 +1739,7 @@ public class FragmentRule extends FragmentBase {
         String body = etBody.getText().toString();
         if (!TextUtils.isEmpty(body)) {
             JSONObject jbody = new JSONObject();
+            jbody.put("not", cbBodyNot.isChecked());
             jbody.put("value", body);
             jbody.put("regex", cbBody.isChecked());
             jbody.put("skip_quotes", cbSkipQuotes.isChecked());
@@ -1712,6 +1790,10 @@ public class FragmentRule extends FragmentBase {
             } catch (Throwable ex) {
                 Log.e(ex);
             }
+
+        String expression = etExpression.getText().toString().trim();
+        if (!TextUtils.isEmpty(expression))
+            jcondition.put("expression", expression);
 
         return jcondition;
     }

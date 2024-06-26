@@ -98,9 +98,12 @@ public class ActivityBilling extends ActivityBase implements
         if (standalone) {
             setContentView(R.layout.activity_billing);
 
-            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.content_frame, new FragmentPro()).addToBackStack("pro");
-            fragmentTransaction.commit();
+            int count = getSupportFragmentManager().getBackStackEntryCount();
+            if (count == 0) {
+                FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.content_frame, new FragmentPro()).addToBackStack("pro");
+                fragmentTransaction.commit();
+            }
 
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -210,7 +213,7 @@ public class ActivityBilling extends ActivityBase implements
                 prefs.getBoolean("test_iab", false));
     }
 
-    private static String getChallenge(Context context) throws NoSuchAlgorithmException {
+    static String getChallenge(Context context) throws NoSuchAlgorithmException {
         String android_id = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         if (android_id == null) {
             Log.e("Android ID empty");
@@ -679,6 +682,10 @@ public class ActivityBilling extends ActivityBase implements
             case BillingClient.BillingResponseCode.USER_CANCELED:
                 // User pressed back or canceled a dialog
                 return "USER_CANCELED";
+
+            case BillingClient.BillingResponseCode.NETWORK_ERROR:
+                // A network error occurred during the operation
+                return "NETWORK_ERROR";
 
             default:
                 return Integer.toString(result.getResponseCode());

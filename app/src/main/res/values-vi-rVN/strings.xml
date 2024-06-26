@@ -92,7 +92,6 @@
     <string name="title_notification_sending">Đang gửi thư</string>
     <string name="title_notification_waiting">Đang đợi kết nối phù hợp</string>
     <string name="title_notification_idle">Rảnh</string>
-    <string name="title_notification_failed">\'%1$s\' thất bại</string>
     <string name="title_notification_alert">Báo động của máy chủ: \'%1$s\'</string>
     <string name="title_notification_sending_left">Lần thử còn lại: %1$d</string>
     <string name="title_notification_sending_retry">Việc gửi sẽ được thử lại khi có thay đổi về kết nối internet hoặc khi kéo xuống trong hộp thư đi</string>
@@ -282,8 +281,6 @@
     <string name="title_setup_reset_full">Hiện thư gốc</string>
     <string name="title_check_gmail_oauth">Các tài khoản Gmail của bạn sẽ tiếp tục hoạt động sau 30 tháng 5, 2022</string>
     <string name="title_check_gmail_password">Một số tài khoản Gmail của bạn có thể dừng hoạt động sau 30 tháng 5, 2022</string>
-    <string name="title_check_outlook_oauth">Các tài khoản Outlook của bạn sẽ tiếp tục hoạt động sau 1 tháng 10, 2022</string>
-    <string name="title_check_outlook_password">Một số tài khoản Outlook của bạn có thể dừng hoạt động sau 1 tháng 10, 2022</string>
     <string name="title_advanced_hint_title">Tuỳ chọn nâng cao hơn</string>
     <string name="title_advanced_hint_message">        Bạn đang điều hướng đến các tùy chọn nâng cao hơn.        Tất cả các tùy chọn đều có các giá trị tiêu chuẩn thường được sử dụng, bạn không cần phải thay đổi trừ khi bạn có tùy chọn khác.
     </string>
@@ -484,7 +481,6 @@
     <string name="title_advanced_actionbar">Hiện thanh hành đông ở cuộc hội thoại</string>
     <string name="title_advanced_actionbar_color">Sử dụng màu tài khoản làm màu nền cho thanh hành động trong cuộc hội thoại</string>
     <string name="title_advanced_category_header">Nhóm theo thể loại tài khoản</string>
-    <string name="title_advanced_navbar_colorize">Tô màu thanh điều hướng Android</string>
     <string name="title_advanced_list_count">Hiện số thư hoặc cuộc hội thoại trong thanh hành động trên cùng</string>
     <string name="title_advanced_bundled_fonts">Sử dụng phông chữ tích hợp</string>
     <string name="title_advanced_parse_classes">Xử lý các trang phong cách</string>
@@ -671,7 +667,6 @@
     <string name="title_advanced_metered_warning">Việc tắt tuỳ chọn này sẽ tắt việc nhận và gửi thư khi dùng kết nối internet di động</string>
     <string name="title_advanced_rlah_hint">Giả sử là không chuyển vùng trong EU (Liên minh châu Âu)</string>
     <string name="title_advanced_usage_hint">Cái này sẽ làm tăng sử dụng pin, dữ liệu và không gian bộ nhớ</string>
-    <string name="title_advanced_plain_hint">Việc bật cái này sẽ giới hạn sử dụng dữ liệu, nhưng thư sẽ được hiện mà không được tạo kiểu</string>
     <string name="title_advanced_tcp_keep_alive_hint">Việc bật cái này có thể gây ra vấn đề kết nối ở một số thiết bị và gây hao pin nhiều hơn</string>
     <string name="title_advanced_validate_hint">Cái này có thể dẫn đến không đồng bộ hoá thư, ví dụ khi sử dụng VPN, nhưng cũng trong các trường hợp khác</string>
     <string name="title_advanced_timeout_hint">Thời gian chờ đọc/ghi sẽ được đặt thành gấp đôi thời gian chờ kết nối. Các giá trị cao hơn sẽ dẫn đến hao pin nhiều hơn.</string>
@@ -909,7 +904,7 @@
     <string name="title_delete_operation_flag">Gắn cờ các hoạt động</string>
     <string name="title_delete_operation_delete">Xoá các hoạt động</string>
     <string name="title_delete_operation_deleted">%1$d hoạt động đã xoá</string>
-    <string name="title_delete_contacts">Xoá các liên hệ cục bộ có thể nhìn thấy?</string>
+    <string name="title_delete_contacts">Xoá tất cả liên hệ cục bộ?</string>
     <string name="title_no_operations">Không có hoạt động đang chờ</string>
     <string name="title_check_operations">Đang kiểm tra hoạt động</string>
     <string name="title_hint_operations">Việc xoá các hoạt động có thể dẫn đến biến mất thư và các vấn đề đồng bộ hoá</string>
@@ -1125,9 +1120,6 @@
     <string name="title_third_party">Bạn đang sử dụng phiên bản của bên thứ ba</string>
     <string name="title_expand_warning">Việc mở rộng thư này sẽ tải xuống %1$s</string>
     <string name="title_download_message">Đang tải xuống &#8230;</string>
-    <string name="title_reformatted">        Đây là thư đã định dạng lại.        Bạn có thể nhấn vào biểu tượng &#x26F6; để xem thư gốc và để ẩn thông báo này.
-        Việc định dạng lại thư sẽ tốn một ít thời gian, tuỳ vào kích cỡ thư và tốc độ thiết bị của bạn.
-    </string>
     <string name="title_compose">Soạn thư</string>
     <string name="title_submitter">Gửi bởi:</string>
     <string name="title_delivered_to">Gửi đến:</string>
@@ -1795,6 +1787,7 @@
         <item>Các thư mục hợp nhất</item>
         <item>Các thư mục tài khoản chính</item>
         <item>Tài khoản</item>
+        <item>Primary inbox</item>
     </string-array>
     <string-array name="downloadNames">
         <item>16 KB</item>

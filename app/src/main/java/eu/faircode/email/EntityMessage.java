@@ -127,6 +127,7 @@ public class EntityMessage implements Serializable {
     static final Long SWIPE_ACTION_JUNK = -8L;
     static final Long SWIPE_ACTION_REPLY = -9L;
     static final Long SWIPE_ACTION_IMPORTANCE = -10L;
+    static final Long SWIPE_ACTION_SUMMARIZE = -11L;
 
     private static final int MAX_SNOOZED = 300;
 
@@ -262,6 +263,7 @@ public class EntityMessage implements Serializable {
     public String warning; // persistent
     public String error; // volatile
     public Long last_attempt; // send
+    public Long last_touched;
 
     static String generateMessageId() {
         return generateMessageId("localhost");
@@ -277,6 +279,7 @@ public class EntityMessage implements Serializable {
         // adb shell pm set-app-links --package eu.faircode.email 0 all
         // adb shell pm verify-app-links --re-verify eu.faircode.email
         // adb shell pm get-app-links eu.faircode.email
+        // https://link.fairemail.net/.well-known/assetlinks.json
         return "https://link.fairemail.net/#" + id;
     }
 
@@ -286,6 +289,15 @@ public class EntityMessage implements Serializable {
 
     boolean hasAlt() {
         return (this.plain_only != null && (this.plain_only & 0x80) != 0);
+    }
+
+    boolean fromSelf(EntityIdentity identity) {
+        if (from != null && identity != null)
+            for (Address sender : from)
+                if (identity.self &&
+                        (identity.sameAddress(sender) || identity.similarAddress(sender)))
+                    return true;
+        return false;
     }
 
     boolean fromSelf(List<TupleIdentityEx> identities) {
@@ -358,6 +370,17 @@ public class EntityMessage implements Serializable {
         if (bcc != null)
             recipients.addAll(Arrays.asList(bcc));
         return recipients;
+    }
+
+    String getRemark() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(MessageHelper.formatAddresses(from));
+        if (!TextUtils.isEmpty(subject)) {
+            if (sb.length() > 0)
+                sb.append('\n');
+            sb.append(subject);
+        }
+        return sb.toString();
     }
 
     boolean hasKeyword(@NonNull String value) {
@@ -742,6 +765,8 @@ public class EntityMessage implements Serializable {
             return "junk";
         if (SWIPE_ACTION_REPLY.equals(type))
             return "reply";
+        if (SWIPE_ACTION_SUMMARIZE.equals(type))
+            return "summarize";
         return "???";
     }
 

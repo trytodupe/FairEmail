@@ -56,7 +56,6 @@
     </plurals>
     <string name="title_junk_clear">ଖାଲି କରନ୍ତୁ</string>
     <string name="title_notification_idle">ନିଷ୍କ୍ରିୟ</string>
-    <string name="title_notification_failed">\'%1$s\' ବିଫଳ ହେଲା</string>
     <string name="title_notification_sending_failed">%1$sକୁ ପଠାଇବା ବିଫଳ ହେଲା</string>
     <string name="title_factor_minutes">%1$d ମିନିଟ୍</string>
     <string name="menu_rules">ନିୟମ</string>
@@ -184,8 +183,6 @@
     <string name="title_setup_reset_full">ମୂଳ ଵାର୍ତ୍ତା ଦେଖାଅ</string>
     <string name="title_check_gmail_oauth">ଆପଣଙ୍କ Gmail ଆକାଉଣ୍ଟସବୁ ୩୦ ମଇ, ୨୦୨୨ ପରେ କାର୍ଯ୍ୟ ଜାରି ରଖିବ</string>
     <string name="title_check_gmail_password">ଆପଣଙ୍କର କିଛିଟା Gmail ଆକାଉଣ୍ଟ୍ ୩୦ ମଇ, ୨୦୨୨ ପରେ କାମ କରିବା ବନ୍ଦ କରିପାରେ</string>
-    <string name="title_check_outlook_oauth">ଆପଣଙ୍କ Outlook ଆକାଉଣ୍ଟସବୁ ୧ ଅକ୍ଟୋବର, ୨୦୨୨ ପରେ କାର୍ଯ୍ୟ ଜାରି ରଖିବ</string>
-    <string name="title_check_outlook_password">ଆପଣଙ୍କର କିଛିଟା Outlook ଆକାଉଣ୍ଟ୍ ୧ ଅକ୍ଟୋବର, ୨୦୨୨ ପରେ କାମ କରିବା ବନ୍ଦ କରିପାରେ</string>
     <string name="title_advanced_hint_title">ଅଧିକ ବିକଶିତ ବିକଳ୍ପଗୁଡ଼ିକ</string>
     <string name="title_advanced_hint_message">        ଆପଣ ଆହୁରି ଵିକଶିତ ଵିକଳ୍ପ ଆଡ଼କୁ ଯାଉଛନ୍ତି।
         ସମସ୍ତ ଵିକଳ୍ପ ସାଧାରଣତଃ ମାନକ ମୂଲ୍ୟ ଵ୍ୟଵହାର କରିଅଛି, ଯାହାକି ଆପଣଙ୍କର କିଛି ଭିନ୍ନ ଅଗ୍ରାଧିକାର ନହେବା ଯାଏଁ ଆପଣଙ୍କୁ ପରିଵର୍ତ୍ତନ କରିବାର ଆଵଶ୍ୟକତା ନାହିଁ।
@@ -268,7 +265,6 @@
     <string name="title_advanced_button_extra">ଵାର୍ତ୍ତାର ତଳେ ଅତିରିକ୍ତ ବଟନ୍ ଦେଖାଇବା</string>
     <string name="title_advanced_actionbar">ବାର୍ତ୍ତାଳାପ କୃତ୍ୟ ଦଣ୍ଡିକା ଦେଖାଇବା</string>
     <string name="title_advanced_category_header">ଆକାଉଣ୍ଟ୍ ବର୍ଗ ଅନୁଯାୟୀ ଗୋଷ୍ଠୀ ପ୍ରସ୍ତୁତ କରନ୍ତୁ</string>
-    <string name="title_advanced_navbar_colorize">ଆଣ୍ଡ୍ରଏଡ୍ ଦିଗଚଳନ ଦଣ୍ଡିକାକୁ ରଞ୍ଜିବା</string>
     <string name="title_advanced_bundled_fonts">ବଣ୍ଡଲ୍ ହୋଇଥିବା ଫଣ୍ଟ ଵ୍ୟଵହାର କରିବା</string>
     <string name="title_advanced_narrow_fonts">ସଂକୀର୍ଣ୍ଣ ଫଣ୍ଟ ବ୍ୟବହାର କରିବା</string>
     <string name="title_advanced_parse_classes">CSS କୁ ବିଶ୍ଳେଷଣ କରନ୍ତୁ</string>
@@ -340,7 +336,6 @@
     <string name="title_advanced_folder_nav_hint">ଏହା ସର୍ବଦା ଗୋଟେ ବାର୍ତ୍ତା ତାଲିକାରୁ ସମ୍ବନ୍ଧୀୟ ଆକାଉଣ୍ଟର ଫୋଲ୍ଡର୍ ତାଲିକାକୁ ଫେରିବ</string>
     <string name="title_advanced_remove_signature_hint">ଏହା ଫଳରେ ବହୁତ କମ୍ କିମ୍ୱା ଅତ୍ୟଧିକ ପାଠ୍ୟ ଅପସାରଣ ହୋଇପାରେ</string>
     <string name="title_advanced_usage_hint">ଏହା ବ୍ୟାଟେରୀ, ଡାଟା ଓ ଷ୍ଟୋରେଜ୍ ଜାଗା ଵ୍ୟଵହାର ଵୃଦ୍ଧି କରିବ</string>
-    <string name="title_advanced_plain_hint">ଏହାକୁ ସକ୍ଷମ କରିବା ଦ୍ୱାରା ଡାଟା ବ୍ୟବହାର ସୀମିତ ହେବ, କିନ୍ତୁ ଶୈଳିକରଣ ବିନା ବାର୍ତ୍ତା ଦେଖାଯିବ</string>
     <string name="title_advanced_cert_strict_hint">ଏହା ଅକ୍ଷମ କରିବା ଦ୍ୱାରା ସର୍ଵର୍ ସାର୍ଟିଫିକେଟ୍ ଯାଞ୍ଚ କରିବା କୋହଳ ହେବ</string>
     <string name="title_advanced_startup_hint">ସନ୍ନିଵିଷ୍ଟ ଫୋଲ୍ଡର୍ ତାଲିକାରେ ଯେକୌଣସି ଫୋଲ୍ଡରକୁ ଯୋଡ଼ିବା କିମ୍ୱା ଅପସାରଣ କରିବାକୁ ହେଲେ ଫୋଲ୍ଡର୍ ତାଲିକାରେ ଥିବା ସେଇ ଫୋଲ୍ଡରଟି ଉପରେ ଲମ୍ବା ସ୍ପର୍ଶ କରନ୍ତୁ</string>
     <string name="title_advanced_date_hint">ସମୟାନୁସାର ସଜାଯାଇଥିଲେ ହି ବାର୍ତ୍ତାଗୁଡ଼ିକ ତାରିଖ ଅନୁଯାୟୀ ଗୋଷ୍ଠୀ ପ୍ରସ୍ତୁତ କରାଯିବ</string>
@@ -446,7 +441,6 @@
     <string name="title_delete_operation_flag">ପ୍ରକ୍ରିୟାରେ ପତାକା ନ୍ୟସ୍ତ କରିବା</string>
     <string name="title_delete_operation_delete">ପ୍ରକ୍ରିୟା ଵିଲୋପ କରିବା</string>
     <string name="title_delete_operation_deleted">%1$dଟି ପ୍ରକ୍ରିୟା ଵିଲୋପ ହେଲା</string>
-    <string name="title_delete_contacts">ଦୃଶ୍ୟମାନ ସ୍ଥାନୀୟ ସମ୍ପର୍କଗୁଡ଼ିକ ବିଲୋପ କରିବେ କି?</string>
     <string name="title_no_operations">କୌଣସି ଵିଚାରାଧୀନ ପ୍ରକ୍ରିୟା ନାହିଁ</string>
     <string name="title_check_operations">ପ୍ରକ୍ରିୟା ପାଇଁ ଯାଞ୍ଚ ଚାଲିଛି</string>
     <string name="title_hint_operations">ପ୍ରକ୍ରିୟା ଵିଲୋପ କରିବା ଫଳରେ ଵାର୍ତ୍ତାଗୁଡ଼ିକ ଅଦୃଶ୍ୟ ହୋଇପାରେ ଏଵଂ ସୀଙ୍କ୍ରୋନାଇଜେଶନ୍ ସମସ୍ୟା ଉପୁଜିପାରେ</string>
@@ -531,6 +525,7 @@
     <string name="title_fit_width">ଓସାର ଫିଟ୍ କରନ୍ତୁ</string>
     <string name="title_disable_widths">ଓସାର ଅକ୍ଷମ କରନ୍ତୁ</string>
     <string name="title_raw_saved">ଅପକ୍ୱ ଵାର୍ତ୍ତା ସଞ୍ଚୟ ହୋଇଛି</string>
+    <string name="title_ask_show_images_always">ଡିଫଲ୍ଟ ଭାବରେ ପ୍ରତିଛବିଗୁଡ଼ିକ ଦେଖାନ୍ତୁ</string>
     <string name="title_ask_show_amp">ବାର୍ତ୍ତାର AMP ଭାରିଆଣ୍ଟ ଦେଖାଇବା କି?</string>
     <string name="title_ask_show_amp_hint">AMP ଵାର୍ତ୍ତାଗୁଡ଼ିକ ଗତିଶୀଳ ଓ ଇଣ୍ଟରନେଟ୍ ସହ ଇଣ୍ଟରାକ୍ଟ କରିବା ପାଇଁ ଡିଜାଇନ୍ କରାଯାଇଥାଏ ଏଣୁ ଆପଣଙ୍କୁ ଟ୍ରାକ୍ କରିବା ପାଇଁ ଵ୍ୟଵହାର କରାଯାଇପାରିବ</string>
     <string name="title_ask_delete_local">ସ୍ଥାନୀୟ ଵାର୍ତ୍ତା ଵିଲୋପ କରିବେ ତ? ଵାର୍ତ୍ତାଗୁଡ଼ିକ ସୁଦୂର ସର୍ଵରରେ ରହିବ।</string>
@@ -830,6 +825,7 @@
         <item>ସନ୍ନିଵିଷ୍ଟ ଫୋଲ୍ଡରଗୁଡ଼ିକ</item>
         <item>Primary account folders</item>
         <item>ଆକାଉଣ୍ଟଗୁଡ଼ିକ</item>
+        <item>Primary inbox</item>
     </string-array>
     <string-array name="downloadNames">
         <item>16 KB</item>

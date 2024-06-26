@@ -108,17 +108,16 @@ public class FragmentOptionsBehavior extends FragmentBase implements SharedPrefe
     private SwitchCompat swSwipeReply;
     private SwitchCompat swMoveThreadAll;
     private SwitchCompat swMoveThreadSent;
+    private SwitchCompat swSwipeTrashAll;
     private Button btnDefaultFolder;
     private TextView tvDefaultFolder;
-
-    private boolean accessibility;
 
     final static int MAX_SWIPE_SENSITIVITY = 10;
     final static int DEFAULT_SWIPE_SENSITIVITY = 6;
 
     final static int REQUEST_DEFAULT_FOLDER = 1;
 
-    private final static List<String> RESET_OPTIONS = Collections.unmodifiableList(Arrays.asList(
+    final static List<String> RESET_OPTIONS = Collections.unmodifiableList(Arrays.asList(
             "restore_on_launch", "sync_on_launch", "double_back", "conversation_actions", "conversation_actions_replies", "language_detection",
             "photo_picker", "default_snooze",
             "pull", "pull_all", "autoscroll", "quick_filter", "quick_scroll", "quick_actions", "swipe_sensitivity", "foldernav",
@@ -129,7 +128,7 @@ public class FragmentOptionsBehavior extends FragmentBase implements SharedPrefe
             "undo_timeout",
             "autoread", "flag_snoozed", "autounflag", "auto_important", "reset_importance",
             "reset_snooze", "auto_block_sender", "auto_hide_answer", "swipe_reply",
-            "move_thread_all", "move_thread_sent",
+            "move_thread_all", "move_thread_sent", "swipe_trash_all",
             "default_folder"
     ));
 
@@ -194,10 +193,9 @@ public class FragmentOptionsBehavior extends FragmentBase implements SharedPrefe
         swSwipeReply = view.findViewById(R.id.swSwipeReply);
         swMoveThreadAll = view.findViewById(R.id.swMoveThreadAll);
         swMoveThreadSent = view.findViewById(R.id.swMoveThreadSent);
+        swSwipeTrashAll = view.findViewById(R.id.swSwipeTrashAll);
         btnDefaultFolder = view.findViewById(R.id.btnDefaultFolder);
         tvDefaultFolder = view.findViewById(R.id.tvDefaultFolder);
-
-        accessibility = Helper.isAccessibilityEnabled(getContext());
 
         setOptions();
 
@@ -235,7 +233,6 @@ public class FragmentOptionsBehavior extends FragmentBase implements SharedPrefe
             }
         });
 
-        swConversationActions.setEnabled(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q);
         swConversationActions.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
@@ -244,7 +241,6 @@ public class FragmentOptionsBehavior extends FragmentBase implements SharedPrefe
             }
         });
 
-        swConversationActionsReplies.setEnabled(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q);
         swConversationActionsReplies.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
@@ -613,6 +609,13 @@ public class FragmentOptionsBehavior extends FragmentBase implements SharedPrefe
             }
         });
 
+        swSwipeTrashAll.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+                prefs.edit().putBoolean("swipe_trash_all", checked).apply();
+            }
+        });
+
         Intent tree = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
         Helper.openAdvanced(getContext(), tree);
         PackageManager pm = getContext().getPackageManager();
@@ -626,8 +629,6 @@ public class FragmentOptionsBehavior extends FragmentBase implements SharedPrefe
         });
 
         // Initialize
-        FragmentDialogTheme.setBackground(getContext(), view, false);
-
         PreferenceManager.getDefaultSharedPreferences(getContext()).registerOnSharedPreferenceChangeListener(this);
 
         return view;
@@ -704,8 +705,9 @@ public class FragmentOptionsBehavior extends FragmentBase implements SharedPrefe
             swSyncOnlaunch.setChecked(prefs.getBoolean("sync_on_launch", false));
             swDoubleBack.setChecked(prefs.getBoolean("double_back", false));
             swConversationActions.setChecked(prefs.getBoolean("conversation_actions", Helper.isGoogle()));
+            swConversationActions.setEnabled(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q);
             swConversationActionsReplies.setChecked(prefs.getBoolean("conversation_actions_replies", true));
-            swConversationActionsReplies.setEnabled(swConversationActions.isChecked());
+            swConversationActionsReplies.setEnabled(swConversationActions.isChecked() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q);
             swLanguageDetection.setChecked(prefs.getBoolean("language_detection", false));
 
             int default_snooze = prefs.getInt("default_snooze", 1);
@@ -787,6 +789,7 @@ public class FragmentOptionsBehavior extends FragmentBase implements SharedPrefe
             swMoveThreadAll.setChecked(prefs.getBoolean("move_thread_all", false));
             swMoveThreadSent.setChecked(prefs.getBoolean("move_thread_sent", false));
             swMoveThreadSent.setEnabled(!swMoveThreadAll.isChecked());
+            swSwipeTrashAll.setChecked(prefs.getBoolean("swipe_trash_all", true));
 
             tvDefaultFolder.setText(prefs.getString("default_folder", null));
         } catch (Throwable ex) {

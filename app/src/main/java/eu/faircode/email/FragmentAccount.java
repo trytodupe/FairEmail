@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -114,6 +115,9 @@ public class FragmentAccount extends FragmentBase {
     private ViewButtonColor btnColor;
     private TextView tvColorPro;
 
+    private Button btnAvatar;
+    private TextView tvAvatarPro;
+
     private Button btnCalendar;
     private TextView tvCalendarPro;
 
@@ -178,14 +182,16 @@ public class FragmentAccount extends FragmentBase {
     private long copy = -1;
     private int auth = AUTH_TYPE_PASSWORD;
     private String provider = null;
+    private String avatar = null;
     private String calendar = null;
     private String certificate = null;
     private boolean saving = false;
 
     private static final int REQUEST_COLOR = 1;
-    private static final int REQUEST_CALENDAR = 2;
-    private static final int REQUEST_SAVE = 3;
-    private static final int REQUEST_DELETE = 4;
+    private static final int REQUEST_AVATAR = 2;
+    private static final int REQUEST_CALENDAR = 3;
+    private static final int REQUEST_SAVE = 4;
+    private static final int REQUEST_DELETE = 5;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -235,6 +241,9 @@ public class FragmentAccount extends FragmentBase {
         etCategory = view.findViewById(R.id.etCategory);
         btnColor = view.findViewById(R.id.btnColor);
         tvColorPro = view.findViewById(R.id.tvColorPro);
+
+        btnAvatar = view.findViewById(R.id.btnAvatar);
+        tvAvatarPro = view.findViewById(R.id.tvAvatarPro);
 
         btnCalendar = view.findViewById(R.id.btnCalendar);
         tvCalendarPro = view.findViewById(R.id.tvCalendarPro);
@@ -461,6 +470,21 @@ public class FragmentAccount extends FragmentBase {
 
         Helper.linkPro(tvColorPro);
 
+        btnAvatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                intent.setType("image/*");
+                Helper.openAdvanced(v.getContext(), intent);
+                startActivityForResult(intent, REQUEST_AVATAR);
+            }
+        });
+
+        Helper.linkPro(tvAvatarPro);
+
         btnCalendar.setEnabled(Helper.hasPermission(getContext(), Manifest.permission.WRITE_CALENDAR));
         btnCalendar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -626,7 +650,6 @@ public class FragmentAccount extends FragmentBase {
 
         // Initialize
         Helper.setViewsEnabled(view, false);
-        FragmentDialogTheme.setBackground(getContext(), view, false);
 
         tvGmailHint.setVisibility(View.GONE);
 
@@ -720,8 +743,9 @@ public class FragmentAccount extends FragmentBase {
                         (ex instanceof UnknownHostException ||
                                 ex instanceof FileNotFoundException ||
                                 ex instanceof IllegalArgumentException))
-                    Snackbar.make(view, new ThrowableWrapper(ex).getSafeMessage(), Snackbar.LENGTH_LONG)
-                            .setGestureInsetBottomIgnored(true).show();
+                    Helper.setSnackbarOptions(
+                                    Snackbar.make(view, new ThrowableWrapper(ex).getSafeMessage(), Snackbar.LENGTH_LONG))
+                            .show();
                 else
                     Log.unexpectedError(getParentFragmentManager(), ex);
             }
@@ -884,8 +908,9 @@ public class FragmentAccount extends FragmentBase {
                 cbIdentity.setVisibility(View.GONE);
 
                 if (ex instanceof IllegalArgumentException)
-                    Snackbar.make(view, new ThrowableWrapper(ex).getSafeMessage(), Snackbar.LENGTH_LONG)
-                            .setGestureInsetBottomIgnored(true).show();
+                    Helper.setSnackbarOptions(
+                                    Snackbar.make(view, new ThrowableWrapper(ex).getSafeMessage(), Snackbar.LENGTH_LONG))
+                            .show();
                 else
                     showError(ex);
             }
@@ -949,6 +974,7 @@ public class FragmentAccount extends FragmentBase {
         args.putString("name", etName.getText().toString());
         args.putString("category", etCategory.getText().toString());
         args.putInt("color", btnColor.getColor());
+        args.putString("avatar", avatar);
         args.putString("calendar", calendar);
 
         args.putBoolean("synchronize", cbSynchronize.isChecked());
@@ -1028,6 +1054,7 @@ public class FragmentAccount extends FragmentBase {
                 String name = args.getString("name");
                 String category = args.getString("category");
                 Integer color = args.getInt("color");
+                String avatar = args.getString("avatar");
                 String calendar = args.getString("calendar");
 
                 boolean synchronize = args.getBoolean("synchronize");
@@ -1135,6 +1162,8 @@ public class FragmentAccount extends FragmentBase {
                     if (!Objects.equals(account.category, category))
                         return true;
                     if (!Objects.equals(account.color, color))
+                        return true;
+                    if (!Objects.equals(account.avatar, avatar))
                         return true;
                     if (!Objects.equals(account.calendar, calendar))
                         return true;
@@ -1291,6 +1320,7 @@ public class FragmentAccount extends FragmentBase {
                     account.name = name;
                     account.category = category;
                     account.color = color;
+                    account.avatar = avatar;
                     account.calendar = calendar;
 
                     account.synchronize = synchronize;
@@ -1477,6 +1507,8 @@ public class FragmentAccount extends FragmentBase {
                 editor.putBoolean("unset." + account.id + "." + EntityFolder.JUNK, junk == null);
                 editor.apply();
 
+                FairEmailBackupAgent.dataChanged(context);
+
                 return false;
             }
 
@@ -1517,8 +1549,9 @@ public class FragmentAccount extends FragmentBase {
             @Override
             protected void onException(Bundle args, Throwable ex) {
                 if (ex instanceof IllegalArgumentException)
-                    Snackbar.make(view, new ThrowableWrapper(ex).getSafeMessage(), Snackbar.LENGTH_LONG)
-                            .setGestureInsetBottomIgnored(true).show();
+                    Helper.setSnackbarOptions(
+                                    Snackbar.make(view, new ThrowableWrapper(ex).getSafeMessage(), Snackbar.LENGTH_LONG))
+                            .show();
                 else
                     showError(ex);
             }
@@ -1572,6 +1605,7 @@ public class FragmentAccount extends FragmentBase {
         outState.putInt("fair:advanced", grpAdvanced == null ? View.VISIBLE : grpAdvanced.getVisibility());
         outState.putInt("fair:auth", auth);
         outState.putString("fair:authprovider", provider);
+        outState.putString("fair:avatar", avatar);
         outState.putString("fair:calendar", calendar);
         super.onSaveInstanceState(outState);
     }
@@ -1617,12 +1651,35 @@ public class FragmentAccount extends FragmentBase {
             protected void onExecuted(Bundle args, final EntityAccount account) {
                 // Get providers
                 final Context context = getContext();
+
+                int colorAccent = Helper.resolveColor(context, androidx.appcompat.R.attr.colorAccent);
+                int textColorSecondary = Helper.resolveColor(context, android.R.attr.textColorSecondary);
+
                 List<EmailProvider> providers = EmailProvider.getProviders(context);
                 providers.add(0, new EmailProvider(getString(R.string.title_select)));
                 providers.add(1, new EmailProvider(getString(R.string.title_custom)));
 
                 ArrayAdapter<EmailProvider> aaProvider =
-                        new ArrayAdapter<>(context, R.layout.spinner_item1, android.R.id.text1, providers);
+                        new ArrayAdapter<EmailProvider>(context, R.layout.spinner_item1, android.R.id.text1, providers) {
+                            @NonNull
+                            @Override
+                            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                                return updateView(position, super.getView(position, convertView, parent));
+                            }
+
+                            @Override
+                            public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                                return updateView(position, super.getDropDownView(position, convertView, parent));
+                            }
+
+                            private View updateView(int position, View view) {
+                                TextView tv = view.findViewById(android.R.id.text1);
+                                tv.setTypeface(null, position == 1 ? Typeface.BOLD : Typeface.NORMAL);
+                                tv.setTextColor(position == 1 ? colorAccent : textColorSecondary);
+
+                                return view;
+                            }
+                        };
                 aaProvider.setDropDownViewResource(R.layout.spinner_item1_dropdown);
                 spProvider.setAdapter(aaProvider);
 
@@ -1722,6 +1779,7 @@ public class FragmentAccount extends FragmentBase {
 
                     auth = (account == null ? AUTH_TYPE_PASSWORD : account.auth_type);
                     provider = (account == null ? null : account.provider);
+                    avatar = (account == null ? null : account.avatar);
                     calendar = (account == null ? null : account.calendar);
 
                     new SimpleTask<EntityAccount>() {
@@ -1753,6 +1811,7 @@ public class FragmentAccount extends FragmentBase {
                     grpAdvanced.setVisibility(savedInstanceState.getInt("fair:advanced"));
                     auth = savedInstanceState.getInt("fair:auth");
                     provider = savedInstanceState.getString("fair:authprovider");
+                    avatar = savedInstanceState.getString("fair:avatar");
                     calendar = savedInstanceState.getString("fair:calendar");
                 }
 
@@ -1949,6 +2008,12 @@ public class FragmentAccount extends FragmentBase {
                             startActivity(new Intent(getContext(), ActivityBilling.class));
                     }
                     break;
+                case REQUEST_AVATAR:
+                    if (resultCode == RESULT_OK && data != null)
+                        onImageSelected(data.getData());
+                    else
+                        avatar = null;
+                    break;
                 case REQUEST_CALENDAR:
                     if (resultCode == RESULT_OK && data != null) {
                         if (ActivityBilling.isPro(getContext())) {
@@ -1988,6 +2053,29 @@ public class FragmentAccount extends FragmentBase {
             }
         } catch (Throwable ex) {
             Log.e(ex);
+        }
+    }
+
+    private void onImageSelected(Uri uri) {
+        final Context context = getContext();
+
+        if (!ActivityBilling.isPro(context)) {
+            startActivity(new Intent(context, ActivityBilling.class));
+            return;
+        }
+
+        try {
+            NoStreamException.check(uri, context);
+
+            context.getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (!Helper.isPersisted(context, uri, true, false))
+                throw new IllegalStateException("No permission granted to access selected image " + uri);
+
+            avatar = uri.toString();
+        } catch (NoStreamException ex) {
+            ex.report(getActivity());
+        } catch (Throwable ex) {
+            Log.unexpectedError(getParentFragmentManager(), ex);
         }
     }
 
@@ -2138,6 +2226,13 @@ public class FragmentAccount extends FragmentBase {
         importance.id = EntityMessage.SWIPE_ACTION_IMPORTANCE;
         importance.name = context.getString(R.string.title_set_importance);
         folders.add(importance);
+
+        if (AI.isAvailable(context)) {
+            EntityFolder summarize = new EntityFolder();
+            summarize.id = EntityMessage.SWIPE_ACTION_SUMMARIZE;
+            summarize.name = context.getString(R.string.title_summarize);
+            folders.add(summarize);
+        }
 
         EntityFolder move = new EntityFolder();
         move.id = EntityMessage.SWIPE_ACTION_MOVE;
