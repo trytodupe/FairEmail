@@ -210,6 +210,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
     private String type;
     private boolean found;
     private String searched;
+    private boolean searchedPartial;
     private ViewType viewType;
     private boolean compact;
     private int zoom;
@@ -1678,7 +1679,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
 
             // Contact info
             ContactInfo[] info = ContactInfo.getCached(context,
-                    message.account, message.folderType, selector, addresses);
+                    message.account, message.folderType, selector, Boolean.TRUE.equals(message.dmarc), addresses);
             if (info == null) {
                 if (taskContactInfo != null) {
                     taskContactInfo.cancel(context);
@@ -1690,6 +1691,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                 aargs.putLong("account", message.account);
                 aargs.putString("folderType", message.folderType);
                 aargs.putString("selector", selector);
+                aargs.putBoolean("dmarc", Boolean.TRUE.equals(message.dmarc));
                 aargs.putSerializable("addresses", addresses);
 
                 taskContactInfo = new SimpleTask<ContactInfo[]>() {
@@ -1698,8 +1700,9 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                         long account = args.getLong("account");
                         String folderType = args.getString("folderType");
                         String selector = args.getString("selector");
+                        boolean dmarc = args.getBoolean("dmarc");
                         Address[] addresses = (Address[]) args.getSerializable("addresses");
-                        return ContactInfo.get(context, account, folderType, selector, addresses);
+                        return ContactInfo.get(context, account, folderType, selector, dmarc, addresses);
                     }
 
                     @Override
@@ -2334,8 +2337,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                     boolean inJunk = EntityFolder.JUNK.equals(message.folderType);
                     boolean outbox = EntityFolder.OUTBOX.equals(message.folderType);
 
-                    boolean move = !(message.folderReadOnly || message.uid == null) ||
-                            (pop && EntityFolder.TRASH.equals(message.folderType));
+                    boolean move = !(message.folderReadOnly || message.uid == null);
                     boolean archive = (move && (hasArchive && !inArchive && !inSent && !inTrash && !inJunk));
                     boolean trash = (move || outbox || debug || pop);
                     boolean inbox = (move && hasInbox && (inArchive || inTrash || inJunk) && imap) ||
@@ -3326,7 +3328,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                         HtmlHelper.autoLink(document);
 
                         if (message.ui_found && found && !TextUtils.isEmpty(searched))
-                            HtmlHelper.highlightSearched(context, document, searched);
+                            HtmlHelper.highlightSearched(context, document, searched, searchedPartial);
 
                         boolean overview_mode = prefs.getBoolean("overview_mode", false);
                         HtmlHelper.setViewport(document, overview_mode);
@@ -3355,7 +3357,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                         HtmlHelper.autoLink(document);
 
                         if (message.ui_found && found && !TextUtils.isEmpty(searched))
-                            HtmlHelper.highlightSearched(context, document, searched);
+                            HtmlHelper.highlightSearched(context, document, searched, searchedPartial);
 
                         // Cleanup message
                         document = HtmlHelper.sanitizeView(context, document, show_images);
@@ -4684,7 +4686,8 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                             .putExtra("lpos", getAdapterPosition())
                             .putExtra("filter_archive", filter_archive)
                             .putExtra("found", viewType == ViewType.SEARCH)
-                            .putExtra("searched", searched);
+                            .putExtra("searched", searched)
+                            .putExtra("searchedPartial", searchedPartial);
 
                     boolean doubletap = prefs.getBoolean("doubletap", false);
 
@@ -6393,12 +6396,13 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
 
             popupMenu.getMenu().findItem(R.id.menu_show_html).setVisible(hasWebView && message.content);
 
-            boolean canRaw = (message.uid != null ||
-                    (EntityFolder.INBOX.equals(message.folderType) &&
-                            message.accountProtocol == EntityAccount.TYPE_POP));
-            popupMenu.getMenu().findItem(R.id.menu_raw_save).setEnabled(canRaw);
-            popupMenu.getMenu().findItem(R.id.menu_raw_send_message).setEnabled(canRaw);
-            popupMenu.getMenu().findItem(R.id.menu_raw_send_thread).setEnabled(canRaw);
+            boolean popReload = (message.accountProtocol == EntityAccount.TYPE_POP &&
+                    message.accountLeaveOnServer &&
+                    EntityFolder.INBOX.equals(message.folderType));
+
+            popupMenu.getMenu().findItem(R.id.menu_raw_save).setEnabled(message.uid != null || popReload);
+            popupMenu.getMenu().findItem(R.id.menu_raw_send_message).setEnabled(message.uid != null || popReload);
+            popupMenu.getMenu().findItem(R.id.menu_raw_send_thread).setEnabled(message.uid != null || popReload);
 
             popupMenu.getMenu().findItem(R.id.menu_thread_info)
                     .setVisible(BuildConfig.DEBUG || debug);
@@ -6409,17 +6413,17 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
             popupMenu.getMenu().findItem(R.id.menu_resync)
                     .setEnabled(message.uid != null ||
                             message.accountProtocol == EntityAccount.TYPE_POP)
-                    .setVisible(message.accountProtocol == EntityAccount.TYPE_IMAP ||
-                            EntityFolder.INBOX.equals(message.folderType));
+                    .setVisible(message.accountProtocol == EntityAccount.TYPE_IMAP || popReload);
             popupMenu.getMenu().findItem(R.id.menu_charset)
-                    .setEnabled(message.uid != null)
-                    .setVisible(message.accountProtocol == EntityAccount.TYPE_IMAP);
-
+                    .setEnabled(message.uid != null ||
+                            message.accountProtocol == EntityAccount.TYPE_POP)
+                    .setVisible(message.accountProtocol == EntityAccount.TYPE_IMAP || popReload);
             popupMenu.getMenu().findItem(R.id.menu_alternative)
                     .setTitle(message.isPlainOnly()
                             ? R.string.title_alternative_html : R.string.title_alternative_text)
-                    .setEnabled(message.uid != null && message.hasAlt() && !message.isEncrypted())
-                    .setVisible(message.accountProtocol == EntityAccount.TYPE_IMAP);
+                    .setEnabled(message.hasAlt() && !message.isEncrypted() &&
+                            (message.uid != null || message.accountProtocol == EntityAccount.TYPE_POP))
+                    .setVisible(message.accountProtocol == EntityAccount.TYPE_IMAP || popReload);
 
             popupMenu.insertIcons(context);
 
@@ -7624,6 +7628,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
             args.putLong("account", message.account);
             args.putString("folderType", message.folderType);
             args.putString("selector", message.bimi_selector);
+            args.putBoolean("dmarc", Boolean.TRUE.equals(message.dmarc));
             args.putSerializable("addresses", message.from);
 
             new SimpleTask<ContactInfo[]>() {
@@ -7632,8 +7637,9 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                     long account = args.getLong("account");
                     String folderType = args.getString("folderType");
                     String selector = args.getString("selector");
+                    boolean dmarc = args.getBoolean("dmarc");
                     Address[] addresses = (Address[]) args.getSerializable("addresses");
-                    return ContactInfo.get(context, account, folderType, selector, addresses);
+                    return ContactInfo.get(context, account, folderType, selector, dmarc, addresses);
                 }
 
                 @Override
@@ -8172,7 +8178,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
     }
 
     AdapterMessage(Fragment parentFragment,
-                   String type, boolean found, String searched, ViewType viewType,
+                   String type, boolean found, String searched, boolean searchedPartial, ViewType viewType,
                    boolean compact, int zoom, boolean large_buttons, String sort, boolean ascending,
                    boolean filter_duplicates, boolean filter_trash,
                    final IProperties properties) {
@@ -8180,6 +8186,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
         this.type = type;
         this.found = found;
         this.searched = searched;
+        this.searchedPartial = searchedPartial;
         this.viewType = viewType;
         this.compact = compact;
         this.zoom = zoom;
