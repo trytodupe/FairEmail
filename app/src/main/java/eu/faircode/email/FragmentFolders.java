@@ -190,8 +190,9 @@ public class FragmentFolders extends FragmentBase {
 
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
 
+        int c = Helper.resolveColor(getContext(), R.attr.colorInfoForeground);
+        swipeRefresh.setColorSchemeColors(c, c, c);
         int colorPrimary = Helper.resolveColor(getContext(), androidx.appcompat.R.attr.colorPrimary);
-        swipeRefresh.setColorSchemeColors(Color.WHITE, Color.WHITE, Color.WHITE);
         swipeRefresh.setProgressBackgroundColorSchemeColor(colorPrimary);
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -383,6 +384,7 @@ public class FragmentFolders extends FragmentBase {
                         intent.putExtra("account", account.id);
                         intent.putExtra("protocol", account.protocol);
                         intent.putExtra("auth_type", account.auth_type);
+                        intent.putExtra("host", account.host);
                         intent.putExtra("address", account.user);
                         intent.putExtra("faq", 22);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -12,6 +12,27 @@ For support you can use [the contact form](https://contact.faircode.eu/?product=
 
 ### [Acantholipan](https://en.wikipedia.org/wiki/Acantholipan)
 
+### 1.2216 - 2024-07-27
+
+* Added support for SVG data URI images
+* Added option to automatically unstar on unsnooze
+* Added option to auto-encrypt on replying to an encrypted message
+* Small improvements and minor bug fixes
+* Updated [AndroidX](https://developer.android.com/jetpack/androidx/versions/all-channel)
+* Updated [Public Suffix List](https://github.com/publicsuffix/list)
+* Updated [translations](https://crowdin.com/project/open-source-email)
+
+### 1.2215 - 2024-07-20 *
+
+* Small improvements and minor bug fixes
+
+### 1.2214 - 2024-07-18
+
+* Fixed all reported bugs
+* Performance improvements
+* Small improvements and minor bug fixes
+* Updated [translations](https://crowdin.com/project/open-source-email)
+
 ### 1.2213 - 2024-07-13
 
 * Added white theme

@@ -183,6 +183,7 @@ import org.openintents.openpgp.OpenPgpError;
 import org.openintents.openpgp.OpenPgpSignatureResult;
 import org.openintents.openpgp.util.OpenPgpApi;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -3312,12 +3313,7 @@ public class FragmentMessages extends FragmentBase
                     int importance = (message.importance == null ? EntityMessage.PRIORITIY_NORMAL : message.importance);
                     onActionSetImportanceSelection((importance + 1) % 3, message.id, false);
                 } else if (EntityMessage.SWIPE_ACTION_SNOOZE.equals(action))
-                    if (ActivityBilling.isPro(getContext()))
-                        onActionSnooze(message);
-                    else {
-                        redraw(viewHolder);
-                        startActivity(new Intent(getContext(), ActivityBilling.class));
-                    }
+                    onSwipeSnooze(message, viewHolder);
                 else if (EntityMessage.SWIPE_ACTION_HIDE.equals(action))
                     onActionHide(message);
                 else if (EntityMessage.SWIPE_ACTION_MOVE.equals(action)) {
@@ -3559,6 +3555,48 @@ public class FragmentMessages extends FragmentBase
                     }
                 }
             });
+        }
+
+        private void onSwipeSnooze(TupleMessageEx message, RecyclerView.ViewHolder viewHolder) {
+            if (!ActivityBilling.isPro(getContext())) {
+                redraw(viewHolder);
+                startActivity(new Intent(getContext(), ActivityBilling.class));
+                return;
+            }
+
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+            long duration = prefs.getInt("default_snooze", 1) * 3600 * 1000L;
+
+            if (duration == 0) {
+                redraw(viewHolder);
+                Bundle args = new Bundle();
+                args.putString("title", getString(R.string.title_snooze));
+                args.putLong("account", message.account);
+                args.putLong("folder", message.folder);
+                args.putString("thread", message.thread);
+                args.putLong("id", message.id);
+                if (message.ui_snoozed != null)
+                    args.putLong("time", message.ui_snoozed);
+
+                FragmentDialogDuration fragment = new FragmentDialogDuration();
+                fragment.setArguments(args);
+                fragment.setTargetFragment(FragmentMessages.this, REQUEST_MESSAGE_SNOOZE);
+                fragment.show(getParentFragmentManager(), "message:snooze");
+            } else {
+                Bundle args = new Bundle();
+                args.putLong("account", message.account);
+                args.putString("thread", message.thread);
+                args.putLong("id", message.id);
+                if (message.ui_snoozed == null) {
+                    args.putLong("duration", duration);
+                    args.putLong("time", new Date().getTime() + duration);
+                } else {
+                    args.putLong("duration", 0);
+                    args.putLong("time", 0);
+                }
+
+                onSnoozeOrHide(args);
+            }
         }
 
         private void onSwipeMove(final @NonNull TupleMessageEx message) {
@@ -4594,25 +4632,6 @@ public class FragmentMessages extends FragmentBase
         }.execute(this, args, "messages:seen");
     }
 
-    private void onActionSnooze(TupleMessageEx message) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-        long duration = prefs.getInt("default_snooze", 1) * 3600 * 1000L;
-
-        Bundle args = new Bundle();
-        args.putLong("account", message.account);
-        args.putString("thread", message.thread);
-        args.putLong("id", message.id);
-        if (message.ui_snoozed == null) {
-            args.putLong("duration", duration);
-            args.putLong("time", new Date().getTime() + duration);
-        } else {
-            args.putLong("duration", 0);
-            args.putLong("time", 0);
-        }
-
-        onSnoozeOrHide(args);
-    }
-
     private void onActionHide(TupleMessageEx message) {
         Bundle args = new Bundle();
         args.putLong("account", message.account);
@@ -5430,6 +5449,19 @@ public class FragmentMessages extends FragmentBase
 
             case SEARCH:
                 setSubtitle(criteria.getTitle(getContext()));
+                if (server) {
+                    tvNoEmailHint.setText(null);
+                    tvNoEmailHint.setCompoundDrawables(null, null, null, null);
+                    db.folder().liveFolderEx(folder).observe(getViewLifecycleOwner(), new Observer<TupleFolderEx>() {
+                        @Override
+                        public void onChanged(TupleFolderEx folder) {
+                            if (folder != null) {
+                                tvNoEmailHint.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.twotone_search_24, 0, 0, 0);
+                                tvNoEmailHint.setText(folder.accountName + "/" + folder.name);
+                            }
+                        }
+                    });
+                }
                 break;
         }
 
@@ -7389,13 +7421,15 @@ public class FragmentMessages extends FragmentBase
                 (language_detection && !TextUtils.isEmpty(filter_language) && !outbox));
 
         boolean none = (items == 0 && initialized);
-        boolean searching = (viewType == AdapterMessage.ViewType.SEARCH && server && (!initialized || loading) && items == 0);
+        boolean search = (viewType == AdapterMessage.ViewType.SEARCH && server);
+        boolean searching = (search && (!initialized || loading) && items == 0);
         boolean filtered = (filter_active && viewType != AdapterMessage.ViewType.SEARCH);
 
         pbWait.setVisibility(loading || tasks > 0 ? View.VISIBLE : View.GONE);
         tvNoEmail.setText(searching ? R.string.title_search_server_wait : R.string.title_no_messages);
         tvNoEmail.setVisibility(none || searching ? View.VISIBLE : View.GONE);
-        tvNoEmailHint.setVisibility(none && filtered ? View.VISIBLE : View.GONE);
+
+        tvNoEmailHint.setVisibility(none && (filtered || search) ? View.VISIBLE : View.GONE);
 
         if (BuildConfig.DEBUG)
             updateDebugInfo();
@@ -8982,7 +9016,7 @@ public class FragmentMessages extends FragmentBase
             Intent data = new Intent();
             data.setAction(OpenPgpApi.ACTION_DECRYPT_VERIFY);
             data.putExtra(BuildConfig.APPLICATION_ID, id);
-            onPgp(data, auto);
+            onPgp(data, auto, false);
         }
     }
 
@@ -9002,7 +9036,7 @@ public class FragmentMessages extends FragmentBase
                     break;
                 case REQUEST_OPENPGP:
                     if (resultCode == RESULT_OK && data != null)
-                        onPgp(data, false);
+                        onPgp(data, false, false);
                     break;
                 case REQUEST_MESSAGE_DELETE:
                     if (resultCode == RESULT_OK && data != null)
@@ -9217,16 +9251,18 @@ public class FragmentMessages extends FragmentBase
         }.execute(this, args, "raw:save");
     }
 
-    private void onPgp(Intent data, boolean auto) {
+    private void onPgp(Intent data, boolean auto, boolean stripped) {
         Bundle args = new Bundle();
         args.putParcelable("data", data);
         args.putBoolean("auto", auto);
+        args.putBoolean("stripped", stripped);
 
         new SimpleTask<PendingIntent>() {
             @Override
             protected PendingIntent onExecute(Context context, Bundle args) throws Throwable {
                 // Get arguments
                 boolean auto = args.getBoolean("auto");
+                boolean stripped = args.getBoolean("stripped");
                 Intent data = args.getParcelable("data");
                 long id = data.getLongExtra(BuildConfig.APPLICATION_ID, -1);
 
@@ -9314,6 +9350,9 @@ public class FragmentMessages extends FragmentBase
                         return null;
                     else
                         throw new IllegalArgumentException(context.getString(R.string.title_not_encrypted));
+
+                if (stripped)
+                    in = new MessageHelper.StripStream(new BufferedInputStream(in));
 
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
                 boolean autocrypt = prefs.getBoolean("autocrypt", true);
@@ -9509,8 +9548,13 @@ public class FragmentMessages extends FragmentBase
                             } else if (sresult == RESULT_KEY_MISSING)
                                 args.putString("sigresult", context.getString(R.string.title_signature_key_missing));
                             else {
-                                String text = context.getString(R.string.title_signature_invalid_reason, Integer.toString(sresult));
-                                args.putString("sigresult", text);
+                                if (stripped) {
+                                    String text = context.getString(R.string.title_signature_invalid_reason, Integer.toString(sresult));
+                                    args.putString("sigresult", text);
+                                } else {
+                                    onPgp(data, auto, true);
+                                    return null;
+                                }
                             }
 
                             break;

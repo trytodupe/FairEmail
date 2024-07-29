@@ -471,7 +471,7 @@ class Core {
                                     break;
 
                                 case EntityOperation.DELETE:
-                                    onDelete(context, jargs, account, folder, messages, (IMAPFolder) ifolder);
+                                    onDelete(context, jargs, account, folder, messages, (IMAPStore) istore, (IMAPFolder) ifolder);
                                     break;
 
                                 case EntityOperation.HEADERS:
@@ -1784,11 +1784,12 @@ class Core {
         }
     }
 
-    private static void onDelete(Context context, JSONArray jargs, EntityAccount account, EntityFolder folder, List<EntityMessage> messages, IMAPFolder ifolder) throws MessagingException, IOException {
+    private static void onDelete(Context context, JSONArray jargs, EntityAccount account, EntityFolder folder, List<EntityMessage> messages, IMAPStore istore, IMAPFolder ifolder) throws MessagingException, IOException {
         // Delete message
         DB db = DB.getInstance(context);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         boolean perform_expunge = prefs.getBoolean("perform_expunge", true);
+        boolean gmail_delete_all = prefs.getBoolean("gmail_delete_all", false);
 
         if (folder.local) {
             Log.i(folder.name + " local delete");
@@ -1798,6 +1799,65 @@ class Core {
         }
 
         try {
+            if (account.isGmail() && gmail_delete_all) {
+                EntityFolder trash = db.folder().getFolderByType(account.id, EntityFolder.TRASH);
+                if (trash != null) {
+                    Map<String, Long> folders = new HashMap<>();
+                    EntityFolder archive = db.folder().getFolderByType(account.id, EntityFolder.ARCHIVE);
+                    if (archive != null)
+                        folders.put(archive.name, archive.id);
+
+                    List<Long> uids = new ArrayList<>();
+                    for (EntityMessage message : messages)
+                        if (message.uid != null)
+                            uids.add(message.uid);
+
+                    IMAPFolder itrash = (IMAPFolder) istore.getFolder(trash.name);
+                    Message[] imessages = ifolder.getMessagesByUID(Helper.toLongArray(uids));
+
+                    List<Message> imove = new ArrayList<>();
+                    if (imessages != null)
+                        for (Message imessage : imessages)
+                            if (imessage instanceof GmailMessage)
+                                try {
+                                    imove.add(imessage);
+                                    String[] labels = ((GmailMessage) imessage).getLabels();
+                                    for (String label : labels)
+                                        if (!folders.containsKey(label)) {
+                                            EntityFolder f = db.folder().getFolderByName(account.id, label);
+                                            if (f != null)
+                                                folders.put(f.name, f.id);
+                                        }
+                                } catch (Throwable ex) {
+                                    Log.e(ex);
+                                }
+
+                    ifolder.moveMessages(imove.toArray(new Message[0]), itrash);
+
+                    itrash.open(READ_WRITE);
+                    try {
+                        List<Message> trashed = new ArrayList<>();
+                        for (EntityMessage message : messages) {
+                            Message[] itrashed = itrash.search(new MessageIDTerm(message.msgid));
+                            if (itrashed != null && itrashed.length == 1)
+                                trashed.add(itrashed[0]);
+                        }
+
+                        itrash.setFlags(trashed.toArray(new Message[0]), new Flags(Flags.Flag.DELETED), true);
+                        if (perform_expunge)
+                            expunge(context, itrash, trashed);
+                    } finally {
+                        if (itrash.isOpen())
+                            itrash.close();
+                    }
+
+                    for (long fid : folders.values())
+                        EntityOperation.sync(context, fid, false);
+
+                    return;
+                }
+            }
+
             if (messages.size() > 1) {
                 boolean ui_deleted = messages.get(0).ui_deleted;
 
@@ -4583,7 +4643,7 @@ class Core {
 
             Long received;
             long future = new Date().getTime() + FUTURE_RECEIVED;
-            if (account.use_date) {
+            if (account.use_date || EntityFolder.SENT.equals(folder.type)) {
                 received = sent;
                 if (received == null || received == 0 || received > future)
                     received = helper.getReceived();
@@ -5550,6 +5610,7 @@ class Core {
         intent.putExtra("account", account.id);
         intent.putExtra("protocol", account.protocol);
         intent.putExtra("auth_type", account.auth_type);
+        intent.putExtra("host", account.host);
         intent.putExtra("address", account.user);
         intent.putExtra("faq", 22);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
