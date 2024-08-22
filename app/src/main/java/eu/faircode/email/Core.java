@@ -1454,6 +1454,8 @@ class Core {
                 Message imessage = ifolder.getMessageByUID(message.uid);
                 if (imessage == null)
                     throw new MessageRemovedException("move without message");
+                if (imessage.isExpunged())
+                    throw new MessageRemovedException("move of expunged message");
                 map.put(imessage, message);
             } catch (MessageRemovedException ex) {
                 Log.e(ex);
@@ -1574,6 +1576,11 @@ class Core {
                 try {
                     imessage.setFlag(Flags.Flag.DELETED, true);
                     deleted.add(imessage);
+                    if (!folder.synchronize || folder.poll || !MessageHelper.hasCapability(ifolder, "IDLE")) {
+                        EntityMessage m = map.get(imessage);
+                        if (m != null && m.uid != null)
+                            EntityOperation.queue(context, folder, EntityOperation.FETCH, m.uid, false, true);
+                    }
                 } catch (MessageRemovedException ex) {
                     Log.w(ex);
                 }
@@ -5254,9 +5261,9 @@ class Core {
                 uidExpunge(context, ifolder, uids);
                 Log.i(ifolder.getName() + " expunged " + TextUtils.join(",", uids));
             } else {
-                Log.i(ifolder.getName() + " expunging all");
+                Log.i(ifolder.getName() + " expunging all=" + messages.size());
                 ifolder.expunge();
-                Log.i(ifolder.getName() + " expunged all");
+                Log.i(ifolder.getName() + " expunged all=" + messages.size());
             }
 
             return true;

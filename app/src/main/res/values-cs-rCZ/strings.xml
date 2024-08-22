@@ -448,6 +448,7 @@ v prohlížeči ze všech Google účtů.</string>
     <string name="title_advanced_prefix_count">Přidat počet do prefixu odpovědi</string>
     <string name="title_advanced_separate_reply">Vložit vodorovnou čáru před hlavičku odpovědi/přeposlání</string>
     <string name="title_advanced_extended_reply">Použít rozšířenou hlavičku odpovědi/přeposlání</string>
+    <string name="title_advanced_template_reply" comment="title_advanced_template_reply&#10;Title for an option in the send settings tab page for defining a template of the reply header">Šablona záhlaví odpovědi/přeposlání</string>
     <string name="title_advanced_write_above">Psát nad textem odesílatele</string>
     <string name="title_advanced_write_below">Psát pod textem odesílatele</string>
     <string name="title_advanced_quote_reply">Citovat text odpovědi</string>
@@ -549,7 +550,7 @@ v prohlížeči ze všech Google účtů.</string>
     <string name="title_advanced_threading_unread">Zobrazit počet nepřečtených zpráv v konverzacích</string>
     <string name="title_advanced_indentation">Levé/pravé odsazení přijatých/odeslaných zpráv v konverzacích</string>
     <string name="title_advanced_highlight_unread">Zvýraznit nepřečtené zprávy</string>
-    <string name="title_advanced_account_color" comment="title_advanced_account_color&#10;Title for an option in the display settings tab page to select none, color stripe or color dot">Zobrazit barevný pruh nebo barevný bod</string>
+    <string name="title_advanced_account_color">Zobrazit barevný pruh nebo barevný bod</string>
     <string name="title_advanced_color_stripe_wide">Použít široký barevný pruh</string>
     <string name="title_advanced_avatars">Zobrazit fotografie kontaktů</string>
     <string name="title_advanced_bimi">Zobrazit Brand Indicators for Message Identification (BIMI)</string>
@@ -872,6 +873,7 @@ v prohlížeči ze všech Google účtů.</string>
     <string name="title_advanced_send_reminders_hint">Zobrazí upozornění, je-li text zprávy či předmět prázdný nebo chybí-li pravděpodobně příloha</string>
     <string name="title_advanced_reply_move_hint">E-mailový server stále může zprávy ukládat i do složky odeslané</string>
     <string name="title_advanced_compose_color_hint">Velmi světlá nebo tmavá barva povede k nečitelným zprávám na straně příjemců</string>
+    <string name="title_advanced_template_reply_hint" comment="title_advanced_template_reply_hint&#10;Remarks for an option in the send settings tab page for defining a template of the reply header">HTML je povoleno. Dostupné zástupné symboly: %1$s</string>
     <string name="title_advanced_write_below_hint">Příjemce může ztratit vaši odpověď, například když je delší zpráva zkrácena</string>
     <string name="title_advanced_attach_new_hint">V opačném případě přidat sdílené adresy nebo soubory do aktuálního konceptu zprávy</string>
     <string name="title_advanced_usenet_hint">Vložit „-- “ mezi text a podpis</string>
@@ -2348,8 +2350,8 @@ v prohlížeči ze všech Google účtů.</string>
     </string-array>
     <string-array name="accountColorNames">
         <item>Žádné</item>
-        <item comment="accountColorNames&#10;Title for selecting a color stripe (display-settings tab page)">Pruh</item>
-        <item comment="accountColorNames&#10;Title for selecting a color dot (display-settings tab page)">Tečka</item>
+        <item>Pruh</item>
+        <item>Tečka</item>
     </string-array>
     <string-array name="contactTypes">
         <item>Příjemce</item>

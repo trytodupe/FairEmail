@@ -3020,9 +3020,10 @@ Note that not all email servers support IMAP keywords.
 The automation action will broadcast the intent *eu.faircode.email.AUTOMATION* with the following string extras:
 
 * *rule*
+* *received* (ISO 8601 date/time)
 * *sender*
 * *subject*
-* *received* (ISO 8601 date/time)
+* *preview* (since version 1.2222)
 
 An app like Tasker can listen for this intent and perform some action.
 Please [see here](https://tasker.joaoapps.com/userguide/en/intents.html) about receiving intents in Tasker.
@@ -6091,7 +6092,7 @@ Changes in the past resulted too often in lots of complaints of other people.
 
 Requested features should:
 
-* within the scope of the app
+* be within the scope of the app
 * be useful to more than a few people
 * fit logically and consistently within the app
 * fit within the philosophy of the app (privacy-oriented, security-minded)
@@ -6107,7 +6108,7 @@ Fonts, sizes, colors, etc should be material design whenever possible.
 There are requests daily to change the appearance in this or that way, but the problem is that these requests are more often than not conflicting.
 To prevent making other people unhappy, changes in the appearance always need to clearly and objectively contribute to the usability of the app to be considered.
 
-A feature will be considered useful to most people if more than 0.1% of the users request a feature, which in practice means about 500 people.
+A feature will be considered useful to most people if more than 0.5% of the users request a feature, which in practice means about 2500 people.
 
 Features not fulfilling these requirements will likely be rejected.
 This is also to keep maintenance and support in the long term feasible.

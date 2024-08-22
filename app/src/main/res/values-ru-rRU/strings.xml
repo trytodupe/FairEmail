@@ -447,6 +447,7 @@
     <string name="title_advanced_prefix_count">Добавлять счётчик в префикс ответа</string>
     <string name="title_advanced_separate_reply">Вставлять горизонтальную линию перед заголовком ответа/пересылки</string>
     <string name="title_advanced_extended_reply">Использовать расширенный заголовок для ответа/пересылки</string>
+    <string name="title_advanced_template_reply" comment="title_advanced_template_reply&#10;Title for an option in the send settings tab page for defining a template of the reply header">Шаблон заголовка для ответа/пересылки</string>
     <string name="title_advanced_write_above">Писать над текстом отправителя</string>
     <string name="title_advanced_write_below">Писать под текстом отправителя</string>
     <string name="title_advanced_quote_reply">Цитировать текст при ответе</string>
@@ -548,7 +549,7 @@
     <string name="title_advanced_threading_unread">Показывать количество непрочитанных сообщений в диалогах</string>
     <string name="title_advanced_indentation">Левый/правый отступ для полученных/отправленных сообщений в диалогах</string>
     <string name="title_advanced_highlight_unread">Выделять непрочитанные сообщения</string>
-    <string name="title_advanced_account_color" comment="title_advanced_account_color&#10;Title for an option in the display settings tab page to select none, color stripe or color dot">Показывать цветные полоски или точки</string>
+    <string name="title_advanced_account_color">Показывать цветные полоски или точки</string>
     <string name="title_advanced_color_stripe_wide">Использовать широкий диапазон цветов</string>
     <string name="title_advanced_avatars">Показывать фотографии контакта</string>
     <string name="title_advanced_bimi">Показывать индикаторы бренда для идентификации сообщений (BIMI)</string>
@@ -872,6 +873,7 @@
     <string name="title_advanced_send_reminders_hint">Показывать предупреждение, если отсутствует текст сообщения, тема или, возможно, отсутствует вложение</string>
     <string name="title_advanced_reply_move_hint">Сервер электронной почты всё ещё может добавлять сообщения в папку отправленных</string>
     <string name="title_advanced_compose_color_hint">Очень светлые или очень тёмные цвета сделают сообщение неразборчивым для получателя</string>
+    <string name="title_advanced_template_reply_hint" comment="title_advanced_template_reply_hint&#10;Remarks for an option in the send settings tab page for defining a template of the reply header">Использование HTML разрешено. Доступные заполнители: %1$s</string>
     <string name="title_advanced_write_below_hint">Получатель может пропустить ваш ответ, например, при сокращении длинного сообщения</string>
     <string name="title_advanced_attach_new_hint">В противном случае общие адреса или файлы добавляются к текущему черновику</string>
     <string name="title_advanced_usenet_hint">Вставлять \"-- \" между текстом и подписью</string>
@@ -2351,8 +2353,8 @@
     </string-array>
     <string-array name="accountColorNames">
         <item>Ничего</item>
-        <item comment="accountColorNames&#10;Title for selecting a color stripe (display-settings tab page)">Полоска</item>
-        <item comment="accountColorNames&#10;Title for selecting a color dot (display-settings tab page)">Точка</item>
+        <item>Полоска</item>
+        <item>Точка</item>
     </string-array>
     <string-array name="contactTypes">
         <item>Получатель</item>

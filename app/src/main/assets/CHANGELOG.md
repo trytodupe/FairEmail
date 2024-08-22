@@ -4,13 +4,37 @@
 
 ### Notices
 
-It is now possible to check the integrity of APK files, see [the FAQ](https://m66b.github.io/FairEmail/#faq205) about how.
+People keep asking me to add new features to the app, to whom I often say “no”, and other people complain about too many features.
+Both groups of people leave bad reviews for this, which is quite frustrating, also because there are already enough bad reviews for the wrong reasons
+(email server problems, which unfortunately happen too often, etc.).
+Therefore, [the rules for new features](https://m66b.github.io/FairEmail/#get-support) will be strictly followed from today.
+The app will continue to be maintained and supported as usual.
+
+<br>
 
 For support you can use [the contact form](https://contact.faircode.eu/?product=fairemailsupport).
 
 <br>
 
 ### [Acantholipan](https://en.wikipedia.org/wiki/Acantholipan)
+
+### 1.2224 - 2024-08-20 *
+
+* Small improvements and minor bug fixes
+* Updated [translations](https://crowdin.com/project/open-source-email)
+
+### 1.2223 - 2024-08-17
+
+* Small improvements and minor bug fixes
+* Updated [translations](https://crowdin.com/project/open-source-email)
+
+### 1.2222 - 2024-08-16
+
+* Fixed bug in JavaMail causing iCloud move issues
+* Added reply/forward header template option
+* Small improvements and minor bug fixes
+* Updated [Public Suffix List](https://github.com/publicsuffix/list)
+* Updated [translations](https://crowdin.com/project/open-source-email)
 
 ### 1.2221 - 2024-08-13
 
