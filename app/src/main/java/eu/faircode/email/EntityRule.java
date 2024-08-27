@@ -437,7 +437,7 @@ public class EntityRule {
 
                 Document d = JsoupEx.parse(html);
                 if (skip_quotes)
-                    HtmlHelper.removeQuotes(d);
+                    HtmlHelper.removeQuotes(d, true);
                 if (jsoup) {
                     String selector = value.substring(JSOUP_PREFIX.length());
                     if (d.select(selector).isEmpty() != not)
@@ -1198,7 +1198,7 @@ public class EntityRule {
 
         File file = reply.getFile(context);
         Helper.writeText(file, body);
-        String text = HtmlHelper.getFullText(body, true);
+        String text = HtmlHelper.getFullText(context, body);
         reply.preview = HtmlHelper.getPreview(text);
         reply.language = HtmlHelper.getLanguage(context, reply.subject, text);
         db.message().setMessageContent(reply.id,
@@ -1296,32 +1296,26 @@ public class EntityRule {
         if (message.ui_seen)
             return;
 
-        Locale locale = (message.language == null ? Locale.getDefault() : new Locale(message.language));
-
-        Configuration configuration = new Configuration(context.getResources().getConfiguration());
-        configuration.setLocale(locale);
-        Resources res = context.createConfigurationContext(configuration).getResources();
-
         StringBuilder sb = new StringBuilder();
-        sb.append(res.getString(R.string.title_rule_tts_prefix)).append(". ");
+        sb.append(context.getString(R.string.title_rule_tts_prefix)).append(". ");
 
         if (message.from != null && message.from.length > 0)
-            sb.append(res.getString(R.string.title_rule_tts_from))
+            sb.append(context.getString(R.string.title_rule_tts_from))
                     .append(' ').append(MessageHelper.formatAddressesShort(message.from)).append(". ");
 
         if (!TextUtils.isEmpty(message.subject))
-            sb.append(res.getString(R.string.title_rule_tts_subject))
+            sb.append(context.getString(R.string.title_rule_tts_subject))
                     .append(' ').append(message.subject).append(". ");
 
         String body = Helper.readText(message.getFile(context));
-        String text = HtmlHelper.getFullText(body, false);
+        String text = HtmlHelper.getFullText(context, body);
         String preview = HtmlHelper.getPreview(text);
 
         if (!TextUtils.isEmpty(preview))
-            sb.append(res.getString(R.string.title_rule_tts_content))
+            sb.append(context.getString(R.string.title_rule_tts_content))
                     .append(' ').append(preview);
 
-        TTSHelper.speak(context, "rule:" + message.id, sb.toString(), locale);
+        TTSHelper.speak(context, "rule:" + message.id, sb.toString(), message.language, false);
     }
 
     private boolean onActionSnooze(Context context, EntityMessage message, JSONObject jargs) throws JSONException {

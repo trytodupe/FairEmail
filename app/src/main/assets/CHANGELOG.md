@@ -4,11 +4,13 @@
 
 ### Notices
 
-People keep asking me to add new features to the app, to whom I often say “no”, and other people complain about too many features.
-Both groups of people leave bad reviews for this, which is quite frustrating, also because there are already enough bad reviews for the wrong reasons
+People keep asking me to add new, often exotic, features to the app, to whom I often say "no", and other people complain about too many features.
+Both groups of people leave bad reviews for this, which is frustrating, also because there are already enough bad reviews for the wrong reasons
 (email server problems, which unfortunately happen too often, etc.).
+The main problem is that more features now make more people unhappy than happy.
 Therefore, [the rules for new features](https://m66b.github.io/FairEmail/#get-support) will be strictly followed from today.
-The app will continue to be maintained and supported as usual.
+
+No worries, the app will [continue to be maintained](https://github.com/M66B/FairEmail/commits/) and supported as usual.
 
 <br>
 
@@ -18,7 +20,19 @@ For support you can use [the contact form](https://contact.faircode.eu/?product=
 
 ### [Acantholipan](https://en.wikipedia.org/wiki/Acantholipan)
 
-### 1.2224 - 2024-08-20 *
+### Next version
+
+* Added Fastmail OAuth
+* Added swipe to speak
+* Small improvements and minor bug fixes
+* Updated [translations](https://crowdin.com/project/open-source-email)
+
+### 1.2225 - 2024-08-24
+
+* Small improvements and minor bug fixes
+* Updated [translations](https://crowdin.com/project/open-source-email)
+
+### 1.2224 - 2024-08-20
 
 * Small improvements and minor bug fixes
 * Updated [translations](https://crowdin.com/project/open-source-email)
