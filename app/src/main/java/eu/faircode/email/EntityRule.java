@@ -26,8 +26,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
@@ -1315,7 +1313,7 @@ public class EntityRule {
             sb.append(context.getString(R.string.title_rule_tts_content))
                     .append(' ').append(preview);
 
-        TTSHelper.speak(context, "rule:" + message.id, sb.toString(), message.language, false);
+        TTSHelper.speak(context, "rule:" + message.id, sb.toString(), message.language, false, null);
     }
 
     private boolean onActionSnooze(Context context, EntityMessage message, JSONObject jargs) throws JSONException {

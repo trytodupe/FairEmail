@@ -419,7 +419,7 @@
     <string name="title_advanced_prefix_count">Προσθήκη μετρητή στο πρόθεμα απάντησης</string>
     <string name="title_advanced_separate_reply">Εισαγωγή μιας οριζόντιας γραμμής πριν από την κεφαλίδα μιας απάντησης/προώθησης</string>
     <string name="title_advanced_extended_reply">Χρήση εκτεταμένων κεφαλίδων κατά την απάντηση/προώθηση</string>
-    <string name="title_advanced_template_reply" comment="title_advanced_template_reply&#10;Title for an option in the send settings tab page for defining a template of the reply header">Πρότυπο κεφαλίδας για απάντηση/προώθηση</string>
+    <string name="title_advanced_template_reply">Πρότυπο κεφαλίδας για απάντηση/προώθηση</string>
     <string name="title_advanced_write_above">Συγγραφή πάνω από το κείμενο του αποστολέα</string>
     <string name="title_advanced_write_below">Συγγραφή κάτω από το κείμενο του αποστολέα</string>
     <string name="title_advanced_quote_reply">Παράθεση του προς απάντηση κειμένου</string>
@@ -842,7 +842,7 @@
     <string name="title_advanced_send_reminders_hint">Να προβάλλεται μια προειδοποίηση όταν το κείμενο του μηνύματος ή το θέμα είναι κενό ή όταν φαίνεται πως ένα συνημμένο λείπει</string>
     <string name="title_advanced_reply_move_hint">Ο διακομιστής ηλ. ταχυδρομείου ενδέχεται να προσθέτει ακόμα τα μηνύματα στον φάκελο απεσταλμένων</string>
     <string name="title_advanced_compose_color_hint">Πολύ ανοικτά ή πολύ σκούρα χρώματα θα έχουν ως αποτέλεσμα δυσανάγνωστα μηνύματα για τους παραλήπτες</string>
-    <string name="title_advanced_template_reply_hint" comment="title_advanced_template_reply_hint&#10;Remarks for an option in the send settings tab page for defining a template of the reply header">Επιτρέπεται HTML. Διαθέσιμα σύμβολα υποκατάστασης: %1$s</string>
+    <string name="title_advanced_template_reply_hint">Επιτρέπεται HTML. Διαθέσιμα σύμβολα υποκατάστασης: %1$s</string>
     <string name="title_advanced_write_below_hint">Ένας παραλήπτης μπορεί να χάσει την απάντησή σας, για παράδειγμα, όταν ένα μακρύτερο μήνυμα περικόπτεται</string>
     <string name="title_advanced_attach_new_hint">Διαφορετικά, προσθήκη κοινόχρηστων διευθύνσεων ή αρχείων στο τρέχον προσχέδιο μηνύματος</string>
     <string name="title_advanced_usenet_hint">Να παρεμβάλλεται ένα \'-- \' ανάμεσα στο κείμενο και την υπογραφή</string>
@@ -1935,10 +1935,12 @@
     <string name="title_hint_folder_actions">Παρατεταμένο πάτημα σε έναν φάκελο για επιλογές, όπως προσθήκη ενός φακέλου στο μενού πλοήγησης για γρήγορη πρόσβαση</string>
     <string name="title_hint_folder_sync">Για να μειωθεί η χρήση μπαταρίας και δικτύου δεν συγχρονίζονται όλοι οι φάκελοι και όλα τα μηνύματα από προεπιλογή</string>
     <string name="title_hint_airplane">Η λειτουργία πτήσης είναι ενεργοποιημένη</string>
+    <string name="title_hint_vpn_active">VPN ενεργό</string>
     <string name="title_hint_notifications">Δεν έχει δοθεί καμία άδεια ειδοποιήσεων</string>
     <string name="title_hint_notifications_remark">Άδειες ειδοποίησης απαιτούνται επίσης και για τις ειδοποιήσεις λογαριασμού. Οι ειδοποιήσεις για νέα μηνύματα μπορούν να απενεργοποιηθούν στις ρυθμίσεις.</string>
     <string name="title_hint_battery_optimizations">Οι βελτιστοποιήσεις μπαταρίας είναι ακόμη ενεργοποιημένες</string>
     <string name="title_hint_data_saver">Εάν είναι ενεργοποιημένη η εξοικονόμηση δεδομένων, η εφαρμογή δεν θα μπορεί να συγχρονίζει στο παρασκήνιο και ενδέχεται να προκύπτουν σφάλματα σύνδεσης.</string>
+    <string name="title_hint_vpn">Οι διακομιστές ηλεκτρονικού ταχυδρομείου συχνά μπλοκάρουν συνδέσεις μέσω VPN. Μόνον ο πάροχος ηλεκτρονικού ταχυδρομείου μπορεί επιλύσει το πρόβλημα.</string>
     <string name="title_hint_dismiss">Μπορείτε να απορρίψετε αυτό το παράθυρο διαλόγου, για να αφαιρέσετε την ειδοποίηση.</string>
     <string name="title_hint_support">Αν έχετε μία ερώτηση ή ένα πρόβλημα, παρακαλώ χρησιμοποιήστε το μενού \"Υποστήριξη\" για να λάβετε βοήθεια</string>
     <string name="title_hint_message_actions">Σάρωση αριστερά για απορρίμματα• σάρωση δεξιά για αρχειοθέτηση (αν είναι διαθέσιμη)• μπορείτε να ρυθμίσετε τις ενέργειες σάρωσης στις ρυθμίσεις του λογαριασμού</string>

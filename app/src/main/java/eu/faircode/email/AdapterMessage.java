@@ -46,7 +46,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.graphics.text.LineBreaker;
 import android.net.Uri;
 import android.os.Build;
@@ -3805,7 +3804,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
 
             int iavailable = 0;
             List<EntityAttachment> media = new ArrayList<>();
-            if (thumbnails && bind_extras) {
+            if (thumbnails && !EntityFolder.JUNK.equals(message.folderType) && bind_extras) {
                 for (EntityAttachment attachment : attachments)
                     if ((pdf_preview && attachment.isPDF()) ||
                             (video_preview && attachment.isVideo()) ||
