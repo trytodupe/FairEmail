@@ -20,14 +20,20 @@ For support you can use the contact form.
 
 Acantholipan
 
-Next version
+1.2229 - 2024-09-07
 
+* Fixed foreground service permission
+* Updated translations
+
+1.2228 - 2024-09-07
+
+* Accessibility improvements (thanks @pvagner)
 * Small improvements and minor bug fixes
 * Updated AndroidX
 * Updated Public Suffix List
 * Updated translations
 
-1.2227 - 2024-08-31
+1.2227 - 2024-08-31 *
 
 * Small improvements and minor bug fixes
 * Updated build tools

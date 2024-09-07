@@ -5,16 +5,16 @@
 &#x1F30E; [Google Translate](https://translate.google.com/translate?sl=en&u=https%3A%2F%2Fm66b.github.io%2FFairEmail%2F)
 
 &#x1F1EC;&#x1F1E7; If you have a question, please check the following frequently asked questions first.
-[At the bottom](#quick-support),
+[At the bottom](#get-support),
 you can find out how to ask other questions, request features, and report bugs.
 You will receive an answer in your own language.
 
 &#x1F1E9;&#x1F1EA; Wenn Sie eine Frage haben, überprüfen Sie bitte zuerst die folgenden häufig gestellten Fragen.
-[Unten](#quick-support) erfahren Sie, wie Sie andere Fragen stellen, Funktionen anfordern und Fehler melden können.
+[Unten](#get-support) erfahren Sie, wie Sie andere Fragen stellen, Funktionen anfordern und Fehler melden können.
 Sie erhalten eine Antwort in Ihrer eigenen Sprache.
 
 &#x1F1EB;&#x1F1F7; Si vous avez une question, veuillez d'abord vérifier les questions fréquemment posées suivantes.
-[En bas](#quick-support), vous pouvez découvrir comment poser d'autres questions, demander des fonctionnalités et signaler des bogues.
+[En bas](#get-support), vous pouvez découvrir comment poser d'autres questions, demander des fonctionnalités et signaler des bogues.
 Vous recevrez une réponse dans votre propre langue.
 
 <br>
@@ -443,7 +443,7 @@ The following Android permissions are **required**:
 * *have full network access* (INTERNET): to send and receive via the internet
 * *view network connections* (ACCESS_NETWORK_STATE): to monitor connectivity changes (mobile data, WiFi)
 * *run at startup* (RECEIVE_BOOT_COMPLETED): to start sending and receiving on device start
-* *run foreground service* (FOREGROUND_SERVICE/DATA_SYNC): to run a foreground service on Android 9 Pie and later, see also the next question
+* *run foreground service* (FOREGROUND_SERVICE/DATA_SYNC/SPECIAL_USE): to run a foreground service on Android 9 Pie and later, see also the next question
 * *schedule exact alarm* (SCHEDULE_EXACT_ALARM): to use exact alarm scheduling (Android 12 and later), for example to snooze messages
 * *prevent device from sleeping* (WAKE_LOCK): to keep the device awake while performing actions, like synchronization of messages
 * *use fingerprint hardware* (USE_FINGERPRINT) and *use biometric hardware* (USE_BIOMETRIC): to use biometric authentication (fingerprint, face unlock, etc)
@@ -2882,6 +2882,8 @@ Example conditions:
 ```header("X-Mailer") contains "Open-Xchange" && from matches ".*service@.*"```
 
 ```!onBlocklist() && hasMx() && attachments() > 0```
+
+```(received + 7*24*60*60*1000) < DT_DATE_TO_EPOCH(DT_NOW())```
 
 <br>
 
@@ -6122,14 +6124,13 @@ There are requests daily to change the appearance in this or that way, but the p
 To prevent making other people unhappy, changes in the appearance always need to clearly and objectively contribute to the usability of the app to be considered.
 
 A feature will be considered useful to most people if more than 0.5% of the users request a feature, which in practice means about 2500 people.
+Assuming that only 10% of the app's users will ask for a new feature, about 250 requests are needed to add a new feature.
 
 Features not fulfilling these requirements will likely be rejected.
 This is also to keep maintenance and support in the long term feasible.
 Please see also this Wikipedia article about [feature creep](https://en.wikipedia.org/wiki/Feature_creep).
 
 Note that there are already more features and options in FairEmail than in any other Android email client.
-
-<a name="quick-support"></a>
 
 <br />
 
