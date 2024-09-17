@@ -541,6 +541,7 @@
     <string name="title_advanced_vpn_only">Connect only via a VPN</string>
     <string name="title_advanced_timeout">Connection timeout (seconds)</string>
     <string name="title_advanced_prefer_ip4">Prefer IPv4 over IPv6</string>
+    <string name="title_advanced_prefer_ip6">Prefer IPv6 over IPv4</string>
     <string name="title_advanced_bind_socket" translatable="false">Bind sockets to the active network</string>
     <string name="title_advanced_standalone_vpn" translatable="false">Standalone VPN</string>
     <string name="title_advanced_dns">Preferred DNS server addresses (comma separated)</string>
@@ -1653,6 +1654,7 @@
     <string name="title_too_large">Message too large to completely reformat</string>
     <string name="title_truncated">Message too large to display completely</string>
     <string name="title_insufficient_memory">Message too large for the available memory (%1$d)</string>
+    <string name="title_screen_recording">The screen is being recorded!</string>
     <string name="title_show_full">Show full message</string>
     <string name="title_fullscreen">Show fullscreen</string>
     <string name="title_fit_width">Fit width</string>
@@ -2313,7 +2315,7 @@
     <string name="title_hint_notifications_remark">Notification permissions are required for (account) alerts too. Notifications for new messages can be turned off in the settings.</string>
     <string name="title_hint_battery_optimizations">Battery optimizations still enabled</string>
     <string name="title_hint_data_saver">If the data saver is enabled, the app will not be able to sync in the background and connection errors may occur.</string>
-    <string name="title_hint_vpn">E-mail servers often block connections through a VPN. Only the email provider can resolve this.</string>
+    <string name="title_hint_vpn">E-mail servers sometimes block connections through a VPN. If this happens, only the e-mail provider can resolve this.</string>
     <string name="title_hint_dismiss">You can dismiss this dialog box to remove the notice.</string>
     <string name="title_hint_support">If you have a question or a problem, please use the support menu to get help</string>
     <string name="title_hint_message_actions">Swipe left to trash; Swipe right to archive (if available); The swipe actions can be configured in the account settings</string>

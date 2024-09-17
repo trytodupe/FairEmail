@@ -20,7 +20,19 @@ For support you can use the contact form.
 
 Acantholipan
 
-Next version
+1.2232 2024-09-16
+
+* Fixed resuming sending after restarting the device
+
+1.2231 2024-09-16
+
+* Fixed downloading raw message files (EML files) in some situations
+* Added detection of screen recording (Android 15+)
+* Small improvements and minor bug fixes
+* Updated Public Suffix List
+* Updated translations
+
+1.2230 2024-09-11
 
 * Fixed text-to-speak stops working on some devices
 * Fixed duplicate sent-messages in some cases for Yahoo
