@@ -99,7 +99,6 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -252,7 +251,8 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
                 " portrait rows=" + portrait2 + " cols=" + portrait2c + " min=" + portrait_min_size +
                 " landscape cols=" + landscape + " min=" + landscape_min_size);
         boolean duo = Helper.isSurfaceDuo();
-        boolean close_pane = prefs.getBoolean("close_pane", !duo);
+        boolean canFold = Helper.canFold(this);
+        boolean close_pane = prefs.getBoolean("close_pane", !duo && !canFold);
         boolean nav_categories = prefs.getBoolean("nav_categories", false);
 
         // 1=small, 2=normal, 3=large, 4=xlarge
@@ -278,16 +278,18 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
 
         if (content_pane != null) {
             // Special: Surface Duo
-            if (duo) {
+            if (duo || canFold) {
                 View content_frame = findViewById(R.id.content_frame);
                 ViewGroup.LayoutParams lparam = content_frame.getLayoutParams();
                 if (lparam instanceof LinearLayout.LayoutParams) {
                     ((LinearLayout.LayoutParams) lparam).weight = 1; // 50/50
                     content_frame.setLayoutParams(lparam);
                 }
-                // https://docs.microsoft.com/en-us/dual-screen/android/duo-dimensions
-                int seam = (Helper.isSurfaceDuo2() ? 26 : 34);
-                content_separator.getLayoutParams().width = Helper.dp2pixels(this, seam);
+                if (duo) {
+                    // https://docs.microsoft.com/en-us/dual-screen/android/duo-dimensions
+                    int seam = (Helper.isSurfaceDuo2() ? 26 : 34);
+                    content_separator.getLayoutParams().width = Helper.dp2pixels(this, seam);
+                }
             } else {
                 int column_width = prefs.getInt("column_width", 67);
                 ViewGroup.LayoutParams lparam = content_pane.getLayoutParams();
@@ -1184,8 +1186,8 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
     @Override
     protected void onStart() {
         super.onStart();
-        if (!Helper.isPlayStoreInstall())
-            infoTracker.addWindowLayoutInfoListener(this, Runnable::run, layoutStateChangeCallback);
+
+        infoTracker.addWindowLayoutInfoListener(this, Runnable::run, layoutStateChangeCallback);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM &&
                 hasPermission(Manifest.permission.DETECT_SCREEN_RECORDING))
@@ -1200,8 +1202,8 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
     @Override
     protected void onStop() {
         super.onStop();
-        if (!Helper.isPlayStoreInstall())
-            infoTracker.removeWindowLayoutInfoListener(layoutStateChangeCallback);
+
+        infoTracker.removeWindowLayoutInfoListener(layoutStateChangeCallback);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM &&
                 hasPermission(Manifest.permission.DETECT_SCREEN_RECORDING))
@@ -2745,6 +2747,11 @@ public class ActivityView extends ActivityBilling implements FragmentManager.OnB
     private final Consumer<WindowLayoutInfo> layoutStateChangeCallback = new Consumer<WindowLayoutInfo>() {
         @Override
         public void accept(WindowLayoutInfo info) {
+            // Window layout=WindowLayoutInfo{
+            //   DisplayFeatures[HardwareFoldingFeature {
+            //       Bounds { [1104,0,1104,1840] }, type=FOLD, state=FLAT }
+            //   ]
+            // }
             EntityLog.log(ActivityView.this, "Window layout=" + info);
         }
     };
