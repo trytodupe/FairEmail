@@ -3,8 +3,8 @@ apply plugin: 'com.bugsnag.android.gradle'
 apply plugin: 'kotlin-android'
 apply plugin: 'de.undercouch.download'
 
-def getVersionCode = { -> return 2235 }
-def getRevision = { -> return "a" }
+def getVersionCode = { -> return 2237 }
+def getRevision = { -> return "b" }
 def getReleaseName = { -> return "Barsboldia" }
 // https://en.wikipedia.org/wiki/List_of_dinosaur_genera
 
@@ -295,7 +295,7 @@ android {
         }
         play {
             dimension "all"
-            //minSdkVersion 23
+            minSdkVersion 23
             manifestPlaceholders.largeHeap = false
             manifestPlaceholders.build_uuid = UUID.nameUUIDFromBytes(("play" + getVersionCode() + getRevision()).getBytes()).toString();
             buildConfigField "boolean", "TEST_RELEASE", "false"
