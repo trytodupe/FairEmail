@@ -261,25 +261,6 @@ public class Helper {
                     ")+"
     );
 
-    // https://support.google.com/mail/answer/6590#zippy=%2Cmessages-that-have-attachments
-    static final List<String> DANGEROUS_EXTENSIONS = Collections.unmodifiableList(Arrays.asList(
-            "ade", "adp", "apk", "appx", "appxbundle",
-            "bat",
-            "cab", "chm", "cmd", "com", "cpl",
-            "dll", "dmg",
-            "ex", "ex_", "exe",
-            "hta",
-            "ins", "isp", "iso",
-            "jar", "js", "jse",
-            "lib", "lnk",
-            "mde", "msc", "msi", "msix", "msixbundle", "msp", "mst",
-            "nsh",
-            "pif", "ps1",
-            "scr", "sct", "shb", "sys",
-            "vb", "vbe", "vbs", "vxd",
-            "wsc", "wsf", "wsh"
-    ));
-
     private static ExecutorService sSerialExecutor = null;
     private static ExecutorService sParallelExecutor = null;
     private static ExecutorService sUIExecutor = null;
@@ -1036,6 +1017,20 @@ public class Helper {
             return context.getResources().getDimensionPixelSize(resid);
     }
 
+    static Snackbar.SnackbarLayout findSnackbarLayout(View rootView) {
+        if (rootView instanceof Snackbar.SnackbarLayout)
+            return (Snackbar.SnackbarLayout) rootView;
+
+        if (rootView instanceof ViewGroup) {
+            for (int i = 0; i < ((ViewGroup) rootView).getChildCount(); i++)
+                if (findSnackbarLayout(((ViewGroup) rootView).getChildAt(i)) != null)
+                    return findSnackbarLayout(((ViewGroup) rootView).getChildAt(i));
+            return null;
+        }
+
+        return null;
+    }
+
     static @NonNull List<View> getViewsWithTag(@NonNull View view, @NonNull String tag) {
         List<View> result = new ArrayList<>();
         if (view != null && tag.equals(view.getTag()))
@@ -1289,6 +1284,7 @@ public class Helper {
                             : CustomTabsIntent.COLOR_SCHEME_LIGHT)
                     .setShareState(CustomTabsIntent.SHARE_STATE_ON)
                     .setUrlBarHidingEnabled(true)
+                    .setSendToExternalDefaultHandlerEnabled(true)
                     .setStartAnimations(context, R.anim.activity_open_enter, R.anim.activity_open_exit)
                     .setExitAnimations(context, R.anim.activity_close_enter, R.anim.activity_close_exit);
 
@@ -3789,9 +3785,11 @@ public class Helper {
     }
 
     static <T> List<List<T>> chunkList(List<T> list, int size) {
+        if (list == null || list.isEmpty())
+            return new ArrayList<>();
         List<List<T>> result = new ArrayList<>(list.size() / size);
         for (int i = 0; i < list.size(); i += size)
-            result.add(list.subList(i, i + size < list.size() ? i + size : list.size()));
+            result.add(new ArrayList<>(list.subList(i, i + size < list.size() ? i + size : list.size())));
         return result;
     }
 
