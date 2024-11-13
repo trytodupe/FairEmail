@@ -29,6 +29,13 @@ Barsboldia
 
 Next version
 
+* Added fast forward to, see the FAQ
+* Small improvements and minor bug fixes
+* Updated Public Suffix List
+* Updated translations
+
+1.2245 2024-11-08
+
 * Added manage keywords for multiple selected messages
 * Small improvements and minor bug fixes
 * Updated Public Suffix List

@@ -422,6 +422,7 @@
 <li><a href="#faq203">(203) Where is my sent message?</a></li>
 <li><a href="#faq204">(204) How do I use Gemini?</a></li>
 <li><a href="#faq205">(205) How do I check the integrity of an APK file?</a></li>
+<li><a href="#faq206">(206) How can I move or copy messages from one account to another?</a></li>
 </ul>
 <p><a href="#get-support">I have another question.</a></p>
 <p><a name="faq1"></a> <strong>(1) Which permissions are needed and why?</strong></p>
@@ -2220,6 +2221,9 @@ $NotDisplayed</code></pre>
 <p><em>Rule expression condition (1.2174+)</em></p>
 <p>See <a href="#faq71">this FAQ</a></p>
 <p><br /></p>
+<p><em>Fast forward to (1.2226+)</em></p>
+<p>Show (fast) <em>Forward to</em> in the answer menu, with addresses recently used for forwarding messages (if any). You can show the answer menu by tapping on the answer button at the bottom right of an opened/expanded message.</p>
+<p><br /></p>
 <p><a name="faq126"></a> <strong>(126) Can message previews be sent to my smartwatch?</strong></p>
 <p>🌎 <a href="https://translate.google.com/translate?sl=en&amp;u=https%3A%2F%2Fm66b.github.io%2FFairEmail%2F%23faq126">Google Translate</a></p>
 <p>FairEmail fetches a message in two steps:</p>
@@ -2669,10 +2673,13 @@ DNS lookup 108.27.250.142.zen.spamhaus.org -&gt;
 <p><a name="faq170"></a> <strong>(170) Why can’t folders be created with POP3?</strong></p>
 <p>🌎 <a href="https://translate.google.com/translate?sl=en&amp;u=https%3A%2F%2Fm66b.github.io%2FFairEmail%2F%23faq170">Google Translate</a></p>
 <p>The POP3 protocol has commands to download and delete messages from the inbox only. There are no commands to access any other folder.</p>
-<p>Creating a local folder only and storing messages on your device only is a bad idea because losing or breaking your device would mean losing your messages. Therefore this isn’t supportable.</p>
+<p>Creating a local folder only and storing messages on your device only is a bad idea because losing or breaking your device would mean losing your messages. Imagine you’ve put a lot of time organizing your messages, and you need to reinstall the app on another device, only to discover all the work you did was a waste of time. Therefore, this isn’t supportable.</p>
 <p>Please note that FairEmail doesn’t store a copy of your messages in the cloud for privacy reasons.</p>
 <p>If you want to store messages in folders, please use IMAP, so that there is always a copy of the messages on the email server.</p>
 <p>You could register, for example, a Gmail account, and configure Gmail to import messages from a POP3 account, automatically label them (=put them in a folder), and configure the Gmail account in FairEmail. Please <a href="https://support.google.com/mail/answer/21289?hl=en&amp;co=GENIE.Platform%3DDesktop">see here</a> for instructions.</p>
+<p>If you are concerned about deleting messages, with IMAP messages are moved to the trash messages folder first, which means that deleted messages can be restored. You can also hide instead of delete messages, please <a href="#faq134">see this FAQ</a>.</p>
+<p>Some people believe POP3 is safer than IMAP, but security wise, there is no difference between POP3 and IMAP. The connection to the email server is always encrypted, and the account is protected by a password in both cases.</p>
+<p>If your email provider only offers POP3 access, tell them the POP3 protocol is 40+ years old (<a href="https://datatracker.ietf.org/doc/html/rfc918">defined in 1984</a>).</p>
 <p><br /></p>
 <p><a name="faq171"></a> <strong>(171) How can I delete a contact?</strong></p>
 <p>🌎 <a href="https://translate.google.com/translate?sl=en&amp;u=https%3A%2F%2Fm66b.github.io%2FFairEmail%2F%23faq171">Google Translate</a></p>
@@ -3067,6 +3074,14 @@ adb install /path/to/FairEmail-xxx.apk</code></pre>
 </ol>
 <pre><code>gh attestation verify xyz.apk -R M66B/FairEmail</code></pre>
 <p>Attestation of APK files is available from version 1.2209.</p>
+<p><br></p>
+<p><a name="faq206"></a> <strong>(206) How can I move or copy messages from one account to another?</strong></p>
+<p>There are two options for this:</p>
+<ol type="1">
+<li>Long press a message in the message list to select it, tap the three-dot button that appears, scroll to the bottom of the pop-up menu and select the target account.</li>
+<li>Long press the move-to button just above the message text to select the target account first.</li>
+</ol>
+<p>To copy a message to another account, long press the target folder.</p>
 <p><br></p>
 <h2>
 <a name="get-support"></a>Get support
