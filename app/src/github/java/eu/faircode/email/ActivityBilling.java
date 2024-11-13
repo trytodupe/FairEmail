@@ -256,10 +256,11 @@ public class ActivityBilling extends ActivityBase implements
     }
 
     static boolean isPro(Context context) {
-        if (BuildConfig.DEBUG && false)
-            return true;
-        return PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean("pro", false);
+        return true;
+        // if (BuildConfig.DEBUG && false)
+        //     return true;
+        // return PreferenceManager.getDefaultSharedPreferences(context)
+        //         .getBoolean("pro", false);
     }
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
